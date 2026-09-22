@@ -1,0 +1,169 @@
+# ============================================================================
+#  TrimBox DIY S3 — tests et compilation en ligne (cahier des charges v2 §9.1)
+#
+#  1. tests natifs de la logique (chrono, protocoles, automate, config A/B)
+#     + comparaison du chrono firmware avec celui de la console (index.html)
+#  2. compilation ESP32-S3 (core figé), artefacts .bin
+#  3. console embarquée : vrai serveur HTTP/WebSocket du firmware sur PC +
+#     Chromium sans tête (chargement, Wi-Fi, direct, téléchargement, mise à
+#     jour du firmware avec le .bin tout juste compilé)
+#  4. test d'intégration sous émulateur QEMU : faux GNSS + faux récepteur ELRS,
+#     Wi-Fi automatique à l'arrêt, pose de ligne par la voie 8, tours
+#     chronométrés, coupure d'alimentation, RETOUR ARRIÈRE après une mise à
+#     jour qui plante (vrai chargeur de démarrage)
+#
+#  La console (index.html) est intégrée au firmware à chaque compilation :
+#  tools/embed_console.py régénère trimbox_s3/src/console_gz.h.
+# ============================================================================
+name: Firmware S3
+
+on:
+  push:
+    paths: ['trimbox_s3/**', 'tests/**', 'lua/**', 'tools/embed_console.py', 'index.html', '.github/workflows/build-s3.yml']
+  pull_request:
+  workflow_dispatch:
+
+env:
+  CORE: 'esp32:esp32@3.3.12'          # version FIGÉE (reproductibilité)
+  CORE_INDEX: 'https://espressif.github.io/arduino-esp32/package_esp32_index.json'
+  NIMBLE: 'NimBLE-Arduino@2.5.1'      # version FIGÉE
+  FQBN: 'esp32:esp32:esp32s3:FlashSize=16M,PSRAM=opi,FlashMode=qio,USBMode=hwcdc,CDCOnBoot=cdc,PartitionScheme=no_fs'
+  FQBN_QEMU: 'esp32:esp32:esp32s3:FlashSize=16M,PSRAM=disabled,FlashMode=dio,USBMode=hwcdc,CDCOnBoot=default,PartitionScheme=no_fs'
+  QEMU_URL: 'https://github.com/espressif/qemu/releases/download/esp-develop-9.2.2-20260417/qemu-xtensa-softmmu-esp_develop_9.2.2_20260417-x86_64-linux-gnu.tar.xz'
+
+jobs:
+  tests:
+    name: Tests natifs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Logique du firmware (g++)
+        run: make -C tests/native
+      - name: Chrono firmware = chrono console
+        run: node tests/native/console_check.js index.html tests/native/lap_cases.json
+      - name: Script Lua de la MT12 (syntaxe + banc avec API EdgeTX simulée)
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q lua5.2
+          luac5.2 -p lua/trmbox.lua
+          lua5.2 tests/lua/test_trmbox.lua lua/trmbox.lua
+        # lap_cases.json est produit par test_lap à l'étape précédente
+
+  console:
+    name: Console embarquée (navigateur)
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v5
+        with:
+          name: firmware-s3-complet
+          path: fw
+      - name: Intégration de la console
+        run: python3 tools/embed_console.py
+      - name: Faux module (serveur HTTP/WebSocket du firmware)
+        run: g++ -std=c++17 -O1 -Wall -Wextra -Werror -o tests/web/fakedev tests/web/fakedev.cpp trimbox_s3/src/core/*.cpp -lm
+      - name: Chromium sans tête
+        run: |
+          python3 -m pip install --user --break-system-packages playwright
+          python3 -m playwright install --with-deps chromium
+      - name: Parcours complet de la console en Wi-Fi
+        run: SHOT=console_wifi.png python3 tests/web/console_web_test.py tests/web/fakedev 8088 fw/trimbox_s3-app.bin
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: capture-console-wifi
+          path: console_wifi.png
+          archive: false
+
+  build:
+    name: Compilation ESP32-S3
+    needs: tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Un seul croquis dans trimbox_s3/
+        run: |
+          n=$(find trimbox_s3 -name '*.ino' | wc -l)
+          if [ "$n" -ne 1 ]; then echo "::error::$n fichiers .ino dans trimbox_s3/ (attendu : 1)"; exit 1; fi
+      - uses: actions/cache@v5
+        with:
+          path: |
+            ~/.arduino15
+            ~/Arduino/libraries
+          key: arduino-s3-${{ env.CORE }}-${{ env.NIMBLE }}-v1
+      - name: arduino-cli (script officiel)
+        run: |
+          mkdir -p "$HOME/.local/bin"
+          curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | BINDIR="$HOME/.local/bin" sh
+          export PATH="$HOME/.local/bin:$PATH"; echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          arduino-cli config init --overwrite
+          arduino-cli config set board_manager.additional_urls "$CORE_INDEX"
+          arduino-cli core update-index
+          arduino-cli core install "$CORE"
+          arduino-cli lib install "$NIMBLE"
+      - name: Intégration de la console
+        run: python3 tools/embed_console.py
+      - name: Compilation
+        run: arduino-cli compile --fqbn "$FQBN" --warnings all --output-dir build trimbox_s3
+      - name: Préparation des fichiers
+        run: |
+          mkdir -p out
+          cp build/trimbox_s3.ino.bin          out/trimbox_s3-app.bin        # mise à jour (0x10000 / OTA)
+          cp build/trimbox_s3.ino.merged.bin   out/trimbox_s3-complet.bin    # premier flashage, adresse 0x0
+          cp build/trimbox_s3.ino.bootloader.bin build/trimbox_s3.ino.partitions.bin out/
+          ls -la out
+      - uses: actions/upload-artifact@v7
+        with:
+          name: firmware-s3-complet
+          path: out/
+      - uses: actions/upload-artifact@v7
+        with:
+          name: firmware-s3-app
+          path: out/trimbox_s3-app.bin
+          archive: false
+
+  qemu:
+    name: Intégration (émulateur)
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/cache@v5
+        with:
+          path: |
+            ~/.arduino15
+            ~/Arduino/libraries
+          key: arduino-s3-${{ env.CORE }}-${{ env.NIMBLE }}-v1
+      - name: Outils
+        run: |
+          sudo apt-get update -q
+          # dépendances de l'émulateur QEMU d'Espressif (documentation ESP-IDF)
+          sudo apt-get install -y -q libgcrypt20 libglib2.0-0 libpixman-1-0 libsdl2-2.0-0 libslirp0 lua5.2
+          mkdir -p "$HOME/.local/bin"
+          curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | BINDIR="$HOME/.local/bin" sh
+          export PATH="$HOME/.local/bin:$PATH"; echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          arduino-cli config init --overwrite
+          arduino-cli config set board_manager.additional_urls "$CORE_INDEX"
+          arduino-cli core update-index
+          arduino-cli core install "$CORE"
+          arduino-cli lib install "$NIMBLE"
+          mkdir -p "$HOME/qemu" && curl -fsSL "$QEMU_URL" | tar xJ -C "$HOME/qemu"
+          echo "QEMU=$HOME/qemu/qemu/bin/qemu-system-xtensa" >> "$GITHUB_ENV"
+      - name: Variantes émulateur (normale, et « plante au démarrage »)
+        run: |
+          python3 tools/embed_console.py
+          arduino-cli compile --fqbn "$FQBN_QEMU" --build-property "compiler.cpp.extra_flags=-DTRIMBOX_QEMU" --output-dir buildq trimbox_s3
+          arduino-cli compile --fqbn "$FQBN_QEMU" --build-property "compiler.cpp.extra_flags=-DTRIMBOX_QEMU -DTRIMBOX_CRASH_TEST" --output-dir buildc trimbox_s3
+      - name: Stand (Wi-Fi auto), circuit, pose de ligne, tours de 12,000 s
+        run: |
+          cp buildq/trimbox_s3.ino.merged.bin flash.bin
+          python3 tests/qemu/sim.py flash.bin
+      - name: Chaîne complète avec le vrai script Lua (pose de ligne depuis la radio)
+        run: |
+          cp buildq/trimbox_s3.ino.merged.bin flash_lua.bin
+          python3 tests/qemu/sim.py flash_lua.bin --lua
+      - name: Coupure d'alimentation (redémarrage sur la même flash)
+        run: python3 tests/qemu/sim.py flash.bin --reboot
+      - name: Mise à jour qui plante → retour à la version précédente
+        run: python3 tests/qemu/ota_rollback.py buildq/trimbox_s3.ino.merged.bin buildq/trimbox_s3.ino.bin buildc/trimbox_s3.ino.bin
