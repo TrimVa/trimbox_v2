@@ -70,6 +70,10 @@ les sorties du récepteur : si le module plante, la voiture reste pilotable.
 
 ## Câblage
 
+![Schéma de câblage](docs/cablage-trimbox-s3.svg)
+
+Schéma vectoriel : [SVG](docs/cablage-trimbox-s3.svg) · [PDF à imprimer](docs/cablage-trimbox-s3.pdf) (régénéré par `tools/gen_cablage.py`).
+
 | Module | Broche du module | ESP32-S3-DevKitC-1 |
 |---|---|---|
 | **GPS M100 Mini** | VCC | **5V** |
