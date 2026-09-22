@@ -1,0 +1,603 @@
+{
+  "_lisezmoi": "Etat du projet TrimBox DIY S3, pour reprendre dans une conversation neuve. Le depot (voir 'fichiers') contient tout le code ; joindre ce JSON, les deux cahiers des charges et les fichiers concernes.",
+  "projet": "TrimBox DIY",
+  "description": "Enregistreur de télémétrie GPS et inertielle pour voitures RC, sur Seeed XIAO nRF52840 Sense. Enregistrement autonome sur flash interne, console web Bluetooth pour le pilotage et l'analyse.",
+  "date_export": "2026-09-20",
+  "versions": {
+    "console_web": "1.7.5",
+    "console_date": "20 septembre 2026",
+    "firmware": "1.0",
+    "cahier_des_charges": "1.0",
+    "cahier_des_charges_v2": "2.1",
+    "firmware_s3": "2.0-a4 (non teste sur materiel)",
+    "script_lua": "trmbox.lua (non teste sur radio)"
+  },
+  "materiel": {
+    "carte": "Seeed XIAO nRF52840 Sense (variante NON-mbed obligatoire)",
+    "flash": "P25Q16H, 2 Mo QSPI, JEDEC 85 60 15",
+    "imu": "LSM6DS3, accelerometre regle sur +/-16 g",
+    "gnss": "u-blox sur Serial1, 115200 bauds, 25 Hz",
+    "capacite_enregistrements": 25789,
+    "autonomie_memoire": {
+      "25Hz": "~17 min",
+      "10Hz": "43 min",
+      "5Hz": "86 min",
+      "1Hz": "7 h"
+    }
+  },
+  "fichiers": [
+    {
+      "chemin": ".github/workflows/build-s3.yml",
+      "octets": 8034,
+      "sha1": "699a898bdc1e"
+    },
+    {
+      "chemin": ".gitignore",
+      "octets": 264,
+      "sha1": "9463f9863546"
+    },
+    {
+      "chemin": "CAHIER-DES-CHARGES-V2.md",
+      "octets": 40861,
+      "sha1": "eaa573b03395"
+    },
+    {
+      "chemin": "CAHIER-DES-CHARGES.md",
+      "octets": 31787,
+      "sha1": "b80141d9210b"
+    },
+    {
+      "chemin": "DEMARRAGE.md",
+      "octets": 3251,
+      "sha1": "b73a8c0e6d18"
+    },
+    {
+      "chemin": "README.md",
+      "octets": 4005,
+      "sha1": "1aec0759ba44"
+    },
+    {
+      "chemin": "index.html",
+      "octets": 154934,
+      "sha1": "7002dd017564"
+    },
+    {
+      "chemin": "lua/LISEZMOI.md",
+      "octets": 3466,
+      "sha1": "0e39554562f5"
+    },
+    {
+      "chemin": "lua/trmbox.lua",
+      "octets": 9047,
+      "sha1": "aecdd6e6cc62"
+    },
+    {
+      "chemin": "tests/lua/radio_bridge.lua",
+      "octets": 1924,
+      "sha1": "633d51c51e40"
+    },
+    {
+      "chemin": "tests/lua/test_trmbox.lua",
+      "octets": 5158,
+      "sha1": "cb5dd5c4da1e"
+    },
+    {
+      "chemin": "tests/native/.gitignore",
+      "octets": 46,
+      "sha1": "229f23de6150"
+    },
+    {
+      "chemin": "tests/native/Makefile",
+      "octets": 508,
+      "sha1": "8831ee27b118"
+    },
+    {
+      "chemin": "tests/native/console_check.js",
+      "octets": 4154,
+      "sha1": "1b4c51940386"
+    },
+    {
+      "chemin": "tests/native/t.h",
+      "octets": 602,
+      "sha1": "57d6848840b4"
+    },
+    {
+      "chemin": "tests/native/test_lap.cpp",
+      "octets": 5999,
+      "sha1": "b0164d44b738"
+    },
+    {
+      "chemin": "tests/native/test_logic.cpp",
+      "octets": 5154,
+      "sha1": "c52b93a5cae7"
+    },
+    {
+      "chemin": "tests/native/test_proto.cpp",
+      "octets": 13954,
+      "sha1": "278d61bd5f1f"
+    },
+    {
+      "chemin": "tests/qemu/ota_rollback.py",
+      "octets": 3683,
+      "sha1": "8c95a099d221"
+    },
+    {
+      "chemin": "tests/qemu/sim.py",
+      "octets": 10608,
+      "sha1": "8fc990a3d5f6"
+    },
+    {
+      "chemin": "tests/web/.gitignore",
+      "octets": 8,
+      "sha1": "110f66525929"
+    },
+    {
+      "chemin": "tests/web/console_web_test.py",
+      "octets": 6097,
+      "sha1": "bba95442cb79"
+    },
+    {
+      "chemin": "tests/web/fakedev.cpp",
+      "octets": 8419,
+      "sha1": "47400d81a9e2"
+    },
+    {
+      "chemin": "tools/embed_console.py",
+      "octets": 1654,
+      "sha1": "6bd12aa5ecd0"
+    },
+    {
+      "chemin": "trimbox-diy-console-demo.html",
+      "octets": 873,
+      "sha1": "63dcdfc655e9"
+    },
+    {
+      "chemin": "trimbox-sw.js",
+      "octets": 2415,
+      "sha1": "dc051ebf3731"
+    },
+    {
+      "chemin": "trimbox_s3/.gitignore",
+      "octets": 7,
+      "sha1": "be7e33f4b474"
+    },
+    {
+      "chemin": "trimbox_s3/LISEZMOI.md",
+      "octets": 8773,
+      "sha1": "d7bbbd6b2917"
+    },
+    {
+      "chemin": "trimbox_s3/partitions.csv",
+      "octets": 474,
+      "sha1": "53c4eb0069e7"
+    },
+    {
+      "chemin": "trimbox_s3/src/app.cpp",
+      "octets": 31549,
+      "sha1": "87af453133d3"
+    },
+    {
+      "chemin": "trimbox_s3/src/app.h",
+      "octets": 136,
+      "sha1": "3de28fd2dbfb"
+    },
+    {
+      "chemin": "trimbox_s3/src/config.h",
+      "octets": 5588,
+      "sha1": "fefa2bbd27e1"
+    },
+    {
+      "chemin": "trimbox_s3/src/console_gz.h",
+      "octets": 258490,
+      "sha1": "712b9515fe10"
+    },
+    {
+      "chemin": "trimbox_s3/src/core/bytes.h",
+      "octets": 1697,
+      "sha1": "edb9ef6ef5ed"
+    },
+    {
+      "chemin": "trimbox_s3/src/core/checksums.cpp",
+      "octets": 469,
+      "sha1": "6bc322fbdc03"
+    },
+    {
+      "chemin": "trimbox_s3/src/core/checksums.h",
+      "octets": 870,
+      "sha1": "273ea329f5ba"
+    },
+    {
+      "chemin": "trimbox_s3/src/core/crsf.cpp",
+      "octets": 3050,
+      "sha1": "7e50aef0c336"
+    },
+    {
+      "chemin": "trimbox_s3/src/core/crsf.h",
+      "octets": 2552,
+      "sha1": "acdd77bbc73d"
+    },
+    {
+      "chemin": "trimbox_s3/src/core/httpws.cpp",
+      "octets": 11913,
+      "sha1": "594968fc5398"
+    },
+    {
+      "chemin": "trimbox_s3/src/core/httpws.h",
+      "octets": 3923,
+      "sha1": "a90f80e6483e"
+    },
+    {
+      "chemin": "trimbox_s3/src/core/lapcore.cpp",
+      "octets": 8082,
+      "sha1": "a7b1105b0ad5"
+    },
+    {
+      "chemin": "trimbox_s3/src/core/lapcore.h",
+      "octets": 5675,
+      "sha1": "17c699207b22"
+    },
+    {
+      "chemin": "trimbox_s3/src/core/linecmd.cpp",
+      "octets": 1184,
+      "sha1": "9c9eba0492cf"
+    },
+    {
+      "chemin": "trimbox_s3/src/core/linecmd.h",
+      "octets": 1482,
+      "sha1": "ecd965049df4"
+    },
+    {
+      "chemin": "trimbox_s3/src/core/otacheck.cpp",
+      "octets": 1898,
+      "sha1": "fbc043bf8ce7"
+    },
+    {
+      "chemin": "trimbox_s3/src/core/otacheck.h",
+      "octets": 1626,
+      "sha1": "d4c41bb58ac2"
+    },
+    {
+      "chemin": "trimbox_s3/src/core/persist.cpp",
+      "octets": 2450,
+      "sha1": "feb243be7bd9"
+    },
+    {
+      "chemin": "trimbox_s3/src/core/persist.h",
+      "octets": 2110,
+      "sha1": "fb8204effef1"
+    },
+    {
+      "chemin": "trimbox_s3/src/core/recorder.cpp",
+      "octets": 2015,
+      "sha1": "e0054560a002"
+    },
+    {
+      "chemin": "trimbox_s3/src/core/recorder.h",
+      "octets": 2071,
+      "sha1": "c4832912993a"
+    },
+    {
+      "chemin": "trimbox_s3/src/core/records.cpp",
+      "octets": 3107,
+      "sha1": "2ec880af27c9"
+    },
+    {
+      "chemin": "trimbox_s3/src/core/records.h",
+      "octets": 2944,
+      "sha1": "5956fb4d4c58"
+    },
+    {
+      "chemin": "trimbox_s3/src/core/tbproto.cpp",
+      "octets": 2434,
+      "sha1": "14b49fe9da3a"
+    },
+    {
+      "chemin": "trimbox_s3/src/core/tbproto.h",
+      "octets": 2586,
+      "sha1": "e0c6a67252e7"
+    },
+    {
+      "chemin": "trimbox_s3/src/core/ubx.cpp",
+      "octets": 2168,
+      "sha1": "9c6659a01940"
+    },
+    {
+      "chemin": "trimbox_s3/src/core/ubx.h",
+      "octets": 3483,
+      "sha1": "0f97b047eb78"
+    },
+    {
+      "chemin": "trimbox_s3/src/core/updatepage.h",
+      "octets": 2435,
+      "sha1": "e05c162276d6"
+    },
+    {
+      "chemin": "trimbox_s3/src/hw/bridge.cpp",
+      "octets": 5485,
+      "sha1": "bdec8426b06c"
+    },
+    {
+      "chemin": "trimbox_s3/src/hw/bridge.h",
+      "octets": 1458,
+      "sha1": "67c740921183"
+    },
+    {
+      "chemin": "trimbox_s3/src/hw/gnss.cpp",
+      "octets": 5855,
+      "sha1": "062844aa9100"
+    },
+    {
+      "chemin": "trimbox_s3/src/hw/gnss.h",
+      "octets": 954,
+      "sha1": "68ec2ace1d4f"
+    },
+    {
+      "chemin": "trimbox_s3/src/hw/imu.cpp",
+      "octets": 3494,
+      "sha1": "52583cb724e1"
+    },
+    {
+      "chemin": "trimbox_s3/src/hw/imu.h",
+      "octets": 835,
+      "sha1": "c0d7f715113e"
+    },
+    {
+      "chemin": "trimbox_s3/src/hw/ota.cpp",
+      "octets": 4234,
+      "sha1": "6abc41fdf98e"
+    },
+    {
+      "chemin": "trimbox_s3/src/hw/ota.h",
+      "octets": 1246,
+      "sha1": "9f20f0b0dc1e"
+    },
+    {
+      "chemin": "trimbox_s3/src/hw/radio.cpp",
+      "octets": 3679,
+      "sha1": "1000fc11da96"
+    },
+    {
+      "chemin": "trimbox_s3/src/hw/radio.h",
+      "octets": 1227,
+      "sha1": "6fffe49e57ff"
+    },
+    {
+      "chemin": "trimbox_s3/src/hw/storage.cpp",
+      "octets": 7449,
+      "sha1": "c579a62724d5"
+    },
+    {
+      "chemin": "trimbox_s3/src/hw/storage.h",
+      "octets": 1445,
+      "sha1": "c170f07cbfed"
+    },
+    {
+      "chemin": "trimbox_s3/src/hw/wifiap.cpp",
+      "octets": 5150,
+      "sha1": "421a60abb566"
+    },
+    {
+      "chemin": "trimbox_s3/src/hw/wifiap.h",
+      "octets": 930,
+      "sha1": "ea8a6a67a682"
+    },
+    {
+      "chemin": "trimbox_s3/trimbox_s3.ino",
+      "octets": 600,
+      "sha1": "db048b6ec41c"
+    }
+  ],
+  "role_des_fichiers": {
+    "index.html": "Console web complete (Bluetooth + demo integree). Nom volontaire : sert aussi de page d'accueil GitHub Pages.",
+    "trimbox_diy.ino": "Firmware. Doit vivre dans un dossier trimbox_diy/ du meme nom.",
+    "trimbox-sw.js": "Service worker PWA, optionnel, a placer a cote de la console.",
+    "trimbox-diy-console-demo.html": "Redirection vers index.html?demo=1 (anciens liens).",
+    "platformio.ini": "Compilation locale PlatformIO, pointe sur trimbox_diy/.",
+    "tools/uf2_post.py": "Convertisseur Intel HEX -> UF2 autonome (teste).",
+    "CAHIER-DES-CHARGES.md": "Specification complete et reproductible, 10 chapitres.",
+    "xiao_diagnostic.ino": "Diagnostic materiel (MCU, flash, BLE).",
+    "xiao_flash_recovery.ino": "Recuperation flash QSPI bas niveau (JEDEC, reset, effacement).",
+    "tools/domshim.js": "Shim DOM Node.js : execute la console hors navigateur pour detecter les erreurs d'execution. Usage : node tools/domshim.js index.html"
+  },
+  "constantes_verifiees": {
+    "console": {
+      "MAX_STEP_M": 30,
+      "MAX_DV_KMH": 20,
+      "MAX_TILE_Z": 19,
+      "ZOOM_MAX": 60,
+      "SIM_TOTAL": 25789,
+      "MIN_AIR_SAMPLES": 3
+    },
+    "firmware": {
+      "SLOT_SIZE": "81",
+      "DATA_START": "8192",
+      "META_A": "0",
+      "META_B": "4096",
+      "REC_MAGIC": "0x534D4252UL",
+      "REC_CFG_VERSION": "2",
+      "AUTO_RESUME_RECORDING": "0",
+      "MAX_NAVIGATION_RATE": "25"
+    },
+    "note": "Valeurs relues dans les sources au moment de l'export, pas de memoire."
+  },
+  "conventions": {
+    "versionnage_console": "Incrementer CONSOLE_VER a CHAQUE modification. Actuellement 1.7.5 : prochaine 1.7.6. Apres modification : python3 tools/embed_console.py.",
+    "langue": "Francais, y compris commentaires du code.",
+    "architecture_console": "Fichier HTML unique, aucune dependance externe, aucun framework."
+  },
+  "validation_obligatoire": {
+    "pourquoi": "Une verification syntaxique seule a deja laisse passer plusieurs bugs graves. Il faut EXECUTER le script.",
+    "shim_dom": "Le shim est fourni : tools/domshim.js. Usage : node tools/domshim.js index.html -> doit afficher 'EXECUTION COMPLETE SANS ERREUR'.",
+    "commandes": [
+      "Syntaxe : node -e \"new (require('vm').Script)(html.match(/<script>([\\\\s\\\\S]*?)<\\\\/script>/)[1])\"",
+      "Execution : node domshim.js index.html  -> doit afficher 'EXECUTION COMPLETE SANS ERREUR'"
+    ]
+  },
+  "protocole_ble": {
+    "service_uart": "6E400001-B5A3-F393-E0A9-E50E24DCCA9E",
+    "rx_ecriture": "6E400002-...",
+    "tx_notification": "6E400003-...",
+    "prefixe_nom": "TrimBox",
+    "trame": "B5 62 | classe | id | longueur LE (2) | charge | ckA ckB (Fletcher-8)",
+    "messages": {
+      "FF 01": "donnees en direct (80 o)",
+      "FF 02/03": "ACK / NACK (2 o)",
+      "FF 21": "enregistrement memoire (80 o)",
+      "FF 22": "etat memoire (12 o)",
+      "FF 23": "telechargement",
+      "FF 24": "effacement + progression",
+      "FF 25": "configuration d'enregistrement (12 o)",
+      "FF 26": "changement d'etat (12 o)",
+      "FF 27": "configuration GNSS (3 o)",
+      "FF 30": "deverrouillage memoire",
+      "FF F0": "EXTENSION MAISON : MODELE|VERSION|DATE_COMPIL|PLAGE_G|PSEUDO"
+    },
+    "origine": "Format herite de la doc RaceBox revision 8. AUCUNE compatibilite avec l'application RaceBox officielle n'est recherchee ni maintenue."
+  },
+  "fonctions_protegees": {
+    "avertissement": "TROIS incidents de corruption par un LLM local, tous presentes comme des 'optimisations', syntaxiquement plausibles et donc indetectables sans execution. Interdire explicitement toute modification de ces elements.",
+    "liste": [
+      "distM() — projection equirectangulaire. Les ecarts sont en DEGRES et les facteurs 111320/110540 sont des metres PAR DEGRE : ne jamais convertir en radians avant. Le cos(latitude) est indispensable.",
+      "anal.pts et anal.scr — ne JAMAIS supprimer pour 'liberer la memoire'. La carte, le survol, les tours et les exports les relisent en continu.",
+      "despike(), despikeSpeed(), plausible(), gStats(), pathLength() — chaine de filtrage, seuils determines par mesure.",
+      "feed() — reassembleur de trames. En cas d'echec de somme de controle, avancer de 2 octets, JAMAIS de la longueur annoncee."
+    ]
+  },
+  "incidents_resolus": [
+    {
+      "quoi": "feed() avancait de la longueur d'une trame invalide",
+      "impact": "50 % de perte de donnees, valeurs delirantes intermittentes",
+      "mesure": "50 % avant correctif -> 0,2 % apres"
+    },
+    {
+      "quoi": "rbRx.setMaxLen() manquant cote firmware",
+      "impact": "commandes > 20 octets rejetees silencieusement, sans callback"
+    },
+    {
+      "quoi": "distM reecrite avec melange radians/degres",
+      "impact": "distances divisees par ~57, tracé invisible"
+    },
+    {
+      "quoi": "cleanupAfterAnalysis() supprimant anal.pts/anal.scr",
+      "impact": "carte, survol, tours et exports casses"
+    },
+    {
+      "quoi": "Ligne d'arrivee de 18 m recoupant le tracé a l'oppose",
+      "impact": "10 traversees pour 5 tours, temps faux"
+    },
+    {
+      "quoi": "Tuiles Esri au-dela du niveau 19",
+      "impact": "tuile grise renvoyee avec un code HTTP 200, indetectable"
+    },
+    {
+      "quoi": "let demoMode declare en fin de script",
+      "impact": "zone morte temporelle, toute la page inerte"
+    },
+    {
+      "quoi": "background-repeat par defaut sur le degrade du theme clair",
+      "impact": "bande visible (mosaique du degrade)"
+    },
+    {
+      "quoi": "refreshTheme() plus appele depuis setTheme()",
+      "impact": "cache THEME vide, textes des canevas invisibles en theme sombre"
+    },
+    {
+      "quoi": "setConnected() ecrasait #connState",
+      "impact": "numero de version jamais affiche (indicateur de cache inoperant)"
+    },
+    {
+      "quoi": "refreshStatus()/refreshConfig() appelees mais jamais definies dans la console 1.7.1",
+      "impact": "avec un vrai module : etat memoire a zero, telechargement refuse ('memoire vide'). Invisible en demo.",
+      "correctif": "1.7.3, trouve par tests/web"
+    }
+  ],
+  "chaines_de_compilation": {
+    "github_actions": {
+      "core": "Seeeduino:nrf52@1.1.13 (fige)",
+      "fqbn": "Seeeduino:nrf52:xiaonRF52840Sense",
+      "bibliotheques": [
+        "SparkFun u-blox GNSS Arduino Library",
+        "Seeed Arduino LSM6DS3"
+      ],
+      "outil": "adafruit-nrfutil via pipx (le core l'appelle mais ne le fournit pas)",
+      "artefacts": [
+        "firmware-uf2 (non compresse)",
+        "firmware-complet"
+      ],
+      "piege": "Ne JAMAIS installer Adafruit TinyUSB, SdFat ni Adafruit SPIFlash : conflit de type File avec Adafruit_LittleFS dans bonding.cpp."
+    },
+    "platformio": {
+      "platform": "https://github.com/Seeed-Studio/platform-seeedboards.git",
+      "board": "seeed-xiao-afruitnrf52-nrf52840-sense",
+      "note": "La faute de frappe 'afruit' est celle du depot Seeed. lib_archive = no est indispensable (sinon les callbacks BLE sont ecartes par l'editeur de liens).",
+      "statut": "Configuration ecrite et convertisseur UF2 teste, mais JAMAIS compile reellement."
+    }
+  },
+  "travail_en_cours": {
+    "demande": "Firmware v2 ESP32-S3",
+    "statut": "2.0-a4 + console 1.7.5 (version firmware dans l'en-tete) + script Lua livres. En attente : materiel, bancs v2 §9, captures X-Bus.",
+    "prochaine_etape": "Essais materiel (bancs LISEZMOI), puis decodeur X-Bus XC-E8 des reception des captures."
+  },
+  "pistes_non_traitees": [
+    "Bascule en mode OTA (DFU Bluetooth) : le bootloader le permet, le firmware ne declenche pas le passage (GPREGRET 0xA8).",
+    "Aucune compilation PlatformIO reellement executee.",
+    "Console jamais testee automatiquement dans un vrai navigateur.",
+    "Commentaires 'Optimisation : ...' orphelins laisses par un LLM local (lignes sans code associe) et fonction addSession()/MAX_SESSIONS jamais appelee : a nettoyer.",
+    "Le texte 'demonstration' (couleur --violet-glow) manque de contraste sur le theme clair, avec ou sans accent personnalise."
+  ],
+  "prompt_de_reprise": "Je reprends le projet TrimBox DIY. Je te joins l'etat du projet (trimbox-etat-projet.json), le cahier des charges (CAHIER-DES-CHARGES.md) et les fichiers sources. Lis d'abord le JSON, en particulier 'fonctions_protegees', 'validation_obligatoire' et 'travail_en_cours'. Respecte la convention de versionnage. Valide toute modification de la console en EXECUTANT le script dans un shim DOM, pas seulement par une verification syntaxique.",
+  "travail_termine_1_7_2": {
+    "couleur_accent": "Selecteur de couleur d'accent (bouton palette a cote du bouton theme) : 5 preselections + input color + 'Par defaut'. Persiste dans localStorage 'trimbox-accent'. Derive --violet-glow (35 % vers blanc), --violet-dim (55 % vers noir), --violet-rgb (halos rgba). --on-violet bascule en noir si le blanc n'atteint pas 4,5:1. La couleur par defaut retire les surcharges inline et reprend les valeurs CSS d'origine. Couleurs d'etat (ok/rec/warn) jamais modifiees.",
+    "correctif_refreshTheme": "setTheme() n'appelait plus refreshTheme() (appel remplace par un commentaire 'Optimisation'). THEME restait vide : textes/axes/grilles des canevas en noir, invisibles en theme sombre. Appel retabli.",
+    "correctif_version": "setConnected() ecrasait le textContent de #connState, effacant #appVer : la version n'etait jamais visible. Etat de connexion deplace dans un span #connText.",
+    "validation": "Execution dans Chromium reel (Playwright) : 25 controles OK, aucune erreur JS, contraste texte/accent >= 4,5:1 sur 5000 couleurs aleatoires, persistance apres rechargement, valeur stockee invalide -> defaut, analyse demo dessinee."
+  },
+  "materiel_v2": {
+    "carte": "ESP32-S3-DevKitC-1 WROOM-1-N16R8",
+    "imu": "module generique LSM6DS3/LSM6DS3TR-C (I2C 0x6A/0x6B)",
+    "gnss": "HGLRC M100 Mini (u-blox M10)",
+    "recepteur": "RadioMaster ER5C-i (ELRS 2,4 GHz), sorties 2/3 en CRSF",
+    "radio": "RadioMaster MT12 (EdgeTX)",
+    "esc": "XC-E8, port X-Bus (protocole inconnu, captures a faire)",
+    "analyseur_logique": "commande"
+  },
+  "firmware_s3": {
+    "arborescence": "trimbox_s3/ (croquis Arduino, src/core portable + src/hw materiel), tests/native (g++), tests/qemu/sim.py, .github/workflows/build-s3.yml",
+    "chaine": "arduino-cli, core esp32:esp32@3.3.12, NimBLE-Arduino@2.5.1, FQBN esp32s3 FlashSize=16M PSRAM=opi FlashMode=qio USBMode=hwcdc CDCOnBoot=cdc PartitionScheme=no_fs (partitions.csv du croquis prioritaire)",
+    "taille": "1,25 Mo / 2 Mo",
+    "teste": [
+      "tests natifs : protocoles 28, chrono 30, logique 872 verifications",
+      "chrono firmware = console a 1 ms (console_check.js extrait les fonctions d'index.html)",
+      "QEMU : GNSS 25 Hz, enregistrement, pose de ligne CH8, tours 12,000 s recus en CRSF, coupure d'alimentation",
+      "console embarquee : vrai serveur HTTP/WebSocket (core/httpws) + Chromium sans tete (tests/web) : chargement gzip, connexion Wi-Fi auto, direct 25 Hz, telechargement, reconnexion apres coupure, couleur d'accent",
+      "QEMU : point d'acces allume apres 30 s d'arret, coupe des que la voiture roule (logique ; radio Wi-Fi non emulee)",
+      "OTA : tests natifs (controles, envoi HTTP, refus explique, coupure), Chromium (vrai .bin envoye depuis la console, refus d'un fichier quelconque), QEMU ota_rollback.py (version saine validee et conservee ; version qui plante -> retour app0, vrai chargeur)",
+      "Lua : tests/lua/test_trmbox.lua (API EdgeTX simulee) ; sim.py --lua : chaine complete script -> GV9 -> CH8 -> firmware QEMU -> tours annonces ; faux ELRS 'dernier message seulement' : aucun tour perdu"
+    ],
+    "non_teste": [
+      "Bluetooth et radio Wi-Fi reelles (pas dans QEMU)",
+      "IMU reelle",
+      "materiel en general"
+    ],
+    "a_faire": [
+      "decodeur X-Bus XC-E8 apres captures",
+      "console : EXPECT_LEN 0x28/0x29, FF 23 avec octet 0x02, recuperation des lignes FF F1"
+    ],
+    "pieges_emulateur": "QIO decale les lectures de 2 octets (DIO pour QEMU), UART2 non emule, RMT bloque rgbLedWrite",
+    "attention_ci_v1": "Le workflow v1 refuse plusieurs .ino dans le depot : limiter sa verification a trimbox_diy/ avant d'ajouter trimbox_s3/",
+    "wifi": "AP TrimBox-<pseudo>, mdp WIFI_PASS (trimbox-rc par defaut), 192.168.4.1, portail captif DNS. Auto : allume apres 30 s a l'arret (<5 km/h ou sans fix), coupe apres 3 solutions >7,2 km/h. BOOT 3 s / touche w / FF F2 (0 off, 1 on, 2 auto). Messages radio W WIFI ON/OFF. WebSocket prioritaire sur BLE.",
+    "ota": "POST /update (console 1.7.4 section Mise a jour, secours GET /update). Controles core/otacheck : 0xE9, puce 9, taille <= partition, marque TRIMBOX-S3-FIRMWARE-MARK-v1 ; SHA-256 par esp_ota_end. Conditions : enregistrement arrete, a l'arret, pas de telechargement/effacement. Rollback : verifyRollbackLater()=true, validation apres autotest (memoire) + 15 s ; enableLoopWDT (5 s). Messages radio U REDEMARRAGE / U VALIDATION / U MAJ OK. Ne jamais changer partitions.csv par OTA.",
+    "messages_radio": "Un message FM a la fois (ELRS ne garde que le dernier) : file cote module, 0,7 s par message. L<n> <t>[+/-ecart] ; S <etat> <C|D|->; R ; K ; W ; U. Plus de B/D separes."
+  },
+  "lua": {
+    "fichier": "lua/trmbox.lua -> SCRIPTS/TELEMETRY/trmbox.lua (6 caracteres max)",
+    "mixage": "CH8 : source MAX, poids GV9, ajouter (+ inter facultatif)",
+    "elrs": "Telem Ratio 1:16 ou plus frequent",
+    "a_valider": [
+      "getValue('FM') renvoie une chaine",
+      "touches MT12",
+      "lisibilite"
+    ]
+  },
+  "depot": "Depot autonome pour la version S3 (ESP32-S3). Le firmware v1 (XIAO, trimbox_diy/) n'y est pas inclus."
+}
