@@ -90,6 +90,11 @@ Schéma vectoriel : [SVG](docs/cablage-trimbox-s3.svg) · [PDF à imprimer](docs
 | **Alimentation (voiture)** | régulateur 5 V | **5V** + GND |
 | ESC X-Bus (plus tard) | signal | GPIO 5, via pont diviseur si 5 V |
 
+**Boîtier imprimé 3D (1/10)** : [docs/boitier/trimbox-boitier.3mf](docs/boitier/trimbox-boitier.3mf),
+sans aucune vis : carte clipsée dans le fond, GPS (antenne à l'air libre par
+une ouverture) et IMU clipsés dans le couvercle, trou pour voir la DEL, dessous
+plat pour adhésif double face + passants pour colliers. Mesures, impression et montage : [docs/boitier/LISEZMOI.md](docs/boitier/LISEZMOI.md).
+
 Réglages du récepteur (interface web de l'ER5C-i, onglet *Model*) :
 sorties 2 et 3 en **Serial TX / RX, protocole CRSF** ; direction sur la
 sortie 1 (CH1) ; ESC sur la sortie 4 (**CH2**).
