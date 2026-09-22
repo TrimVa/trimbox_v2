@@ -1,4 +1,4 @@
-# TrimBox DIY S3 — firmware 2.0-a4
+# TrimBox DIY S3 — firmware 2.0-a5
 
 Première version du firmware ESP32-S3. Spécification : `CAHIER-DES-CHARGES.md`
 (v1) et `CAHIER-DES-CHARGES-V2.md`.

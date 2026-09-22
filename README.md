@@ -4,7 +4,7 @@ Enregistreur de télémétrie **GPS + inertiel** pour voitures radiocommandées,
 avec **chronométrage au tour** affiché et annoncé sur la radio, **console web**
 d'analyse et **mise à jour par Wi-Fi**. Construit autour d'un **ESP32-S3**.
 
-> **État :** firmware **2.0-a4**, console **1.7.5**. Tout est écrit et testé
+> **État :** firmware **2.0-a5**, console **1.7.6**. Tout est écrit et testé
 > sur PC, dans un navigateur et dans un émulateur ESP32-S3. **Les essais sur
 > le vrai matériel commencent** : voir [les bancs d'essai](#bancs-dessai-à-la-réception-du-matériel).
 
@@ -172,9 +172,25 @@ d'accent** au choix (bouton palette), installable comme une application
 (PWA). L'en-tête affiche la version de la console et celle du firmware de la
 carte connectée.
 
-En Wi-Fi, le fond satellite n'est pas disponible (pas d'accès Internet) ;
-le reste fonctionne à l'identique, et le téléchargement est bien plus rapide
-qu'en Bluetooth.
+En Wi-Fi, le fond satellite n'est pas disponible : sur le point d'accès de la
+TrimBox, le téléphone n'a pas Internet. La console revient alors d'elle-même à
+la vue schématique et l'explique. Le reste fonctionne à l'identique, et le
+téléchargement est bien plus rapide qu'en Bluetooth. Pour voir la carte
+satellite, deux solutions :
+
+- **après la séance** : télécharger la session (CSV / GPX / VBO), puis la
+  rouvrir dans la console en ligne, avec *Ouvrir des enregistrements* ;
+- **au bord de la piste** : ouvrir la console en ligne et se connecter à la
+  TrimBox **par Bluetooth**. Le téléphone garde sa 4G, donc les tuiles
+  satellite arrivent.
+
+**Voiture à l'arrêt.** Une voiture posée semble « dériver » de 1 à 3 m à cause
+du bruit du GPS. Pour l'éviter, le firmware fige la position et met la
+vitesse à 0 dès que la voiture est immobile :
+- **quand** : vitesse sous 1,1 km/h pendant 0,2 s, sans mouvement vu par l'IMU ;
+- **reprise** : dès que la vitesse dépasse 2,2 km/h, que l'IMU bouge, ou que la
+  voiture s'est éloignée de 4 m ;
+- **pour enregistrer le GPS brut** : `STILL_HOLD 0` dans `config.h`.
 
 ---
 

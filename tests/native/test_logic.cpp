@@ -4,6 +4,7 @@
 #include "../../trimbox_s3/src/core/linecmd.h"
 #include "../../trimbox_s3/src/core/records.h"
 #include "../../trimbox_s3/src/core/persist.h"
+#include "../../trimbox_s3/src/core/stillhold.h"
 #include <string.h>
 
 static void testRecorder(){
@@ -91,4 +92,61 @@ static void testPersist(){
   persist::LineConfig M; CHECK(persist::decode(lb, M) && M.mode == 2 && M.startLat == 453456789 && M.finishHeading == -9000000, "lignes : aller-retour");
 }
 
-int main(){ testRecorder(); testLineCmd(); testPersist(); DONE("logique"); }
+// Maintien à l'arrêt : bruit GNSS réaliste sur une voiture posée.
+static void testStillHold(){
+  still::Hold h;
+  const int32_t LAT0 = 459192780, LON0 = -13359680;          // ≈ 45,919 N ; 1,336 W
+  const double mPerLat = 0.01112, mPerLon = 0.01112 * cos(45.919 * M_PI / 180);  // m par 1e-7°
+  uint32_t seed = 12345;
+  auto rnd = [&](){ seed = seed * 1103515245u + 12345u; return ((seed >> 8) & 0xFFFF) / 65535.0 - 0.5; };
+  double wn = 0, we = 0;                                       // marche aléatoire (m)
+  auto sample = [&](int32_t speed){
+    still::Sample x = {};
+    wn += rnd() * 0.15; we += rnd() * 0.15;
+    wn = fmax(-1.5, fmin(1.5, wn)); we = fmax(-1.5, fmin(1.5, we));
+    x.fix = true; x.lat = LAT0 + (int32_t)(wn / mPerLat); x.lon = LON0 + (int32_t)(we / mPerLon);
+    x.hMSL = 10600 + (int32_t)(rnd() * 2000); x.gSpeed = speed;
+    x.imuOk = true; x.az = 1000; x.gx = 120;
+    return x;
+  };
+  // 60 s posé : vitesse parasite 0–250 mm/s
+  double minN = 1e9, maxN = -1e9, minE = 1e9, maxE = -1e9, rawSpan = 0; int held = 0;
+  double rMinN = 1e9, rMaxN = -1e9;
+  for(int i = 0; i < 1500; i++){
+    still::Sample x = sample((int32_t)(125 + rnd() * 250));
+    rMinN = fmin(rMinN, wn); rMaxN = fmax(rMaxN, wn);
+    if(h.apply(x)){
+      held++;
+      CHECK(x.gSpeed == 0, "vitesse nulle à l'arrêt");
+      if(i > 100){
+        const double n = (x.lat - LAT0) * mPerLat, e = (x.lon - LON0) * mPerLon;
+        minN = fmin(minN, n); maxN = fmax(maxN, n); minE = fmin(minE, e); maxE = fmax(maxE, e);
+      }
+    }
+  }
+  rawSpan = rMaxN - rMinN;
+  CHECK(held >= 1490, "maintien engagé en 0,2 s (%d/1500)", held);
+  CHECK(maxN - minN < 0.01 && maxE - minE < 0.01, "trace figée : %.3f × %.3f m", maxN - minN, maxE - minE);
+  CHECK(rawSpan > 1.0, "le bruit simulé est réaliste (%.2f m)", rawSpan);
+  // Départ franc : libéré dès la première époque rapide
+  { still::Sample x = sample(3000); CHECK(!h.apply(x) && x.gSpeed == 3000, "départ : libéré immédiatement"); }
+  // Retour à l'arrêt puis mouvement IMU (voiture soulevée)
+  for(int i = 0; i < 10; i++){ still::Sample x = sample(100); h.apply(x); }
+  CHECK(h.held(), "de nouveau figé");
+  { still::Sample x = sample(100); x.ax = 600; CHECK(!h.apply(x), "mouvement IMU : libéré"); }
+  // Poussée lente sous le seuil de sortie : libérée par la distance
+  h.reset();
+  still::Hold h2; int released = -1;
+  for(int i = 0; i < 600; i++){
+    still::Sample x = {}; x.fix = true; x.gSpeed = 250; x.imuOk = false;
+    x.lat = LAT0 + (int32_t)(i * 0.01 / mPerLat); x.lon = LON0;   // 1 cm par époque
+    if(!h2.apply(x) && i > 10 && released < 0) released = i;
+  }
+  CHECK(released > 0 && released < 480, "poussée lente : libérée après ~4 m (époque %d)", released);
+  // Sans fix : jamais figé
+  still::Hold h3; bool any = false;
+  for(int i = 0; i < 50; i++){ still::Sample x = {}; x.fix = false; any |= h3.apply(x); }
+  CHECK(!any, "sans fix : pas de maintien");
+}
+
+int main(){ testRecorder(); testLineCmd(); testPersist(); testStillHold(); DONE("logique"); }

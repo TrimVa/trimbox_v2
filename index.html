@@ -231,8 +231,9 @@ button.go{background:var(--ok);color:#08281F}
       background:linear-gradient(90deg,transparent,rgba(199,125,255,.65),transparent);display:none}
 .tape.scanning .scan{display:block;animation:sweep 1.1s linear infinite}
 @keyframes sweep{from{left:-46px}to{left:100%}}
-.tape .cap{position:absolute;right:8px;bottom:6px;font-family:var(--mono);font-size:10px;
-      letter-spacing:.03em;color:var(--ink);background:rgba(18,12,30,.7);padding:1px 5px;border-radius:4px}
+.tape .cap{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-family:var(--mono);
+      font-size:12px;font-weight:600;letter-spacing:.02em;color:#fff;background:rgba(18,12,30,.82);
+      padding:3px 8px;border-radius:5px}
 @media (prefers-reduced-motion:reduce){
   .tape.scanning .scan{animation:none;left:0;width:100%;opacity:.25}
   .tape .fill{transition:none}
@@ -278,6 +279,8 @@ details[open] summary::before{content:"▾ "}
 #log u{color:var(--ok);text-decoration:none}
 
 .note{font-size:13px;color:var(--mute);margin:10px 0 0}
+.warn-note{color:var(--ink);background:var(--panel-2);border:1px solid var(--warn);
+  border-radius:var(--rad-sm);padding:8px 10px;line-height:1.45}
 .hint{font-family:var(--mono);font-size:11px;color:var(--mute);margin-top:8px;letter-spacing:.01em}
 .hide{display:none !important}
 
@@ -293,8 +296,8 @@ details[open] summary::before{content:"▾ "}
 .zoomlab{font-family:var(--mono);font-size:11px;letter-spacing:.03em;
   color:var(--mute);min-width:78px;text-align:center}
 .scalebar{position:absolute;left:8px;bottom:7px;font-family:var(--mono);font-size:10px;
-  letter-spacing:.03em;color:var(--ink);background:rgba(18,12,30,.75);
-  padding:2px 7px;border:1px solid var(--line);border-radius:4px}
+  letter-spacing:.03em;color:#fff;background:rgba(18,12,30,.8);
+  padding:2px 7px;border:1px solid rgba(255,255,255,.25);border-radius:4px}
 .legend{display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap}
 .lg-lab{font-family:var(--mono);font-size:10px;letter-spacing:.03em;color:var(--mute)}
 .lg-grad{flex:0 0 92px;height:8px;border-radius:4px;border:1px solid var(--line);
@@ -339,7 +342,7 @@ button.tool.active{background:var(--violet);color:var(--on-violet);box-shadow:no
 .tip b{color:var(--violet-glow);font-weight:600}
 .tip s{color:var(--mute);text-decoration:none}
 .credit{position:absolute;right:6px;top:6px;font-family:var(--mono);font-size:9px;
-  color:var(--ink);background:rgba(18,12,30,.75);padding:2px 6px;border-radius:4px}
+  color:#fff;background:rgba(18,12,30,.8);padding:2px 6px;border-radius:4px}
 .lapRow{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:13px;
   padding:8px 10px;border:1px solid var(--line);border-radius:var(--rad-sm);
   background:var(--panel-2);margin-bottom:5px;flex-wrap:wrap}
@@ -484,6 +487,7 @@ button.tool.active{background:var(--violet);color:var(--on-violet);box-shadow:no
     <div id="tip" class="tip hide"></div>
     <div id="satCredit" class="credit hide">Imagerie Esri, Maxar, Earthstar Geographics</div>
   </div>
+  <p class="note warn-note hide" id="satNote"></p>
   <div class="legend">
     <span class="lg-lab">lent</span>
     <span class="lg-grad"></span>
@@ -856,7 +860,8 @@ function onLive(r){
   $('lAcc').innerHTML     = r.hAcc.toFixed(2)+'<small>m</small>';
   $('lAlt').innerHTML     = r.alt.toFixed(1)+'<small>m</small>';
   $('lHead').innerHTML    = r.head.toFixed(0)+'<small>°</small>';
-  $('lBat').innerHTML     = r.batPct+'<small>%'+(r.charging?' ⚡':'')+'</small>';
+  $('lBat').innerHTML     = (r.batPct || r.charging) ? r.batPct+'<small>%'+(r.charging?' ⚡':'')+'</small>'
+                                                    : '—<small>non mesurée</small>';
   $('lLat').textContent   = r.lat.toFixed(6);
   $('lLon').textContent   = r.lon.toFixed(6);
   $('lHz').innerHTML      = hz.toFixed(1)+'<small>Hz</small>';
@@ -1366,6 +1371,7 @@ let splitSpeeds = [30, 50, 80];   // chronos 0 → V, en km/h
 let splitDists  = [25, 50, 100];  // chronos de passage, en mètres
 const baseCv = document.createElement('canvas');  // calque de fond hors écran
 const tileCache = new Map();
+let satEverOk = false;      // au moins une tuile reçue : Internet joignable
 
 /* ---------- géométrie ---------- */
 function distM(a, b){
@@ -1413,7 +1419,9 @@ function gStats(recs){
     if(r.az < s.vdn) s.vdn = r.az;
 
     // En vol libre, l'accéléromètre ne mesure plus la pesanteur : |az| chute.
-    if(Math.abs(r.az) < 0.35) run++;
+    // Sans IMU (0 g sur les 3 axes), rien à mesurer : ce n'est pas un vol.
+    const imuMissing = !r.ax && !r.ay && !r.az;
+    if(!imuMissing && Math.abs(r.az) < 0.35) run++;
     else {
       if(run >= MIN_AIR_SAMPLES){ s.air += run * 0.04; s.jumps++; }
       run = 0;
@@ -1535,12 +1543,21 @@ function fitView(pts, W, H){
   const n = pts.map(r => mercN(r.lat, r.lon));
   const minX = Math.min(...n.map(q=>q.nx)), maxX = Math.max(...n.map(q=>q.nx));
   const minY = Math.min(...n.map(q=>q.ny)), maxY = Math.max(...n.map(q=>q.ny));
-  const spanX = Math.max(maxX-minX, 1e-12), spanY = Math.max(maxY-minY, 1e-12);
+ /* Cadrage d'au moins MIN_FRAME_M mètres : sinon le bruit d'une voiture
+     posée (1 à 2 m) est agrandi jusqu'à ressembler à un parcours. */
+  const MIN_FRAME_M = 25;
+  const latC = pts.reduce((a,r)=>a+r.lat,0)/pts.length;
+  const minSpan = MIN_FRAME_M / (EARTH_C * Math.cos(latC*Math.PI/180));
+  let spanX = Math.max(maxX-minX, 1e-12), spanY = Math.max(maxY-minY, 1e-12);
+  let x0 = minX, y0 = minY;
+  if(spanX < minSpan && spanY < minSpan){
+    x0 -= (minSpan - spanX)/2; y0 -= (minSpan - spanY)/2; spanX = spanY = minSpan;
+  }
   const K = Math.min((W-2*pad)/spanX, (H-2*pad)/spanY);
   const lat0 = pts.reduce((a,r)=>a+r.lat,0)/pts.length;
   return {K, K0: K, lat0,
-          onx: minX - ((W - spanX*K)/2)/K,
-          ony: minY - ((H - spanY*K)/2)/K};
+          onx: x0 - ((W - spanX*K)/2)/K,
+          ony: y0 - ((H - spanY*K)/2)/K};
 }
 
 /* Niveaux de tuile sans couverture chez le fournisseur : découverts à l'usage,
@@ -1594,7 +1611,7 @@ function drawTiles(ctx, v, done){
       img.crossOrigin = 'anonymous';
       tileCache.set(key, img);
       pending++; asked++;
-      img.onload  = () => { if(--pending <= 0) settle(); };
+      img.onload  = () => { satEverOk = true; if(--pending <= 0) settle(); };
       img.onerror = () => { tileCache.set(key, null); failed++; if(--pending <= 0) settle(); };
       img.src = tileUrl(z, tx, ty);
     }
@@ -1602,6 +1619,12 @@ function drawTiles(ctx, v, done){
   function settle(){
     // Aucune tuile disponible à ce niveau : le fournisseur ne couvre pas cette
     // finesse ici. On le mémorise et on redessine un cran en dessous.
+    // Aucune tuile n'a JAMAIS été reçue : ce n'est pas un trou de couverture
+    // mais l'absence d'Internet (point d'accès TrimBox, zone blanche).
+    if(asked > 0 && failed === asked && !satEverOk){
+      satOffline();
+      return;
+    }
     if(asked > 0 && failed === asked && z > 1){
       badZoom.add(z);
       log(`imagerie absente au niveau ${z}, repli sur ${z-1}`);
@@ -1611,6 +1634,26 @@ function drawTiles(ctx, v, done){
     done();
   }
   return any;
+}
+
+/* Sur le point d'accès de la TrimBox, le téléphone n'a pas Internet : les
+   tuiles ne peuvent pas arriver. On revient au schéma et on explique. */
+const onDeviceAp = () => location.hostname === '192.168.4.1';
+const SAT_OFFLINE_MSG = 'Fond satellite indisponible : pas d\'accès à Internet. ' +
+  (onDeviceAp()
+    ? 'Sur le Wi-Fi de la TrimBox, le téléphone est coupé d\'Internet. Pour avoir la carte : '
+      + 'téléchargez la session puis rouvrez-la dans la console en ligne, ou connectez la console en ligne à la TrimBox par Bluetooth (4G conservée).'
+    : 'Vérifiez la connexion puis réessayez.');
+function satOffline(){
+  for(const [k, v] of tileCache) if(v === null) tileCache.delete(k);   // réessayables plus tard
+  satOn = false;
+  $('btnSat').classList.remove('active');
+  $('btnSat').textContent = 'Vue satellite';
+  $('satCredit').classList.add('hide');
+  $('satNote').textContent = SAT_OFFLINE_MSG;
+  $('satNote').classList.remove('hide');
+  log('fond satellite : aucune tuile reçue, pas d\'accès à Internet', 'err');
+  paintBase(); render();
 }
 
 /* ---------- zoom et déplacement ---------- */
@@ -1702,7 +1745,7 @@ function paintBase(){
   const pow = Math.pow(10, Math.floor(Math.log10(target)));
   const nice = [1,2,5,10].map(n=>n*pow).find(n=>n>=target) || pow*10;
   const barPx = nice / v.mPerPx;
-  ctx.strokeStyle = THEME.ink; ctx.lineWidth = 2;
+  ctx.strokeStyle = satOn ? '#fff' : THEME.ink; ctx.lineWidth = 2;
   ctx.beginPath();
   ctx.moveTo(34, v.H-16); ctx.lineTo(34+barPx, v.H-16);
   ctx.moveTo(34, v.H-21); ctx.lineTo(34, v.H-11);
@@ -2282,6 +2325,7 @@ function bindCanvas(){
     $('btnSat').classList.toggle('active', satOn);
     $('btnSat').textContent = satOn ? 'Vue schématique' : 'Vue satellite';
     $('satCredit').classList.toggle('hide', !satOn);
+    $('satNote').classList.add('hide');
     if(satOn) log('fond satellite : chargement des tuiles Esri (connexion requise)');
     paintBase(); render();
   };
@@ -3315,7 +3359,7 @@ $('btnGpxAll').onclick = () => { const r=allRecords(); r.length ? exportGpx(r,'t
 const META_DESC = 'TrimBox DIY — Console d\'analyse pour RC/GPS. Visualisez vos données de vitesse, distance, accélération en temps réel avec analyse de circuit et dragster.';
 const META_KEYWORDS = 'RC, GPS, TrimBox, analyse, vitesse, circuit, dragster, PWA';
 
-const CONSOLE_VER  = '1.7.5';
+const CONSOLE_VER  = '1.7.6';
 const CONSOLE_DATE = '20 septembre 2026';
 // En-tête : deux lignes courtes, « console v… » puis « firmware … » ; la
 // date de la console reste consultable au survol / appui long.

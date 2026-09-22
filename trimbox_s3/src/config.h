@@ -9,7 +9,7 @@
 #define DEVICE_NICKNAME   "Buggy 1"          // ≤ 16 caractères (v1 §9.4)
 #define BRAND             "TrimBox DIY S3"
 #define DEVICE_NAME       "TrimBox " DEVICE_NICKNAME
-#define FIRMWARE_VER      "2.0-a4"
+#define FIRMWARE_VER      "2.0-a5"
 #define HARDWARE_VER      "ESP32-S3-DevKitC-1 N16R8"
 #define MANUFACTURER      "TrimBox DIY"
 #define BUILD_STAMP       __DATE__ " " __TIME__
@@ -57,6 +57,9 @@
 // [À VALIDER] : comparer la détection du temps en l'air (console,
 // MIN_AIR_SAMPLES = 3, seuil 0,35 g) sur un même roulage dans les deux modes.
 #define IMU_AVERAGE       1
+// Maintien à l'arrêt (core/stillhold.h) : position figée et vitesse à 0
+// quand la voiture est immobile. 0 pour enregistrer le GNSS brut.
+#define STILL_HOLD        1
 // Correspondance des axes selon le montage : AXIS_X_SRC = 0/1/2 pour x/y/z
 // du capteur, AXIS_X_SIGN = ±1. Par défaut : capteur à plat, x vers l'avant.
 #define AXIS_X_SRC 0

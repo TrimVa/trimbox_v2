@@ -17,6 +17,7 @@
 #include "core/tbproto.h"
 #include "core/records.h"
 #include "core/recorder.h"
+#include "core/stillhold.h"
 #include "core/lapcore.h"
 #include "core/linecmd.h"
 #include "core/persist.h"
@@ -42,6 +43,7 @@ namespace app {
 static persist::RecConfig  g_cfg;
 static persist::LineConfig g_lines;
 static recd::Recorder      g_rec;
+static still::Hold         g_still;     // position figée à l'arrêt
 static lap::Engine         g_lap;
 static tb::Parser          g_rx(true);
 static bool     g_storageOk = false, g_imuOk = false, g_gnssOk = false;
@@ -458,11 +460,29 @@ static void powerDown(){
 // ---------------------------------------------------------------------------
 //  Acquisition
 // ---------------------------------------------------------------------------
-static void onPvt(const rec::Pvt& p){
-  g_pvt = p; g_havePvt = true;
+static void onPvt(const rec::Pvt& raw){
   const uint32_t now = millis();
   g_lastPvtMs = now;
   const rec::Imu m = imu::take();
+
+  // Maintien à l'arrêt : sans lui, le bruit GNSS fait « dériver » une
+  // voiture posée de 1 à 3 m et laisse une vitesse parasite.
+  rec::Pvt p = raw;
+  {
+    bool fix0 = raw.fixType >= 3 && raw.gnssFixOK();
+    if(fix0 && g_cfg.gnssMinAcc && raw.hAcc > (uint32_t)g_cfg.gnssMinAcc * 1000u) fix0 = false;
+    still::Sample x;
+    x.fix = fix0; x.lat = raw.lat; x.lon = raw.lon; x.hMSL = raw.hMSL; x.height = raw.height;
+    x.gSpeed = raw.gSpeed;
+    x.ax = m.ax; x.ay = m.ay; x.az = m.az; x.gx = m.gx; x.gy = m.gy; x.gz = m.gz;
+    // IMU absente ou muette (lecture nulle) : décision sur le seul GNSS
+    x.imuOk = g_imuOk && (m.ax || m.ay || m.az);
+    if(STILL_HOLD && g_still.apply(x)){
+      p.lat = x.lat; p.lon = x.lon; p.hMSL = x.hMSL; p.height = x.height;
+      p.gSpeed = 0; p.velN = p.velE = p.velD = 0;
+    }
+  }
+  g_pvt = p; g_havePvt = true;
 
   // iTOW continu (passage de semaine GNSS)
   if(g_itowPrev && p.iTOW + 302400000u < g_itowPrev) g_weekOffset += 604800.0;

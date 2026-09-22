@@ -4,12 +4,12 @@
   "description": "Enregistreur de télémétrie GPS et inertielle pour voitures RC, sur Seeed XIAO nRF52840 Sense. Enregistrement autonome sur flash interne, console web Bluetooth pour le pilotage et l'analyse.",
   "date_export": "2026-09-20",
   "versions": {
-    "console_web": "1.7.5",
+    "console_web": "1.7.6",
     "console_date": "20 septembre 2026",
     "firmware": "1.0",
     "cahier_des_charges": "1.0",
     "cahier_des_charges_v2": "2.1",
-    "firmware_s3": "2.0-a4 (non teste sur materiel)",
+    "firmware_s3": "2.0-a5 (premiers essais materiel : GPS OK)",
     "script_lua": "trmbox.lua (non teste sur radio)"
   },
   "materiel": {
@@ -421,7 +421,7 @@
     "note": "Valeurs relues dans les sources au moment de l'export, pas de memoire."
   },
   "conventions": {
-    "versionnage_console": "Incrementer CONSOLE_VER a CHAQUE modification. Actuellement 1.7.5 : prochaine 1.7.6. Apres modification : python3 tools/embed_console.py.",
+    "versionnage_console": "Incrementer CONSOLE_VER a CHAQUE modification. Actuellement 1.7.6 : prochaine 1.7.7. Apres modification : python3 tools/embed_console.py.",
     "langue": "Francais, y compris commentaires du code.",
     "architecture_console": "Fichier HTML unique, aucune dependance externe, aucun framework."
   },
@@ -535,7 +535,7 @@
   },
   "travail_en_cours": {
     "demande": "Firmware v2 ESP32-S3",
-    "statut": "2.0-a4 + console 1.7.5 (version firmware dans l'en-tete) + script Lua livres. En attente : materiel, bancs v2 §9, captures X-Bus.",
+    "statut": "2.0-a5 + console 1.7.6 : maintien a l'arret (core/stillhold, position figee et vitesse 0 quand la voiture est immobile), lisibilite des pastilles, cadrage minimal 25 m, temps en l'air ignore sans IMU, repli du fond satellite hors Internet. Premiers essais materiel : GPS OK (fix 3D, 13 sat, ~20 Hz). En attente : IMU, bancs v2 §9, captures X-Bus.",
     "prochaine_etape": "Essais materiel (bancs LISEZMOI), puis decodeur X-Bus XC-E8 des reception des captures."
   },
   "pistes_non_traitees": [

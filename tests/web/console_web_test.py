@@ -65,6 +65,26 @@ try:
         laps = pg.evaluate("(anal.laps || []).map(l => l.time)")
         check(len(laps) >= 2 and all(abs(t - 15.0) < 0.01 for t in laps), f'tours dans la console : {laps}')
 
+        # fond satellite sans Internet : repli sur le schéma, avec explication
+        pg.evaluate("document.getElementById('btnSat').scrollIntoView()")
+        pg.click('#btnSat')
+        pg.wait_for_function("!satOn && !document.getElementById('satNote').classList.contains('hide')", timeout=8000)
+        check('Internet' in pg.inner_text('#satNote'), 'satellite hors Internet : repli schéma + message')
+        # pastilles lisibles quel que soit le thème : texte blanc sur fond sombre
+        col = pg.evaluate("getComputedStyle(document.getElementById('tapeCap')).color")
+        check(col == 'rgb(255, 255, 255)', f'« % occupé » en blanc ({col})')
+        # voiture posée : cadrage d'au moins 25 m (le bruit GPS n'est pas agrandi)
+        span = pg.evaluate("""(() => {
+            const pts = []; for(let i=0;i<200;i++) pts.push({lat:45.919278+Math.sin(i)*1e-5, lon:-1.335968+Math.cos(i*1.3)*1e-5});
+            const v = fitView(pts, 900, 620);
+            return Math.min(900, 620) / v.K * EARTH_C * Math.cos(45.92*Math.PI/180); })()""")
+        check(span >= 25, f'cadrage minimal : {span:.1f} m')
+        # sans IMU (0 g partout), pas de « temps en l'air »
+        air = pg.evaluate("gStats(Array.from({length:500}, (_, i) => ({lat:45.9, lon:-1.3, speed:0.2, alt:10, ax:0, ay:0, az:0, fix:3, sats:12, t:i*0.04}))).air")
+        check(air == 0, f'temps en l\'air sans IMU : {air} s')
+        air2 = pg.evaluate("gStats(Array.from({length:500}, (_, i) => ({lat:45.9, lon:-1.3, speed:0.2, alt:10, ax:0.01, ay:0, az:0, fix:3, sats:12, t:i*0.04}))).air")
+        check(air2 > 19, f'… mais chute libre réelle toujours comptée : {air2:.2f} s')
+
         # coupure du point d'accès puis retour
         open(f'/tmp/fakedev_drop_{PORT}', 'w').close()
         pg.wait_for_function("document.getElementById('connText').textContent.includes('hors ligne')", timeout=5000)
