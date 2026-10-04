@@ -336,11 +336,15 @@ button.tool.ghost{background:transparent;box-shadow:inset 0 0 0 1px var(--line)}
 button.tool.active{background:var(--violet);color:var(--on-violet);box-shadow:none}
 #map{cursor:crosshair;touch-action:none}
 #chart{cursor:ew-resize;touch-action:none}
-.tip{position:absolute;pointer-events:none;background:rgba(28,20,48,.96);color:var(--ink);
-  border:1px solid var(--line);border-radius:8px;padding:9px 11px;font-family:var(--mono);font-size:11px;
+/* Infobulle du tracé : fond sombre FIXE, comme les autres incrustations de la
+   carte (échelle, crédit). Ses couleurs ne suivent donc PAS le thème : avec
+   var(--ink), le texte devenait sombre sur sombre en thème lumineux.
+   Contraste ≥ 7:1 pour le texte, valeurs en blanc quel que soit l'accent. */
+.tip{position:absolute;pointer-events:none;background:rgba(28,20,48,.96);color:#E6E1F2;
+  border:1px solid rgba(255,255,255,.14);border-radius:8px;padding:9px 11px;font-family:var(--mono);font-size:11px;
   line-height:1.6;white-space:nowrap;z-index:5;box-shadow:0 8px 24px rgba(0,0,0,.45)}
-.tip b{color:var(--violet-glow);font-weight:600}
-.tip s{color:var(--mute);text-decoration:none}
+.tip b{color:#fff;font-weight:700}
+.tip s{color:#ADA5C8;text-decoration:none}
 .credit{position:absolute;right:6px;top:6px;font-family:var(--mono);font-size:9px;
   color:#fff;background:rgba(18,12,30,.8);padding:2px 6px;border-radius:4px}
 .lapRow{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:13px;
@@ -3558,7 +3562,7 @@ $('btnGpxAll').onclick = () => { const r=allRecords(); r.length ? exportGpx(r,'t
 const META_DESC = 'TrimBox DIY — Console d\'analyse pour RC/GPS. Visualisez vos données de vitesse, distance, accélération en temps réel avec analyse de circuit et dragster.';
 const META_KEYWORDS = 'RC, GPS, TrimBox, analyse, vitesse, circuit, dragster, PWA';
 
-const CONSOLE_VER  = '1.7.11';
+const CONSOLE_VER  = '1.7.12';
 const CONSOLE_DATE = '20 septembre 2026';
 // En-tête : deux lignes courtes, « console v… » puis « firmware … » ; la
 // date de la console reste consultable au survol / appui long.
