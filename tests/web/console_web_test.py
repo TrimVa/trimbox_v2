@@ -7,6 +7,8 @@ Vérifie, sur la VRAIE page intégrée au firmware :
   2. source « Wi-Fi » choisie et connexion WebSocket automatique ;
   3. identification, état mémoire, données en direct à ~25 Hz ;
   4. téléchargement → session → analyse avec des tours de 15,00 s ;
+     lignes du module (FF F1) reprises d'office, chronos du module (0x29)
+     affichés et comparés au calcul de la console ;
   5. coupure du point d'accès → reconnexion automatique ;
   6. choix de la couleur d'accent conservé (localStorage, origine du module) ;
   7. mise à jour du firmware : fichier quelconque refusé avec un message clair,
@@ -68,6 +70,23 @@ try:
         n = pg.evaluate("sessions.map(s => s.length)")
         check(n and max(n) == 1125, f'téléchargement : sessions {n}')
         check(pg.evaluate("badFrames") == 0, f'aucune trame rejetée (badFrames = {pg.evaluate("badFrames")})')
+        # firmware S3 : lignes posées depuis la radio, lues à la connexion (FF F1)
+        ml = pg.evaluate("moduleLines && [moduleLines.mode, moduleLines.channel, +moduleLines.start.head.toFixed(1)]")
+        check(ml == [1, 8, 90.0], f'lignes du module lues (FF F1) : {ml}')
+        auto = pg.evaluate("[analMode, !!anal.lineB, !anal.lineA, (anal.laps || []).map(l => +l.time.toFixed(3))]")
+        check(auto[0] == 'circuit' and auto[1] and auto[2] and len(auto[3]) == 2 and all(abs(t - 15) < 0.01 for t in auto[3]),
+              f'ligne du module posée d\'office dans l\'analyse : {auto}')
+        mod = pg.evaluate("(sessions[0].moduleEvents || []).filter(e => e.kind === 1).map(e => [e.n, e.ms])")
+        check(mod == [[1, 15000], [2, 15000]], f'téléchargement avec 0x02 : tours du module {mod}')
+        check(pg.is_visible('#modBox') and pg.locator('#modList .lapRow').count() == 2, 'encart « Chronos du module » affiché')
+        ecarts = [int(x) for x in re.findall(r'écart ([+-]?\d+) ms', pg.inner_text('#modList'))]
+        check(len(ecarts) == 2 and all(abs(x) <= 5 for x in ecarts), f'module et console d\'accord : écarts {ecarts} ms')
+        # bouton : relecture explicite, puis « Réinitialiser » puis de nouveau le bouton
+        pg.click('#btnClearSel')
+        check(pg.evaluate("!anal.lineB"), 'lignes retirées par « Réinitialiser »')
+        pg.click('#btnModLines')
+        pg.wait_for_function("anal.lineB && (anal.laps || []).length === 2", timeout=5000)
+        check('radio' in pg.inner_text('#anHelp'), 'bouton « Lignes du module » : ' + pg.inner_text('#anHelp'))
         # ligne posée par programme au milieu de la ligne droite → tours de 15 s
         pg.evaluate("""(() => {
             const i = anal.pts.findIndex((p, k) => k > 5 && Math.abs(p.speed - anal.pts[0].speed) < 1) + 10;

@@ -10,6 +10,10 @@
 //
 //  Usage : fakedev <port>     (arrêt : SIGTERM)
 //          Commande « coupure » : fichier /tmp/fakedev_drop_<port> → ferme le WebSocket.
+//  Lignes du module (FF F1) : une ligne de circuit posée au milieu de la
+//  ligne droite (x = 15 m, cap 90°). Téléchargement avec l'octet 0x02 : les
+//  franchissements et les tours de 15,000 s (emplacements 0x29) sont
+//  intercalés entre les points, comme dans la mémoire du vrai module.
 // ============================================================================
 #include "../../trimbox_s3/src/core/httpws.h"
 #include "../../trimbox_s3/src/core/tbproto.h"
@@ -70,6 +74,14 @@ static rec::Pvt pvtAt(double t){
   return p;
 }
 
+// Piste : constantes partagées avec pvtAt (franchissement de la ligne x = 15 m)
+static const double TRACK_V = (2*30 + 2*M_PI*20) / 15.0, LINE_X = 15.0;
+static double crossT(int k){ return LINE_X / TRACK_V + 15.0 * k; }
+static void latlonAt(double x, double y, int32_t& lat, int32_t& lon){
+  lat = (int32_t)llround((44.6386 + y/110540.0) * 1e7);
+  lon = (int32_t)llround((-0.8672 + x/(111320.0*cos(44.6386*M_PI/180))) * 1e7);
+}
+
 int main(int argc, char** argv){
   const int port = argc > 1 ? atoi(argv[1]) : 8088;
   int srv = socket(AF_INET, SOCK_STREAM, 0); int one = 1;
@@ -85,7 +97,7 @@ int main(int argc, char** argv){
   std::vector<Client*> cl;
   const int N = 3 * 15 * 25;                      // 3 tours enregistrés
   uint8_t& recState = g_recState; uint64_t lastLive = 0; double tLive = 0;
-  struct { bool on; int idx; } dl = {false, 0};
+  struct { bool on; int idx; bool ext; int k; } dl = {false, 0, false, 0};
 
   for(;;){
     // Coupure simulée du point d'accès : la voiture roule.
@@ -125,7 +137,12 @@ int main(int argc, char** argv){
           else if(f.id == tb::ID_STATUS){ uint8_t s[12] = {recState ? (uint8_t)1 : (uint8_t)0, 1, 0, 0}; put_le32(s+4, N + 2); put_le32(s+8, 154333); reply(tb::ID_STATUS, s, 12); }
           else if(f.id == tb::ID_CONFIG && f.len == 0){ uint8_t s[12] = {recState, 0, 0x3F, 0}; put_le16(s+4, 1389); put_le16(s+6, 30); put_le16(s+8, 30); put_le16(s+10, 300); reply(tb::ID_CONFIG, s, 12); }
           else if(f.id == tb::ID_CONFIG){ recState = f.payload[0] ? 1 : 0; uint8_t s[12] = {recState}; reply(tb::ID_STATE, s, 12); uint8_t ak[2] = {0xFF, tb::ID_CONFIG}; reply(tb::ID_ACK, ak, 2); }
-          else if(f.id == tb::ID_DOWNLOAD){ uint8_t s[4]; put_le32(s, N + 2); reply(tb::ID_DOWNLOAD, s, 4); dl.on = true; dl.idx = 0; }
+          else if(f.id == tb::ID_DOWNLOAD){ uint8_t s[4]; put_le32(s, N + 2); reply(tb::ID_DOWNLOAD, s, 4); dl.on = true; dl.idx = 0;
+            dl.ext = f.len == 1 && (f.payload[0] & 0x02); dl.k = 0; }
+          else if(f.id == tb::ID_LINES && f.len == 0){
+            uint8_t s[28] = {1, 1, 8, 0}; int32_t la, lo; latlonAt(LINE_X, 0, la, lo);
+            put_le32(s+4, (uint32_t)la); put_le32(s+8, (uint32_t)lo); put_le32(s+12, 9000000u);
+            reply(tb::ID_LINES, s, 28); }
           else { uint8_t nk[2] = {0xFF, f.id}; reply(tb::ID_NACK, nk, 2); }
         }
         // Téléchargement : un état, les points, un état, puis ACK.
@@ -134,8 +151,18 @@ int main(int argc, char** argv){
             uint8_t d[80];
             if(dl.idx == 0 || dl.idx == N + 1){ uint8_t s[12] = {(uint8_t)(dl.idx ? 0 : 1)}; reply(tb::ID_STATE, s, 12); continue; }
             rec::Imu m{(int16_t)(300*sin(dl.idx/10.0)), (int16_t)(900*cos(dl.idx/25.0)), 1000, 0, 0, 1500};
-            rec::buildData(d, pvtAt((dl.idx-1)*0.04), m, 80, false);
+            const double t = (dl.idx-1)*0.04;
+            rec::buildData(d, pvtAt(t), m, 80, false);
             reply(tb::ID_HIST, d, 80);
+            // Chrono du module : franchissement puis tour, juste après le point
+            // pendant lequel il a été calculé (v2 §6.2, emplacement 0x29).
+            while(dl.ext && t >= crossT(dl.k)){
+              uint8_t e[80] = {0};
+              put_le32(e, 400000000u + (uint32_t)llround(crossT(dl.k)*1000)); e[4] = 0; e[5] = 0; put_le16(e+6, (uint16_t)dl.k);
+              reply(0x29, e, 80);
+              if(dl.k > 0){ e[5] = 1; put_le32(e+8, 15000); reply(0x29, e, 80); }
+              dl.k++;
+            }
           }
           if(dl.idx > N + 1){ uint8_t ak[2] = {0xFF, tb::ID_DOWNLOAD}; reply(tb::ID_ACK, ak, 2); dl.on = false; }
         }else if(ms() - lastLive >= 40){          // direct à 25 Hz

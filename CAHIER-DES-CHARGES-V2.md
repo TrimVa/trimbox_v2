@@ -1,8 +1,9 @@
 # TrimBox DIY v2 — Cahier des charges
 
-**Version du document :** 2.4 — 4 octobre 2026
+**Version du document :** 2.5 — 4 octobre 2026
 **Statut :** firmware 2.0-a12 et script Lua (2.3) écrits, testés sur PC, dans un navigateur et sous émulateur. Premiers essais sur matériel : **GPS validé** (fix 3D, 13 satellites, ~20 Hz) ; **IMU validée** avec `tools/imu_test` (|a| = 0,99 g au repos) ; **script Lua validé sur la MT12** (affichage, tours, annonces vocales, accusés de pose). **Objectif 5 (X-Bus de l'ESC) abandonné** : le port est une entrée, voir §5.
 **[2.4]** Relecture de cohérence : texte aligné sur le code 2.0-a12 (batterie, pose de ligne à l'arrêt, Wi-Fi, chaîne de compilation, restes de l'objectif ESC).
+**[2.5]** Console 1.7.11 : lignes du module (`FF F1`) et chronos calculés en course (`0x29`) exploités (§6.4).
 Les choix faits pendant l'implémentation sont signalés par **[2.1]**, **[2.3]**…
 (numéro de version du document où le point est apparu).
 **Prérequis :** `CAHIER-DES-CHARGES.md` (v1). Ce document **ne le remplace pas** :
@@ -443,7 +444,7 @@ transport ne change pas la nature du flux d'octets.
 | Classe/ID | Sens | Long. | Rôle |
 |---|---|---|---|
 | `FF 28` | → console | 80 | Réservé (lot ESC, §5) : jamais émis |
-| `FF 29` | → console | 80 | Franchissement, en direct et en téléchargement |
+| `FF 29` | → console | 80 | Franchissement, tour, parcours ou chrono intermédiaire. **[2.5]** Émis en téléchargement seulement (`FF 23` + `0x02`) : le firmware 2.0-a12 ne l'envoie pas en direct |
 | `FF F1` | ↔ | 0 / 28 | Lecture / écriture de `LineConfig` sans `magic`, `seq`, `crc` (4 octets d'en-tête + 6 × i32) |
 | `FF F2` | ↔ | 0 / 1 → 4 | **[2.1]** Wi-Fi. Requête vide → `[allumé, auto, nb appareils, console WebSocket connectée]`. `0` : couper et désactiver l'automatique ; `1` : allumer maintenant (NACK si la voiture roule) ; `2` : automatique seul |
 
@@ -474,13 +475,29 @@ La table `EXPECT_LEN` de la console reçoit `0x28:80, 0x29:80`. Elle
   dans la console les lignes placées depuis la radio.
 - Versionnage : convention inchangée (`CONSOLE_VER`).
 
-**[2.4] État réel (console 1.7.10) — À FAIRE.** Le firmware gère déjà
-`FF F1`, `FF F2`, `FF 23` avec `0x02` et les emplacements `0x29`. La
-console, elle, ne les utilise **pas encore** : `EXPECT_LEN` ne contient ni
-`0x28` ni `0x29`, le téléchargement part sans l'octet `0x02` (donc sans les
-franchissements), et le bouton « Récupérer les lignes » n'existe pas. Les
-tours de la console sont donc recalculés à partir du tracé, et les lignes
-posées depuis la radio sont à reposer à la main dans la console.
+**[2.5] Réalisé en console 1.7.11** :
+
+- `EXPECT_LEN` reçoit `0x28:80, 0x29:80` ; `feed()` n'est pas modifiée
+  autrement. `0x28` (réservé) est ignoré sans message.
+- Le modèle annoncé par `FF F0` décide : avec un module **S3**, le
+  téléchargement part avec l'octet `0x02` ; avec un module v1, sans charge
+  (compatibilité inchangée).
+- Les emplacements `0x29` sont rattachés à leur session (celle du point qui
+  les précède) et affichés dans l'encart **« Chronos du module »** : tours ou
+  parcours au millième, chronos intermédiaires, et écart avec le calcul de la
+  console sur le même tracé (§10.8 : il doit rester de quelques ms).
+- **Lignes du module** : `FF F1` est lu à la connexion d'un module S3, puis
+  les lignes sont posées d'office dans l'analyse si elles sont à moins de
+  30 m du tracé (mode circuit ou dragster déduit du module). Bouton
+  « Lignes du module » pour les relire à la demande. Elles restent connues
+  après la coupure du Wi-Fi. La ligne est reconstruite à partir de son centre
+  et du cap (`makeLineAt`), avec la même géométrie que `makeLine`.
+- La démonstration simule un module S3 (154 333 emplacements).
+
+Bancs : `tests/web` (faux module : lignes `FF F1`, téléchargement `0x02`
+avec tours de 15,000 s, écart 0 ms avec la console) ;
+`tests/native/console_check.js` (une ligne relue dans le module donne les
+mêmes franchissements que la ligne posée sur le tracé).
 
 ---
 
@@ -858,5 +875,5 @@ Démarche suivie, gardée comme trace de la méthode.
 | Trames `0x0C` / `0x0D` relayées et reconnues | §4.3 | Banc n°6 |
 | Révision de la DevKitC-1 (v1.0 ou v1.1 : DEL sur GPIO 48 ou 38) | §2.3 | Sérigraphie de la carte |
 | Plage accéléromètre suffisante à ±16 g | §2.1, §10.9 | Premiers roulages, recherche de plateaux à 15,99 g |
-| Console : `EXPECT_LEN` `0x28`/`0x29`, `FF 23` + `0x02`, bouton `FF F1` | §6.4 | Développement console (firmware déjà prêt) |
+| ~~Console : `EXPECT_LEN` `0x28`/`0x29`, `FF 23` + `0x02`, bouton `FF F1`~~ | §6.4 | **Clos** : console 1.7.11 |
 | Enregistrement automatique en roulage | §7.1, README | Roulage |

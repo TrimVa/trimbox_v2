@@ -30,10 +30,10 @@ const code = [
   extractConst('MAX_STEP_M'), extractConst('MAX_DV_KMH'),
   extractConst('splitSpeeds'), extractConst('splitDists'),
   'let anal = null; const scr = () => ({});',
-  ...['distM','plausible','despike','despikeSpeed','makeLine','segCross',
+  ...['distM','plausible','despike','despikeSpeed','makeLine','makeLineAt','lineFrom','segCross',
       'crossingsOf','cumulDist','runSplits'].map(extractFn),
   'return {setAnal: a => { anal = a; }, getAnal: () => anal, distM, plausible, despike, despikeSpeed,',
-  '        makeLine, crossingsOf, runSplits};',
+  '        makeLine, makeLineAt, crossingsOf, runSplits};',
 ].join('\n');
 const C = new Function(code)();
 
@@ -56,6 +56,20 @@ for(const cs of cases){
   const A = C.makeLine(idxOf(cs.idxA));
   const B = cs.idxB >= 0 ? C.makeLine(idxOf(cs.idxB)) : null;
   const fw = cs.events;
+
+  // Console 1.7.11 : une ligne lue dans le module (FF F1 : centre + cap)
+  // doit donner exactement les mêmes franchissements que la ligne posée
+  // sur le tracé (même centre, même direction).
+  const viaModule = L => {
+    const h = Math.atan2(L.dirX * 111320, L.dirY * 110540) * 180 / Math.PI;
+    return C.makeLineAt(L.anchor.lat, L.anchor.lon, h);
+  };
+  for(const [tag, L] of [['A', A], ['B', B]]){
+    if(!L) continue;
+    const c1 = C.crossingsOf(L), c2 = C.crossingsOf(viaModule(L));
+    checks++; if(c1.length !== c2.length){ fails++; console.log(`  ECHEC ${cs.name} ligne ${tag} lue dans le module : ${c2.length} / ${c1.length} franchissements`); }
+    c1.forEach((c, i) => cmp(c.t, c2[i] ? c2[i].t : null, `${cs.name} ligne ${tag} (FF F1) franchissement ${i+1}`));
+  }
 
   if(!B){
     const cr = C.crossingsOf(A);

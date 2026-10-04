@@ -471,6 +471,7 @@ button.tool.active{background:var(--violet);color:var(--on-violet);box-shadow:no
     <button class="tool" id="btnSat">Vue satellite</button>
     <button class="tool" id="btnLineA">Ligne de départ</button>
     <button class="tool" id="btnLineB">Ligne départ / arrivée</button>
+    <button class="tool" id="btnModLines" title="Lignes posées depuis la radio, lues dans le module (FF F1)">Lignes du module</button>
     <button class="tool ghost" id="btnClearSel">Réinitialiser</button>
     <span class="zoomgrp">
       <button class="tool zbtn" id="btnZoomOut" title="Dézoomer">−</button>
@@ -503,6 +504,12 @@ button.tool.active{background:var(--violet);color:var(--on-violet);box-shadow:no
   <div id="lapBox" class="hide" style="margin-top:14px">
     <h2 style="margin-bottom:8px">Tours</h2>
     <div id="lapList"></div>
+  </div>
+
+  <div id="modBox" class="hide" style="margin-top:14px">
+    <h2 style="margin-bottom:8px">Chronos du module</h2>
+    <p class="note" id="modNote"></p>
+    <div id="modList"></div>
   </div>
 
   <div id="dragBox" class="hide" style="margin-top:14px">
@@ -650,6 +657,9 @@ const CLS = 0xFF;
 const ID_BUILD=0xF0;   // extension propriétaire : identification du firmware
 const ID_LIVE=0x01, ID_ACK=0x02, ID_NACK=0x03, ID_HIST=0x21, ID_STATUS=0x22,
       ID_DOWNLOAD=0x23, ID_ERASE=0x24, ID_CONFIG=0x25, ID_STATE=0x26, ID_UNLOCK=0x30;
+// Messages ajoutés par la v2 (firmware ESP32-S3, cahier des charges v2 §6.3).
+// 0x28 est réservé (lot ESC, objectif abandonné) : jamais émis, ignoré.
+const ID_ESC=0x28, ID_LAP=0x29, ID_LINES=0xF1;
 
 const RATE_HZ = {0:25, 1:10, 2:5, 3:1, 4:20};
 
@@ -671,6 +681,15 @@ let wsUserClosed = false;     // déconnexion voulue : pas de reconnexion auto
 // Mise à jour du firmware en cours de vérification : empreinte de compilation
 // d'avant l'envoi, comparée à celle que le module annonce en revenant.
 let fwUpd = null;
+// Modèle annoncé par FF F0 (« TrimBox DIY S3 » pour la v2) : décide si l'on
+// peut demander les emplacements v2 au téléchargement et les lignes (FF F1).
+let fwModel = '';
+// Lignes posées depuis la radio, lues dans le module (FF F1). Conservées
+// après une déconnexion : le point d'accès se coupe dès que la voiture
+// roule, les lignes restent valables pour analyser la session.
+let moduleLines = null;
+let linesWanted = false;      // réponse FF F1 attendue après un clic
+const isS3 = () => /\bS3\b/.test(fwModel);
 // Page servie par le module (http://192.168.4.1/…) : seule situation où le
 // WebSocket est joignable (une page https ne peut pas ouvrir un ws:// local).
 const SERVED_BY_MODULE = location.protocol === 'http:' &&
@@ -751,7 +770,7 @@ function refreshConfig(){ return send(CLS, ID_CONFIG).catch(e => log(e.message, 
 /* Longueur attendue pour les messages que nous savons interpréter. Une trame
    dont la longueur ne correspond pas est forcément un faux départ tombé au
    milieu de données binaires. */
-const EXPECT_LEN = {0x01:80, 0x02:2, 0x03:2, 0x21:80, 0x22:12, 0x26:12};
+const EXPECT_LEN = {0x01:80, 0x02:2, 0x03:2, 0x21:80, 0x22:12, 0x26:12, 0x28:80, 0x29:80};
 
 function feed(chunk){
   const merged = new Uint8Array(rxBuf.length + chunk.length);
@@ -844,6 +863,9 @@ function dispatch(cls, id, p){
     case ID_DOWNLOAD: onDownloadStart(p); break;
     case ID_ERASE:    onEraseProgress(p); break;
     case ID_BUILD:    onBuild(p); break;
+    case ID_LAP:      onLapSlot(p); break;
+    case ID_LINES:    onLines(p); break;
+    case ID_ESC:      break;                  // réservé (v2 §5) : ignoré sans bruit
     case ID_ACK:      onAck(p); break;
     case ID_NACK:     onNack(p); break;
     default: log(`← message inconnu 0x${id.toString(16)}`, 'err');
@@ -954,7 +976,7 @@ function onStateChange(p){
 /* ---------- téléchargement ---------- */
 function onDownloadStart(p){
   const expected = new DataView(p.buffer,p.byteOffset,p.byteLength).getUint32(0,true);
-  dl = {expected, records:[], marks:[0], t0:performance.now()};
+  dl = {expected, records:[], marks:[0], events:[], t0:performance.now()};
   $('tape').classList.add('scanning');
   showOp(0, `Téléchargement — 0 / ${expected}`);
   log(`← téléchargement démarré : ${expected} points annoncés`, 'in');
@@ -967,6 +989,20 @@ function onHistory(r){
     const pct = dl.expected ? dl.records.length/dl.expected*100 : 0;
     showOp(pct, `Téléchargement — ${dl.records.length} / ${dl.expected}`);
   }
+}
+/* Événement de chrono calculé en course par le module (emplacement 0x29,
+   v2 §6.2). Reçu seulement si le téléchargement a été demandé avec 0x02.
+   pos = nombre de points déjà reçus : sert à le rattacher à sa session. */
+function parseLapSlot(p){
+  const d = new DataView(p.buffer, p.byteOffset, p.byteLength);
+  return {itow: d.getUint32(0,true), line: p[4], kind: p[5], n: d.getUint16(6,true),
+          ms: d.getUint32(8,true), splitKind: p[12], splitValue: d.getUint16(14,true)};
+}
+function onLapSlot(p){
+  const e = parseLapSlot(p);
+  if(dl){ e.pos = dl.records.length; dl.events.push(e); }
+  else if(e.kind === 1 || e.kind === 2)
+    log(`← ${e.kind === 1 ? 'tour' : 'parcours'} ${e.n} : ${(e.ms/1000).toFixed(3)} s (module)`, 'in');
 }
 function finishDownload(){
   if(!dl) return;
@@ -981,17 +1017,107 @@ function finishDownload(){
   // Découpe en sessions aux frontières signalées par les changements d'état.
   const bounds = [...new Set([...dl.marks, recs.length])].sort((a,b)=>a-b);
   const out = [];
+  const evs = dl.events;
   for(let k=0;k<bounds.length-1;k++){
     const slice = recs.slice(bounds[k], bounds[k+1]);
+    // Un événement suit le point pendant lequel il a été calculé : il
+    // appartient à la session qui contient ce point.
+    slice.moduleEvents = evs.filter(e => e.pos > bounds[k] && e.pos <= bounds[k+1]);
     if(slice.length) out.push(slice);
   }
-  if(!out.length && recs.length) out.push(recs);
+  if(!out.length && recs.length){ recs.moduleEvents = evs; out.push(recs); }
+  if(evs.length) log(`chronos du module : ${evs.filter(e => e.kind === 1 || e.kind === 2).length} tour(s) ou parcours`, 'ok');
   sessions = out;
   dl = null;
   hideOp();
   paintSessions();
   if(sessions.length) showAnalysis(0);
   refreshStatus();
+}
+
+/* ==========================================================================
+   Firmware S3 : lignes posées depuis la radio (FF F1) et chronos calculés
+   en course (emplacements 0x29). Cahier des charges v2 §6.3 et §6.4.
+   ========================================================================== */
+/* Réponse à FF F1 (28 octets) : [0] version, [1] mode (0 aucune, 1 circuit,
+   2 dragster), [2] voie de commande, [3] réservé, puis départ et arrivée :
+   lat, lon (deg × 1e7), cap (deg × 1e5), en entiers signés little-endian. */
+function onLines(p){
+  if(p.length !== 28) return;
+  const d = new DataView(p.buffer, p.byteOffset, p.byteLength);
+  const pt = o => {
+    const lat = d.getInt32(o, true)/1e7, lon = d.getInt32(o+4, true)/1e7;
+    return (lat || lon) ? {lat, lon, head: d.getInt32(o+8, true)/1e5} : null;
+  };
+  moduleLines = {mode: p[1], channel: p[2], start: pt(4), finish: pt(16)};
+  const m = moduleLines.mode;
+  log(`← lignes du module : ${m === 2 ? 'dragster (départ + arrivée)' : m === 1 ? 'circuit (une ligne)' : 'aucune'} · voie CH${p[2]}`, 'in');
+  const explicit = linesWanted; linesWanted = false;
+  if(anal) applyModuleLines(explicit);
+}
+
+/* Pose dans l'analyse les lignes lues dans le module. Automatique à
+   l'ouverture d'une session (silencieux si elles sont loin du tracé), ou
+   sur demande (bouton « Lignes du module », avec explication). */
+function applyModuleLines(explicit){
+  if(!anal) return;
+  const L = moduleLines;
+  const say = t => { if(explicit) $('anHelp').textContent = t; };
+  const first = L && (L.start || L.finish);
+  if(!L || !L.mode || !first){ say('Aucune ligne posée sur le module (page Lignes du script radio).'); return; }
+  let dmin = Infinity;
+  for(const r of anal.pts){ const dd = distM(first, r); if(dd < dmin) dmin = dd; }
+  if(dmin > 30){
+    say(`Les lignes du module sont à ${dmin >= 1000 ? (dmin/1000).toFixed(1)+' km' : Math.round(dmin)+' m'} de ce tracé : posées sur une autre piste ?`);
+    return;
+  }
+  const drag = L.mode === 2 && L.start && L.finish;
+  // Le changement de mode efface les lignes de la console (setMode).
+  $(drag ? 'modeDrag' : 'modeCircuit').onclick();
+  if(drag){
+    anal.lineA = makeLineAt(L.start.lat, L.start.lon, L.start.head);
+    anal.lineB = makeLineAt(L.finish.lat, L.finish.lon, L.finish.head);
+  }else{
+    anal.lineB = makeLineAt(first.lat, first.lon, first.head);
+  }
+  $('anHelp').textContent = drag
+    ? "Lignes de départ et d'arrivée posées depuis la radio (lues dans le module)."
+    : 'Ligne posée depuis la radio (lue dans le module).';
+  computeRuns(); render(); drawChart();
+}
+
+/* Tours et parcours calculés en course par le module, comparés à ceux que
+   la console recalcule à partir du tracé. Même algorithme des deux côtés
+   (v2 §10.8) : l'écart doit rester de l'ordre de la milliseconde. */
+function paintModule(){
+  const box = $('modBox');
+  const evs = (sessions[selectedSession] || {}).moduleEvents || [];
+  const mod = [];
+  let pend = [];
+  for(const e of evs){
+    if(e.kind === 0 && e.line === 0) pend = [];          // départ : nouveau parcours
+    else if(e.kind === 3) pend.push(e);                 // chrono intermédiaire
+    else if(e.kind === 1 || e.kind === 2){ mod.push({...e, splits: e.kind === 2 ? pend : []}); pend = []; }
+  }
+  if(!anal || !mod.length){ box.classList.add('hide'); return; }
+  const cons = anal.laps || anal.runs || [];
+  const best = Math.min(...mod.map(e => e.ms));
+  $('modNote').textContent = 'Calculés en course par le module, à 25 Hz, avec les lignes posées depuis la radio. ' +
+    (cons.length ? "À droite, le calcul de la console sur le même tracé : l'écart doit rester de quelques millisecondes."
+                 : 'Posez les lignes (bouton « Lignes du module ») pour comparer avec le calcul de la console.');
+  $('modList').innerHTML = mod.map((e, i) => {
+    const c = cons[i];
+    const diff = c ? Math.round(c.time*1000 - e.ms) : null;
+    const sp = e.splits.map(s =>
+      `<span class="sp"><b>${s.splitKind ? s.splitValue+' m' : '0 → '+s.splitValue+' km/h'}</b> ${(s.ms/1000).toFixed(2)} s</span>`).join('');
+    return `<div class="lapRow${e.ms === best ? ' best' : ''}">
+       <span class="n">${e.kind === 1 ? 'TOUR' : 'RUN'} ${e.n}</span>
+       <span class="t">${(e.ms/1000).toFixed(3)} s</span>
+       <span class="d">${c ? `console ${c.time.toFixed(3)} s · écart ${diff > 0 ? '+' : ''}${diff} ms` : 'console : —'}</span>
+       ${sp ? `<div class="splits">${sp}</div>` : ''}
+     </div>`;
+  }).join('');
+  box.classList.remove('hide');
 }
 
 /* ==========================================================================
@@ -1928,13 +2054,23 @@ function makeLine(idx){
   const rad = Math.PI/180, cosL = Math.cos(pts[idx].lat*rad);
   // Direction de déplacement, en degrés de longitude/latitude
   let dx = (b.lon - a.lon)*cosL, dy = (b.lat - a.lat);
+  return lineFrom(pts[idx], dx, dy, idx);
+}
+/* Ligne posée par le module depuis la radio (FF F1) : centre et cap de
+   la voiture (0 = nord, sens horaire), exprimés dans le même repère que
+   makeLine (degrés de latitude, degrés de longitude × cos φ). */
+function makeLineAt(lat, lon, headDeg){
+  const rad = Math.PI/180;
+  return lineFrom({lat, lon}, Math.sin(headDeg*rad)/111320, Math.cos(headDeg*rad)/110540, -1);
+}
+function lineFrom(P, dx, dy, idx){
+  const rad = Math.PI/180, cosL = Math.cos(P.lat*rad);
   const n = Math.hypot(dx, dy) || 1e-9; dx/=n; dy/=n;
   // Demi-longueur volontairement courte : sur une piste RC, une ligne trop
   // longue recoupe le tracé à l'opposé du circuit et double les passages.
   const halfM = 4;
   const dLat = halfM / 110540, dLon = halfM / (111320*cosL);
   // Perpendiculaire : (-dy, dx)
-  const P = pts[idx];
   return {
     idx, halfM,
     dirX: dx, dirY: dy,               // cap de référence, pour filtrer le sens
@@ -2033,7 +2169,8 @@ function runSplits(iStart, iEnd, t0){
 
 /* Détecte soit des tours (une seule ligne, circuit fermé), soit des parcours
    départ → arrivée (deux lignes distinctes, tracé ouvert ou dragster). */
-function computeRuns(){
+function computeRuns(){ computeRunsCore(); paintModule(); }
+function computeRunsCore(){
   if(!anal){ return; }
   const A = anal.lineA, B = anal.lineB;
   anal.laps = null; anal.runs = null;
@@ -2401,6 +2538,18 @@ function bindCanvas(){
 
   $('btnLineA').onclick = () => armLine('A');
   $('btnLineB').onclick = () => armLine('B');
+  $('btnModLines').onclick = () => {
+    if(!anal) return;
+    if(demoMode){ $('anHelp').textContent = 'Démonstration : aucun module, donc aucune ligne posée depuis la radio.'; return; }
+    const connected = !$('btnDisconnect').classList.contains('hide');
+    if(connected && fwModel && !isS3()){ $('anHelp').textContent = 'Ce firmware (v1) ne pose pas de lignes depuis la radio.'; return; }
+    if(connected){
+      linesWanted = true;
+      $('anHelp').textContent = 'Lecture des lignes du module…';
+      send(CLS, ID_LINES).catch(e => { linesWanted = false; log(e.message, 'err'); });
+    }else if(moduleLines) applyModuleLines(true);   // lues avant la coupure du Wi-Fi
+    else $('anHelp').textContent = 'Connectez le module pour lire ses lignes.';
+  };
   $('btnClearSel').onclick = () => {
     if(!anal) return;
     anal.sel = null; anal.lineA = null; anal.lineB = null;
@@ -2466,6 +2615,7 @@ function showAnalysis(idx){
   const cv = $('map');
   if(pts.length < 2){
     anal = null;
+    $('modBox').classList.add('hide');
     paintAir(stats);
     const ctx = cv.getContext('2d');
     ctx.clearRect(0,0,cv.width,cv.height);
@@ -2495,6 +2645,9 @@ function showAnalysis(idx){
   $('lapBox').classList.add('hide');
   $('secBox').classList.add('hide');
   refreshView(); drawChart();
+  paintModule();
+  // Lignes posées depuis la radio : reprises d'office si elles sont sur ce tracé.
+  if(moduleLines) applyModuleLines(false);
 
   $('secAnalysis').classList.remove('hide');
   document.querySelectorAll('.sessionRow').forEach((e,i)=>
@@ -2556,6 +2709,8 @@ function onEraseProgress(p){
 function onBuild(p){
   const txt = new TextDecoder().decode(p).replace(/\0+$/,'');
   const [model, ver, stamp, gRange, nick] = txt.split('|');
+  fwModel = model || '';
+  if(isS3()) setTimeout(() => send(CLS, ID_LINES).catch(()=>{}), 150);
   if(nick) $('dNick').textContent = nick;
   if(stamp){
     $('dBuild').textContent = stamp + (gRange ? ` · accél. ±${gRange} g` : '');
@@ -2587,6 +2742,8 @@ function onNack(p){
   log(`← REFUSÉ (0x${id.toString(16).toUpperCase()})`, 'err');
   hideOp();
   if(id===ID_DOWNLOAD){ dl=null; $('tape').classList.remove('scanning'); }
+  if(id===ID_LINES && linesWanted){ linesWanted = false;
+    $('anHelp').textContent = 'Le module ne sait pas renvoyer ses lignes (firmware v1 ?).'; }
 }
 
 /* ---------- barre d'opération ---------- */
@@ -2867,7 +3024,7 @@ function onDisconnectedReal(){
    qu'un vrai appareil, sans passer par le Bluetooth ni le format de trame.
    Activée uniquement quand demoMode vaut true.
    ========================================================================== */
-const SIM_TOTAL = 25789;          // capacité réelle après réserve de config
+const SIM_TOTAL = 154333;         // capacité du firmware S3 : 12 500 992 o / 81 o (v2 §2.4)
 let simUsed = 0, simTimer = null, simT = 0, simLap = 0;
 
 /* Piste simulée : un circuit RC d'environ 45 × 28 m, avec une longue ligne
@@ -2990,14 +3147,14 @@ function selectSessionForMode(){
 
 function connectDemo(){
   $('dNick').textContent   = 'Buggy 1';
-  $('dModel').textContent  = 'TrimBox DIY';
+  $('dModel').textContent  = 'TrimBox DIY S3';
   $('dSerial').textContent = '1234567890';
-  showFwVersion('1.0 (démo)');
+  showFwVersion('2.0 (démo)');
   $('dBuild').textContent  = 'appareil simulé · accél. ±16 g';
   $('devInfo').classList.remove('hide');
   setConnected(true);
   log('mode démonstration : aucun matériel connecté', 'ok');
-  log('appareil simulé : TrimBox DIY · série 1234567890', 'ok');
+  log('appareil simulé : TrimBox DIY S3 · série 1234567890', 'ok');
 
   // Mémoire partiellement occupée au départ : sans cette initialisation, le
   // bloc « Mémoire » reste vide et le bouton Télécharger n'a rien à offrir.
@@ -3091,6 +3248,7 @@ function setConnected(on){
   $('btnConnect').classList.toggle('hide', on);
   $('btnDisconnect').classList.toggle('hide', !on);
   if(!on){
+    fwModel = '';
     showFwVersion('');
     $('dBuild').textContent = '—';
     $('dNick').textContent  = '—';
@@ -3111,6 +3269,7 @@ function setSource(src){
 
   demoMode = src === 'demo';
   wifiMode = src === 'wifi';
+  if(demoMode) moduleLines = null;   // les lignes d'un vrai module n'ont rien à faire en démo
   const btns = {ble: 'srcReal', wifi: 'srcWifi', demo: 'srcDemo'};
   for(const [k, id] of Object.entries(btns)){
     $(id).classList.toggle('on', k === src);
@@ -3137,7 +3296,7 @@ function doDisconnect(){
 function doStatus(){   demoMode ? demoStatus()   : refreshStatus(); }
 function doDownload(){ demoMode ? demoDownload() : (
   !status.used ? log('la mémoire est vide, rien à télécharger', 'err')
-               : send(CLS, ID_DOWNLOAD).catch(e=>log(e.message,'err'))
+               : send(CLS, ID_DOWNLOAD, isS3() ? [0x02] : []).catch(e=>log(e.message,'err'))
 ); }
 function doErase(){
   if(demoMode){ demoErase(); return; }
@@ -3399,7 +3558,7 @@ $('btnGpxAll').onclick = () => { const r=allRecords(); r.length ? exportGpx(r,'t
 const META_DESC = 'TrimBox DIY — Console d\'analyse pour RC/GPS. Visualisez vos données de vitesse, distance, accélération en temps réel avec analyse de circuit et dragster.';
 const META_KEYWORDS = 'RC, GPS, TrimBox, analyse, vitesse, circuit, dragster, PWA';
 
-const CONSOLE_VER  = '1.7.10';
+const CONSOLE_VER  = '1.7.11';
 const CONSOLE_DATE = '20 septembre 2026';
 // En-tête : deux lignes courtes, « console v… » puis « firmware … » ; la
 // date de la console reste consultable au survol / appui long.
