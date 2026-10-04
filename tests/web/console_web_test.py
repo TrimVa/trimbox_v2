@@ -148,6 +148,15 @@ try:
             print('(FW_BIN absent : envoi d\'un vrai firmware non testé)')
         r = pg.request.get(URL + 'update')
         check(r.status == 200 and 'Mise à jour du firmware' in r.text(), 'page de secours /update')
+        # mise en page adaptative (1.7.13) : aucun défilement horizontal du
+        # petit téléphone au grand écran, deux colonnes sur ordinateur
+        for w in (320, 360, 412, 768, 1024, 1440):
+            pg.set_viewport_size({'width': w, 'height': 900}); pg.wait_for_timeout(250)
+            sw = pg.evaluate('document.documentElement.scrollWidth')
+            check(sw <= w, f'{w} px : pas de défilement horizontal (largeur {sw})')
+        cols = pg.evaluate("getComputedStyle(document.querySelector('.wrap')).gridTemplateColumns.split(' ').length")
+        check(cols == 2, f'1440 px : deux colonnes ({cols})')
+        pg.set_viewport_size({'width': 412, 'height': 900}); pg.wait_for_timeout(250)
         pg.screenshot(path=os.environ.get('SHOT', '/tmp/console_wifi.png'), full_page=False)
         check(not errs, f'aucune erreur JavaScript {errs}')
         b.close()

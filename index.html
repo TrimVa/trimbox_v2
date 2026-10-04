@@ -357,6 +357,76 @@ button.tool.active{background:var(--violet);color:var(--on-violet);box-shadow:no
 .bar{height:6px;background:var(--line);border-radius:4px;overflow:hidden;margin-top:10px}
 .bar>i{display:block;height:100%;width:0;background:var(--violet);transition:width .2s}
 
+
+/* ==========================================================================
+   Mise en page adaptative (1.7.13)
+   - téléphone (< 700 px) : une colonne, ordre d'origine ;
+   - tablette (700 à 1099 px) : une colonne plus large ;
+   - ordinateur (≥ 1100 px) : deux colonnes — à gauche l'appareil (connexion,
+     direct, mémoire, enregistrement, mise à jour, journal), à droite
+     l'analyse (sessions, carte, comparaison).
+   Les deux colonnes (.colA, .colB) sont « transparentes » (display:contents)
+   tant qu'il n'y en a qu'une : l'ordre d'affichage est alors fixé par
+   « order », identique à celui des versions précédentes.
+   ========================================================================== */
+.wrap{display:flex;flex-direction:column}
+.colA,.colB{display:contents}
+.wrap>header{order:1}
+#accentPanel{order:2}
+.wrap>.modebar.wide{order:3}
+#secConnect{order:4}  #secLive{order:5}  #secMem{order:6}
+#secAnalysis{order:7} #secImport{order:8} #secSessions{order:9} #secCompare{order:10}
+#secRec{order:11}     #secFw{order:12}    #secLog{order:13}
+
+/* Grilles de valeurs : le fond de la grille prend la couleur des cases et
+   chaque case trace son propre filet (outline dans l'interstice de 1 px) :
+   une dernière ligne incomplète ne laisse plus de bloc vide coloré. Une
+   valeur trop longue passe à la ligne au lieu de déborder de sa case. */
+.readout{background:var(--panel-2)}
+.readout>.cell{outline:1px solid var(--line)}
+.cell .v{overflow-wrap:anywhere}
+
+/* Petits téléphones : l'état de connexion passe sous le titre. */
+@media (max-width:440px){
+  header{flex-wrap:wrap;row-gap:6px}
+  h1{font-size:20px}
+  .sub{flex-basis:100%;margin-left:0;text-align:left;white-space:normal;line-height:1.5}
+  .sub br{display:none}
+  .sub>span{margin-right:12px;display:inline-block}
+  .speed{font-size:52px}
+  .cell{padding:9px 8px}
+  #lLat,#lLon,#dSerial,#dNick,#dModel,#dFw{font-size:12px !important}
+  section{padding:var(--sp3)}
+  .zoomgrp{margin-left:0}
+  .zoomlab{min-width:64px}
+}
+@media (max-width:360px){
+  .wrap{padding-left:10px;padding-right:10px}
+  .row>button{min-width:110px}
+  .grid2,.splitcfg{grid-template-columns:1fr}
+  .lapRow .d{margin-left:0;flex-basis:100%}
+}
+
+/* Tablette : une colonne plus large. */
+@media (min-width:700px){
+  .wrap{max-width:800px}
+}
+
+/* Ordinateur : deux colonnes. */
+@media (min-width:1100px){
+  .wrap{max-width:1440px;display:grid;column-gap:var(--sp4);align-items:start;
+    grid-template-columns:minmax(340px,410px) minmax(0,1fr);
+    grid-template-rows:auto auto auto 1fr}   /* la colonne d'analyse ne repousse pas la colonne appareil */
+  .wrap>header,#accentPanel{grid-column:1/-1}
+  .wrap>.modebar.wide{grid-column:1;grid-row:3}
+  .colA{display:block;grid-column:1;grid-row:4;min-width:0}
+  .colB{display:block;grid-column:2;grid-row:3/span 2;min-width:0}
+  #secAnalysis .speed{font-size:68px}
+  #chart{height:170px !important}
+  #cmpChart{height:200px !important}
+  .colA #dSerial,.colA #dNick,.colA #dModel,.colA #dFw,.colA #lLat,.colA #lLon{font-size:12px !important}
+}
+
 </style>
 </head>
 <body>
@@ -392,6 +462,9 @@ button.tool.active{background:var(--violet);color:var(--on-violet);box-shadow:no
   <button class="seg hide" id="srcWifi" aria-pressed="false">Wi-Fi</button>
   <button class="seg" id="srcDemo" aria-pressed="false">Démo</button>
 </div>
+
+<!-- Colonne « appareil » (à gauche sur ordinateur) -->
+<div class="colA">
 
 <!-- ================= CONNEXION ================= -->
 <section id="secConnect">
@@ -446,6 +519,73 @@ button.tool.active{background:var(--violet);color:var(--on-violet);box-shadow:no
   <div class="bar hide" id="opBar"><i></i></div>
   <p class="hint hide" id="opText"></p>
 </section>
+
+<!-- ================= ENREGISTREMENT ================= -->
+<section id="secRec" class="hide">
+  <h2>Enregistrement autonome</h2>
+  <div style="margin-bottom:4px"><span class="badge off" id="recBadge"><i class="dot"></i><span>arrêté</span></span></div>
+
+  <label for="fRate">Cadence d'échantillonnage</label>
+  <select id="fRate">
+    <option value="0">25 Hz</option>
+    <option value="4">20 Hz</option>
+    <option value="1">10 Hz</option>
+    <option value="2">5 Hz</option>
+    <option value="3">1 Hz</option>
+  </select>
+
+  <div class="checks">
+    <label><input type="checkbox" id="fAuto" checked> <b>Démarrer et arrêter tout seul</b> (au roulage)</label>
+    <label><input type="checkbox" id="fWaitFix" checked> Attendre un point GPS avant de commencer</label>
+    <label><input type="checkbox" id="fStationary" checked> Suspendre à l'arrêt</label>
+    <label><input type="checkbox" id="fNoFix" checked> Suspendre sans signal GPS</label>
+    <label><input type="checkbox" id="fAutoOff" checked> Éteindre après inactivité</label>
+    <label><input type="checkbox" id="fWaitData" checked> Ne pas éteindre avant d'avoir enregistré</label>
+  </div>
+
+  <p class="note">Avec <b>Démarrer et arrêter tout seul</b>, l'enregistrement
+  s'ouvre dès que la voiture dépasse le seuil d'arrêt et se ferme après le
+  délai ci-dessous passé à l'arrêt. Chaque roulage donne une session.</p>
+
+  <div class="grid2">
+    <div><label for="fStatSpeed">Seuil d'arrêt (km/h)</label><input type="number" id="fStatSpeed" value="5" min="0" max="200" step="1"></div>
+    <div><label for="fStatInt">Délai avant pause / fermeture (s)</label><input type="number" id="fStatInt" value="30" min="1" max="65535"></div>
+    <div><label for="fNoFixInt">Délai sans signal (s)</label><input type="number" id="fNoFixInt" value="30" min="1" max="65535"></div>
+    <div><label for="fOffInt">Délai d'extinction (s)</label><input type="number" id="fOffInt" value="300" min="1" max="65535"></div>
+  </div>
+
+  <div class="row" style="margin-top:14px">
+    <button class="go" id="btnStart">Démarrer</button>
+    <button class="ghost" id="btnStop">Arrêter</button>
+  </div>
+  <p class="hint">Les réglages sont conservés par l'appareil et repris après une coupure d'alimentation.</p>
+</section>
+
+<!-- ================= MISE À JOUR DU FIRMWARE (Wi-Fi) ================= -->
+<section id="secFw" class="hide">
+  <h2>Mise à jour du firmware</h2>
+  <p class="note" style="margin-top:0">Fichier <strong>trimbox_s3-app.bin</strong> (artefact
+  <em>firmware-s3-app</em> de la compilation GitHub). Voiture et enregistrement à l'arrêt.
+  Si la nouvelle version ne démarre pas correctement, le module revient seul à la précédente.</p>
+  <input type="file" id="fwFile" accept=".bin" style="margin-top:10px;width:100%">
+  <button class="wide" id="btnFw" style="margin-top:10px">Envoyer au module</button>
+  <div class="bar hide" id="fwBar"><i></i></div>
+  <p class="note" id="fwMsg"></p>
+</section>
+
+<details id="secLog" class="hide">
+  <summary>Journal du protocole</summary>
+  <div id="log"></div>
+  <div class="row" style="margin-top:8px">
+    <button class="ghost" id="btnClearLog">Vider</button>
+    <button class="ghost" id="btnUnlock">Déverrouiller la mémoire</button>
+  </div>
+</details>
+
+</div><!-- /colA -->
+
+<!-- Colonne « analyse » (à droite sur ordinateur) -->
+<div class="colB">
 
 <!-- ================= SESSIONS ================= -->
 <section id="secAnalysis" class="hide">
@@ -581,67 +721,8 @@ button.tool.active{background:var(--violet);color:var(--on-violet);box-shadow:no
   </div>
 </section>
 
-<!-- ================= ENREGISTREMENT ================= -->
-<section id="secRec" class="hide">
-  <h2>Enregistrement autonome</h2>
-  <div style="margin-bottom:4px"><span class="badge off" id="recBadge"><i class="dot"></i><span>arrêté</span></span></div>
+</div><!-- /colB -->
 
-  <label for="fRate">Cadence d'échantillonnage</label>
-  <select id="fRate">
-    <option value="0">25 Hz</option>
-    <option value="4">20 Hz</option>
-    <option value="1">10 Hz</option>
-    <option value="2">5 Hz</option>
-    <option value="3">1 Hz</option>
-  </select>
-
-  <div class="checks">
-    <label><input type="checkbox" id="fAuto" checked> <b>Démarrer et arrêter tout seul</b> (au roulage)</label>
-    <label><input type="checkbox" id="fWaitFix" checked> Attendre un point GPS avant de commencer</label>
-    <label><input type="checkbox" id="fStationary" checked> Suspendre à l'arrêt</label>
-    <label><input type="checkbox" id="fNoFix" checked> Suspendre sans signal GPS</label>
-    <label><input type="checkbox" id="fAutoOff" checked> Éteindre après inactivité</label>
-    <label><input type="checkbox" id="fWaitData" checked> Ne pas éteindre avant d'avoir enregistré</label>
-  </div>
-
-  <p class="note">Avec <b>Démarrer et arrêter tout seul</b>, l'enregistrement
-  s'ouvre dès que la voiture dépasse le seuil d'arrêt et se ferme après le
-  délai ci-dessous passé à l'arrêt. Chaque roulage donne une session.</p>
-
-  <div class="grid2">
-    <div><label for="fStatSpeed">Seuil d'arrêt (km/h)</label><input type="number" id="fStatSpeed" value="5" min="0" max="200" step="1"></div>
-    <div><label for="fStatInt">Délai avant pause / fermeture (s)</label><input type="number" id="fStatInt" value="30" min="1" max="65535"></div>
-    <div><label for="fNoFixInt">Délai sans signal (s)</label><input type="number" id="fNoFixInt" value="30" min="1" max="65535"></div>
-    <div><label for="fOffInt">Délai d'extinction (s)</label><input type="number" id="fOffInt" value="300" min="1" max="65535"></div>
-  </div>
-
-  <div class="row" style="margin-top:14px">
-    <button class="go" id="btnStart">Démarrer</button>
-    <button class="ghost" id="btnStop">Arrêter</button>
-  </div>
-  <p class="hint">Les réglages sont conservés par l'appareil et repris après une coupure d'alimentation.</p>
-</section>
-
-<!-- ================= MISE À JOUR DU FIRMWARE (Wi-Fi) ================= -->
-<section id="secFw" class="hide">
-  <h2>Mise à jour du firmware</h2>
-  <p class="note" style="margin-top:0">Fichier <strong>trimbox_s3-app.bin</strong> (artefact
-  <em>firmware-s3-app</em> de la compilation GitHub). Voiture et enregistrement à l'arrêt.
-  Si la nouvelle version ne démarre pas correctement, le module revient seul à la précédente.</p>
-  <input type="file" id="fwFile" accept=".bin" style="margin-top:10px;width:100%">
-  <button class="wide" id="btnFw" style="margin-top:10px">Envoyer au module</button>
-  <div class="bar hide" id="fwBar"><i></i></div>
-  <p class="note" id="fwMsg"></p>
-</section>
-
-<details id="secLog" class="hide">
-  <summary>Journal du protocole</summary>
-  <div id="log"></div>
-  <div class="row" style="margin-top:8px">
-    <button class="ghost" id="btnClearLog">Vider</button>
-    <button class="ghost" id="btnUnlock">Déverrouiller la mémoire</button>
-  </div>
-</details>
 
 </div>
 
@@ -1226,6 +1307,8 @@ function paintCompare(){
 
 function drawCompareChart(rows){
   const cv = $('cmpChart'), ctx = cv.getContext('2d');
+  fitCanvas(cv);
+  const k = cv.width / (cv.clientWidth || cv.width);   // pixels internes par pixel CSS
   const W = cv.width, H = cv.height, pad = 8;
   ctx.clearRect(0,0,W,H);
   const N = 400;
@@ -1235,14 +1318,14 @@ function drawCompareChart(rows){
   const vmax = Math.max(...series.map(s => Math.max(...s.d.profile))) || 1;
 
   // repères horizontaux
-  ctx.strokeStyle = 'rgba(198,202,191,.9)'; ctx.lineWidth = 1;
+  ctx.strokeStyle = 'rgba(198,202,191,.9)'; ctx.lineWidth = 1*k;
   for(let q=1;q<4;q++){
     const y = pad + (H-2*pad)*q/4;
     ctx.beginPath(); ctx.moveTo(pad,y); ctx.lineTo(W-pad,y); ctx.stroke();
   }
 
   series.forEach(s => {
-    ctx.strokeStyle = get_cmp_color(s.k); ctx.lineWidth = 2;
+    ctx.strokeStyle = get_cmp_color(s.k); ctx.lineWidth = 2*k;
     ctx.beginPath();
     s.d.profile.forEach((v,n) => {
       const x = pad + (W-2*pad)*n/(N-1);
@@ -1253,8 +1336,8 @@ function drawCompareChart(rows){
   });
 
   ctx.fillStyle = THEME.mute;
-  ctx.font = '600 15px ui-monospace, monospace';
-  ctx.fillText(vmax.toFixed(0)+' km/h', pad+4, pad+16);
+  ctx.font = `600 ${Math.round(11*k)}px ui-monospace, monospace`;
+  ctx.fillText(vmax.toFixed(0)+' km/h', pad+4, pad+14*k);
   ctx.fillText('0', pad+4, H-pad-4);
   ctx.textAlign = 'right';
   ctx.fillText('distance parcourue →', W-pad-4, H-pad-4);
@@ -1956,9 +2039,32 @@ function render(){
 }
 
 /* ---------- profil de vitesse ---------- */
+/* Courbes : la résolution interne du canevas suit sa taille affichée (et la
+   densité de l'écran), sinon le tracé et les textes sont étirés dès que la
+   largeur affichée s'écarte des 900 px d'origine (téléphone, grand écran).
+   Les conversions souris → canevas passent toutes par le rapport
+   largeur interne / largeur affichée : elles restent justes. */
+function fitCanvas(cv){
+  const r = cv.getBoundingClientRect();
+  if(!r.width || !r.height) return;
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const w = Math.round(r.width * dpr), h = Math.round(r.height * dpr);
+  if(cv.width !== w || cv.height !== h){ cv.width = w; cv.height = h; }
+}
+let fitTimer = null;
+window.addEventListener('resize', () => {
+  clearTimeout(fitTimer);
+  fitTimer = setTimeout(() => {
+    if(anal) drawChart();
+    if(typeof cmpSel !== 'undefined' && cmpSel.size >= 2 && typeof paintCompare === 'function') paintCompare();
+  }, 150);
+});
+
 function drawChart(){
   if(!anal) return;
   const cv = $('chart'), ctx = cv.getContext('2d');
+  fitCanvas(cv);
+  const k = cv.width / (cv.clientWidth || cv.width);   // pixels internes par pixel CSS
   const W = cv.width, H = cv.height, pad = 6;
   const pts = anal.pts;
   ctx.clearRect(0,0,W,H);
@@ -1978,29 +2084,32 @@ function drawChart(){
   ctx.lineTo(pad+(pts.length-1)*step, H-pad); ctx.closePath();
   ctx.fillStyle = 'rgba(91,124,250,.16)'; ctx.fill();
 
-  ctx.strokeStyle = '#5B7CFA'; ctx.lineWidth = 2;
+  ctx.strokeStyle = '#5B7CFA'; ctx.lineWidth = 2*k;
   ctx.beginPath();
   pts.forEach((r,i)=>{ const x=pad+i*step, y=yOf(r.speed); i?ctx.lineTo(x,y):ctx.moveTo(x,y); });
   ctx.stroke();
 
   // Marques de passage sur la ligne d'arrivée
   if(anal.laps) for(const L of anal.laps){
-    ctx.strokeStyle = 'rgba(51,214,166,.7)'; ctx.lineWidth = 1;
+    ctx.strokeStyle = 'rgba(51,214,166,.7)'; ctx.lineWidth = 1*k;
     ctx.beginPath(); ctx.moveTo(pad+L.i*step, 0); ctx.lineTo(pad+L.i*step, H); ctx.stroke();
   }
 
-  ctx.strokeStyle = 'rgba(255,77,109,.55)'; ctx.lineWidth = 1; ctx.setLineDash([4,3]);
+  ctx.strokeStyle = 'rgba(255,77,109,.55)'; ctx.lineWidth = 1*k; ctx.setLineDash([4,3]);
   ctx.beginPath(); ctx.moveTo(pad, yOf(vmax)); ctx.lineTo(W-pad, yOf(vmax)); ctx.stroke();
   ctx.setLineDash([]);
-  ctx.fillStyle = '#FF4D6D'; ctx.font = '600 15px ui-monospace, monospace';
-  ctx.fillText(vmax.toFixed(1)+' km/h', pad+4, yOf(vmax)-5);
+  ctx.fillStyle = '#FF4D6D'; ctx.font = `600 ${Math.round(11*k)}px ui-monospace, monospace`;
+  // Libellé SOUS la ligne de V max : au-dessus, il sortait du canevas.
+  ctx.textBaseline = 'top';
+  ctx.fillText(vmax.toFixed(1)+' km/h', pad+4, yOf(vmax)+3*k);
+  ctx.textBaseline = 'alphabetic';
 
   if(anal.hover != null){
     const x = pad + anal.hover*step, y = yOf(pts[anal.hover].speed);
-    ctx.strokeStyle = THEME.ink; ctx.lineWidth = 1;
+    ctx.strokeStyle = THEME.ink; ctx.lineWidth = 1*k;
     ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
     ctx.fillStyle = THEME.ink;
-    ctx.beginPath(); ctx.arc(x, y, 4, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x, y, 4*k, 0, Math.PI*2); ctx.fill();
   }
 }
 
@@ -2654,6 +2763,9 @@ function showAnalysis(idx){
   if(moduleLines) applyModuleLines(false);
 
   $('secAnalysis').classList.remove('hide');
+  // Le profil a été dessiné panneau masqué (taille inconnue) : on le
+  // redessine une fois affiché, à la résolution de l'écran.
+  requestAnimationFrame(() => { if(anal) drawChart(); });
   document.querySelectorAll('.sessionRow').forEach((e,i)=>
     e.classList.toggle('sel', i===idx));
   $('secAnalysis').scrollIntoView({behavior:'smooth', block:'start'});
@@ -3562,7 +3674,7 @@ $('btnGpxAll').onclick = () => { const r=allRecords(); r.length ? exportGpx(r,'t
 const META_DESC = 'TrimBox DIY — Console d\'analyse pour RC/GPS. Visualisez vos données de vitesse, distance, accélération en temps réel avec analyse de circuit et dragster.';
 const META_KEYWORDS = 'RC, GPS, TrimBox, analyse, vitesse, circuit, dragster, PWA';
 
-const CONSOLE_VER  = '1.7.12';
+const CONSOLE_VER  = '1.7.13';
 const CONSOLE_DATE = '20 septembre 2026';
 // En-tête : deux lignes courtes, « console v… » puis « firmware … » ; la
 // date de la console reste consultable au survol / appui long.
