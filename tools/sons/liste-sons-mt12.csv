@@ -1,0 +1,248 @@
+﻿Priorité;Dossier sur la carte SD;Fichier;Texte à faire dire;Rôle
+1 - TrimBox (script);SOUNDS/trimbox;arme.wav;ligne armée, roulez;pose à l'arrêt : ligne armée, démarrer dans les 10 s
+1 - TrimBox (script);SOUNDS/trimbox;arrivee.wav;arrivée posée;ligne d'arrivée posée
+1 - TrimBox (script);SOUNDS/trimbox;delai.wav;délai dépassé;pose à l'arrêt : pas de départ dans les 10 s
+1 - TrimBox (script);SOUNDS/trimbox;depart.wav;départ posé;ligne de départ posée
+1 - TrimBox (script);SOUNDS/trimbox;efface.wav;lignes effacées;lignes effacées
+1 - TrimBox (script);SOUNDS/trimbox;egal.wav;égal;écart : même temps que le tour précédent
+1 - TrimBox (script);SOUNDS/trimbox;meilleur.wav;meilleur tour;annoncé avant le temps quand c'est le meilleur tour
+1 - TrimBox (script);SOUNDS/trimbox;moins.wav;moins;écart : tour plus rapide que le précédent
+1 - TrimBox (script);SOUNDS/trimbox;pasgps.wav;pas de GPS;pose refusée : pas de fix GPS
+1 - TrimBox (script);SOUNDS/trimbox;plus.wav;plus;écart : tour plus lent que le précédent
+1 - TrimBox (script);SOUNDS/trimbox;refus.wav;commande refusée;commande refusée (autre raison)
+1 - TrimBox (script);SOUNDS/trimbox;vitfaib.wav;vitesse trop faible;pose refusée : vitesse trop faible
+1 - nombres;SOUNDS/fr/SYSTEM;0000.wav;zéro;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0001.wav;un;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0002.wav;deux;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0003.wav;trois;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0004.wav;quatre;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0005.wav;cinq;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0006.wav;six;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0007.wav;sept;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0008.wav;huit;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0009.wav;neuf;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0010.wav;dix;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0011.wav;onze;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0012.wav;douze;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0013.wav;treize;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0014.wav;quatorze;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0015.wav;quinze;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0016.wav;seize;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0017.wav;dix-sept;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0018.wav;dix-huit;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0019.wav;dix-neuf;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0020.wav;vingt;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0021.wav;vingt et un;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0022.wav;vingt-deux;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0023.wav;vingt-trois;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0024.wav;vingt-quatre;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0025.wav;vingt-cinq;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0026.wav;vingt-six;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0027.wav;vingt-sept;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0028.wav;vingt-huit;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0029.wav;vingt-neuf;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0030.wav;trente;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0031.wav;trente et un;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0032.wav;trente-deux;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0033.wav;trente-trois;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0034.wav;trente-quatre;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0035.wav;trente-cinq;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0036.wav;trente-six;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0037.wav;trente-sept;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0038.wav;trente-huit;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0039.wav;trente-neuf;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0040.wav;quarante;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0041.wav;quarante et un;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0042.wav;quarante-deux;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0043.wav;quarante-trois;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0044.wav;quarante-quatre;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0045.wav;quarante-cinq;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0046.wav;quarante-six;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0047.wav;quarante-sept;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0048.wav;quarante-huit;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0049.wav;quarante-neuf;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0050.wav;cinquante;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0051.wav;cinquante et un;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0052.wav;cinquante-deux;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0053.wav;cinquante-trois;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0054.wav;cinquante-quatre;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0055.wav;cinquante-cinq;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0056.wav;cinquante-six;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0057.wav;cinquante-sept;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0058.wav;cinquante-huit;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0059.wav;cinquante-neuf;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0060.wav;soixante;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0061.wav;soixante et un;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0062.wav;soixante-deux;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0063.wav;soixante-trois;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0064.wav;soixante-quatre;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0065.wav;soixante-cinq;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0066.wav;soixante-six;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0067.wav;soixante-sept;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0068.wav;soixante-huit;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0069.wav;soixante-neuf;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0070.wav;soixante-dix;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0071.wav;soixante et onze;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0072.wav;soixante-douze;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0073.wav;soixante-treize;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0074.wav;soixante-quatorze;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0075.wav;soixante-quinze;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0076.wav;soixante-seize;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0077.wav;soixante-dix-sept;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0078.wav;soixante-dix-huit;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0079.wav;soixante-dix-neuf;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0080.wav;quatre-vingts;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0081.wav;quatre-vingt-un;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0082.wav;quatre-vingt-deux;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0083.wav;quatre-vingt-trois;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0084.wav;quatre-vingt-quatre;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0085.wav;quatre-vingt-cinq;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0086.wav;quatre-vingt-six;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0087.wav;quatre-vingt-sept;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0088.wav;quatre-vingt-huit;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0089.wav;quatre-vingt-neuf;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0090.wav;quatre-vingt-dix;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0091.wav;quatre-vingt-onze;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0092.wav;quatre-vingt-douze;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0093.wav;quatre-vingt-treize;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0094.wav;quatre-vingt-quatorze;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0095.wav;quatre-vingt-quinze;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0096.wav;quatre-vingt-seize;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0097.wav;quatre-vingt-dix-sept;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0098.wav;quatre-vingt-dix-huit;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0099.wav;quatre-vingt-dix-neuf;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0100.wav;cent;nombre (temps des tours, écarts, tension…)
+1 - nombres;SOUNDS/fr/SYSTEM;0119.wav;virgule;« virgule » des nombres décimaux
+2 - nombres;SOUNDS/fr/SYSTEM;0101.wav;deux cents;centaines, formes féminines, « et », « moins », minuit, midi
+2 - nombres;SOUNDS/fr/SYSTEM;0102.wav;trois cents;centaines, formes féminines, « et », « moins », minuit, midi
+2 - nombres;SOUNDS/fr/SYSTEM;0103.wav;quatre cents;centaines, formes féminines, « et », « moins », minuit, midi
+2 - nombres;SOUNDS/fr/SYSTEM;0104.wav;cinq cents;centaines, formes féminines, « et », « moins », minuit, midi
+2 - nombres;SOUNDS/fr/SYSTEM;0105.wav;six cents;centaines, formes féminines, « et », « moins », minuit, midi
+2 - nombres;SOUNDS/fr/SYSTEM;0106.wav;sept cents;centaines, formes féminines, « et », « moins », minuit, midi
+2 - nombres;SOUNDS/fr/SYSTEM;0107.wav;huit cents;centaines, formes féminines, « et », « moins », minuit, midi
+2 - nombres;SOUNDS/fr/SYSTEM;0108.wav;neuf cents;centaines, formes féminines, « et », « moins », minuit, midi
+2 - nombres;SOUNDS/fr/SYSTEM;0109.wav;mille;centaines, formes féminines, « et », « moins », minuit, midi
+2 - nombres;SOUNDS/fr/SYSTEM;0110.wav;une;centaines, formes féminines, « et », « moins », minuit, midi
+2 - nombres;SOUNDS/fr/SYSTEM;0111.wav;onze;centaines, formes féminines, « et », « moins », minuit, midi
+2 - nombres;SOUNDS/fr/SYSTEM;0112.wav;vingt et une;centaines, formes féminines, « et », « moins », minuit, midi
+2 - nombres;SOUNDS/fr/SYSTEM;0113.wav;trente et une;centaines, formes féminines, « et », « moins », minuit, midi
+2 - nombres;SOUNDS/fr/SYSTEM;0114.wav;quarante et une;centaines, formes féminines, « et », « moins », minuit, midi
+2 - nombres;SOUNDS/fr/SYSTEM;0115.wav;cinquante et une;centaines, formes féminines, « et », « moins », minuit, midi
+2 - nombres;SOUNDS/fr/SYSTEM;0116.wav;soixante et une;centaines, formes féminines, « et », « moins », minuit, midi
+2 - nombres;SOUNDS/fr/SYSTEM;0117.wav;soixante et onze;centaines, formes féminines, « et », « moins », minuit, midi
+2 - nombres;SOUNDS/fr/SYSTEM;0118.wav;quatre-vingt-une;centaines, formes féminines, « et », « moins », minuit, midi
+2 - nombres;SOUNDS/fr/SYSTEM;0120.wav;et;centaines, formes féminines, « et », « moins », minuit, midi
+2 - nombres;SOUNDS/fr/SYSTEM;0121.wav;moins;centaines, formes féminines, « et », « moins », minuit, midi
+2 - nombres;SOUNDS/fr/SYSTEM;0122.wav;minuit;centaines, formes féminines, « et », « moins », minuit, midi
+2 - nombres;SOUNDS/fr/SYSTEM;0123.wav;midi;centaines, formes féminines, « et », « moins », minuit, midi
+2 - nombres;SOUNDS/fr/SYSTEM;0180.wav;virgule zéro;« virgule N » (décimales à un chiffre)
+2 - nombres;SOUNDS/fr/SYSTEM;0181.wav;virgule un;« virgule N » (décimales à un chiffre)
+2 - nombres;SOUNDS/fr/SYSTEM;0182.wav;virgule deux;« virgule N » (décimales à un chiffre)
+2 - nombres;SOUNDS/fr/SYSTEM;0183.wav;virgule trois;« virgule N » (décimales à un chiffre)
+2 - nombres;SOUNDS/fr/SYSTEM;0184.wav;virgule quatre;« virgule N » (décimales à un chiffre)
+2 - nombres;SOUNDS/fr/SYSTEM;0185.wav;virgule cinq;« virgule N » (décimales à un chiffre)
+2 - nombres;SOUNDS/fr/SYSTEM;0186.wav;virgule six;« virgule N » (décimales à un chiffre)
+2 - nombres;SOUNDS/fr/SYSTEM;0187.wav;virgule sept;« virgule N » (décimales à un chiffre)
+2 - nombres;SOUNDS/fr/SYSTEM;0188.wav;virgule huit;« virgule N » (décimales à un chiffre)
+2 - nombres;SOUNDS/fr/SYSTEM;0189.wav;virgule neuf;« virgule N » (décimales à un chiffre)
+3 - alertes radio;SOUNDS/fr/SYSTEM;eebad.wav;mémoire corrompue;alerte ou message système d'EdgeTX
+3 - alertes radio;SOUNDS/fr/SYSTEM;hello.wav;Bienvenue sur EdgeTX;alerte ou message système d'EdgeTX
+3 - alertes radio;SOUNDS/fr/SYSTEM;inactiv.wav;Radio inactive;alerte ou message système d'EdgeTX
+3 - alertes radio;SOUNDS/fr/SYSTEM;lowbatt.wav;Batterie radio faible;alerte ou message système d'EdgeTX
+3 - alertes radio;SOUNDS/fr/SYSTEM;maxtrim.wav;Trim maximum atteint;alerte ou message système d'EdgeTX
+3 - alertes radio;SOUNDS/fr/SYSTEM;midtrim.wav;Trim centré;alerte ou message système d'EdgeTX
+3 - alertes radio;SOUNDS/fr/SYSTEM;mintrim.wav;Trim minimum atteint;alerte ou message système d'EdgeTX
+3 - alertes radio;SOUNDS/fr/SYSTEM;modelpwr.wav;Récepteur encore sous tension;alerte ou message système d'EdgeTX
+3 - alertes radio;SOUNDS/fr/SYSTEM;rssi_org.wav;signal radio faible;alerte ou message système d'EdgeTX
+3 - alertes radio;SOUNDS/fr/SYSTEM;rssi_red.wav;signal radio critique;alerte ou message système d'EdgeTX
+3 - alertes radio;SOUNDS/fr/SYSTEM;rxko.wav;Surcharge réception;alerte ou message système d'EdgeTX
+3 - alertes radio;SOUNDS/fr/SYSTEM;sensorko.wav;Sonde de télémétrie perdue;alerte ou message système d'EdgeTX
+3 - alertes radio;SOUNDS/fr/SYSTEM;servoko.wav;Servo en surcharge;alerte ou message système d'EdgeTX
+3 - alertes radio;SOUNDS/fr/SYSTEM;swalert.wav;Alerte inters;alerte ou message système d'EdgeTX
+3 - alertes radio;SOUNDS/fr/SYSTEM;swr_red.wav;Antenne défectueuse;alerte ou message système d'EdgeTX
+3 - alertes radio;SOUNDS/fr/SYSTEM;telemco.wav;Télémétrie connectée;alerte ou message système d'EdgeTX
+3 - alertes radio;SOUNDS/fr/SYSTEM;telemko.wav;Télémétrie perdue;alerte ou message système d'EdgeTX
+3 - alertes radio;SOUNDS/fr/SYSTEM;telemok.wav;Télémétrie retrouvée;alerte ou message système d'EdgeTX
+3 - alertes radio;SOUNDS/fr/SYSTEM;thralert.wav;Alerte manche des gaz;alerte ou message système d'EdgeTX
+3 - alertes radio;SOUNDS/fr/SYSTEM;timovr1.wav;Chrono un à zéro;alerte ou message système d'EdgeTX
+3 - alertes radio;SOUNDS/fr/SYSTEM;timovr2.wav;Chrono deux à zéro;alerte ou message système d'EdgeTX
+3 - alertes radio;SOUNDS/fr/SYSTEM;timovr3.wav;Chrono trois à zéro;alerte ou message système d'EdgeTX
+3 - alertes radio;SOUNDS/fr/SYSTEM;trainco.wav;écolage connecté;alerte ou message système d'EdgeTX
+3 - alertes radio;SOUNDS/fr/SYSTEM;trainko.wav;Signal écolage perdu;alerte ou message système d'EdgeTX
+3 - alertes radio;SOUNDS/fr/SYSTEM;trainok.wav;Signal écolage retrouvé;alerte ou message système d'EdgeTX
+3 - unités;SOUNDS/fr/SYSTEM;amp0.wav;ampères;unité dite après une valeur
+3 - unités;SOUNDS/fr/SYSTEM;celsius0.wav;degrés;unité dite après une valeur
+3 - unités;SOUNDS/fr/SYSTEM;db0.wav;décibels;unité dite après une valeur
+3 - unités;SOUNDS/fr/SYSTEM;degf0.wav;degrés fahrenheit;unité dite après une valeur
+3 - unités;SOUNDS/fr/SYSTEM;degree0.wav;degrés;unité dite après une valeur
+3 - unités;SOUNDS/fr/SYSTEM;foot0.wav;pieds;unité dite après une valeur
+3 - unités;SOUNDS/fr/SYSTEM;founce0.wav;onces;unité dite après une valeur
+3 - unités;SOUNDS/fr/SYSTEM;fps0.wav;pieds par seconde;unité dite après une valeur
+3 - unités;SOUNDS/fr/SYSTEM;g0.wav;gé;unité dite après une valeur
+3 - unités;SOUNDS/fr/SYSTEM;hour0.wav;heure;unité dite après une valeur
+3 - unités;SOUNDS/fr/SYSTEM;knot0.wav;nœuds;unité dite après une valeur
+3 - unités;SOUNDS/fr/SYSTEM;kph0.wav;kilomètre heure;unité dite après une valeur
+3 - unités;SOUNDS/fr/SYSTEM;mamp0.wav;milli ampères;unité dite après une valeur
+3 - unités;SOUNDS/fr/SYSTEM;mamph0.wav;milli ampères heure;unité dite après une valeur
+3 - unités;SOUNDS/fr/SYSTEM;meter0.wav;mètres;unité dite après une valeur
+3 - unités;SOUNDS/fr/SYSTEM;minute0.wav;minute;unité dite après une valeur
+3 - unités;SOUNDS/fr/SYSTEM;ml0.wav;millilitres;unité dite après une valeur
+3 - unités;SOUNDS/fr/SYSTEM;mlpm0.wav;millilitre minute;unité dite après une valeur
+3 - unités;SOUNDS/fr/SYSTEM;mph0.wav;miles par heure;unité dite après une valeur
+3 - unités;SOUNDS/fr/SYSTEM;mps0.wav;mètres seconde;unité dite après une valeur
+3 - unités;SOUNDS/fr/SYSTEM;mwatt0.wav;milli watt;unité dite après une valeur
+3 - unités;SOUNDS/fr/SYSTEM;percent0.wav;pourcents;unité dite après une valeur
+3 - unités;SOUNDS/fr/SYSTEM;rad0.wav;radians;unité dite après une valeur
+3 - unités;SOUNDS/fr/SYSTEM;rpm0.wav;tours minute;unité dite après une valeur
+3 - unités;SOUNDS/fr/SYSTEM;second0.wav;seconde;unité dite après une valeur
+3 - unités;SOUNDS/fr/SYSTEM;volt0.wav;volts;unité dite après une valeur
+3 - unités;SOUNDS/fr/SYSTEM;watt0.wav;watt;unité dite après une valeur
+4 - facultatif;SOUNDS/fr;acro.wav;mode acro;piste jouée par une fonction spéciale d'EdgeTX (modes de vol…)
+4 - facultatif;SOUNDS/fr;alt.wav;altitude;piste jouée par une fonction spéciale d'EdgeTX (modes de vol…)
+4 - facultatif;SOUNDS/fr;armed.wav;armé;piste jouée par une fonction spéciale d'EdgeTX (modes de vol…)
+4 - facultatif;SOUNDS/fr;attero.wav;atterrissage;piste jouée par une fonction spéciale d'EdgeTX (modes de vol…)
+4 - facultatif;SOUNDS/fr;auro.wav;autorotation;piste jouée par une fonction spéciale d'EdgeTX (modes de vol…)
+4 - facultatif;SOUNDS/fr;blkact.wav;Blackbox activée;piste jouée par une fonction spéciale d'EdgeTX (modes de vol…)
+4 - facultatif;SOUNDS/fr;buzact.wav;Buzzer activé;piste jouée par une fonction spéciale d'EdgeTX (modes de vol…)
+4 - facultatif;SOUNDS/fr;disarm.wav;désarmé;piste jouée par une fonction spéciale d'EdgeTX (modes de vol…)
+4 - facultatif;SOUNDS/fr;engoff.wav;moteur coupé;piste jouée par une fonction spéciale d'EdgeTX (modes de vol…)
+4 - facultatif;SOUNDS/fr;flapdn.wav;volets sortis;piste jouée par une fonction spéciale d'EdgeTX (modes de vol…)
+4 - facultatif;SOUNDS/fr;flapup.wav;volets rentrés;piste jouée par une fonction spéciale d'EdgeTX (modes de vol…)
+4 - facultatif;SOUNDS/fr;fm-1.wav;mode de vol un;piste jouée par une fonction spéciale d'EdgeTX (modes de vol…)
+4 - facultatif;SOUNDS/fr;fm-2.wav;mode de vol deux;piste jouée par une fonction spéciale d'EdgeTX (modes de vol…)
+4 - facultatif;SOUNDS/fr;fm-3.wav;mode de vol trois;piste jouée par une fonction spéciale d'EdgeTX (modes de vol…)
+4 - facultatif;SOUNDS/fr;fm-4.wav;mode de vol quatre;piste jouée par une fonction spéciale d'EdgeTX (modes de vol…)
+4 - facultatif;SOUNDS/fr;fm-5.wav;mode de vol cinq;piste jouée par une fonction spéciale d'EdgeTX (modes de vol…)
+4 - facultatif;SOUNDS/fr;fm-6.wav;mode de vol six;piste jouée par une fonction spéciale d'EdgeTX (modes de vol…)
+4 - facultatif;SOUNDS/fr;fm-7.wav;mode de vol sept;piste jouée par une fonction spéciale d'EdgeTX (modes de vol…)
+4 - facultatif;SOUNDS/fr;fm-8.wav;mode de vol huit;piste jouée par une fonction spéciale d'EdgeTX (modes de vol…)
+4 - facultatif;SOUNDS/fr;fm-9.wav;mode de vol neuf;piste jouée par une fonction spéciale d'EdgeTX (modes de vol…)
+4 - facultatif;SOUNDS/fr;fm-acr.wav;mode de vol acro;piste jouée par une fonction spéciale d'EdgeTX (modes de vol…)
+4 - facultatif;SOUNDS/fr;fm-crs.wav;mode de vol de croisière;piste jouée par une fonction spéciale d'EdgeTX (modes de vol…)
+4 - facultatif;SOUNDS/fr;fm-flt.wav;mode de vol amérissage;piste jouée par une fonction spéciale d'EdgeTX (modes de vol…)
+4 - facultatif;SOUNDS/fr;fm-fst.wav;mode de vol rapide;piste jouée par une fonction spéciale d'EdgeTX (modes de vol…)
+4 - facultatif;SOUNDS/fr;fm-lch.wav;mode de vol lancé;piste jouée par une fonction spéciale d'EdgeTX (modes de vol…)
+4 - facultatif;SOUNDS/fr;fm-lnd.wav;mode de vol atterrissage;piste jouée par une fonction spéciale d'EdgeTX (modes de vol…)
+4 - facultatif;SOUNDS/fr;fm-nrm.wav;mode de vol normal;piste jouée par une fonction spéciale d'EdgeTX (modes de vol…)
+4 - facultatif;SOUNDS/fr;fm-png.wav;mode de vol ping;piste jouée par une fonction spéciale d'EdgeTX (modes de vol…)
+4 - facultatif;SOUNDS/fr;fm-pwr.wav;mode de vol puissance;piste jouée par une fonction spéciale d'EdgeTX (modes de vol…)
+4 - facultatif;SOUNDS/fr;fm-rce.wav;mode de vol course;piste jouée par une fonction spéciale d'EdgeTX (modes de vol…)
+4 - facultatif;SOUNDS/fr;fm-spd.wav;mode de vol vitesse;piste jouée par une fonction spéciale d'EdgeTX (modes de vol…)
+4 - facultatif;SOUNDS/fr;fm-thl.wav;mode de vol thermique gauche;piste jouée par une fonction spéciale d'EdgeTX (modes de vol…)
+4 - facultatif;SOUNDS/fr;fm-thm.wav;mode de vol thermique;piste jouée par une fonction spéciale d'EdgeTX (modes de vol…)
+4 - facultatif;SOUNDS/fr;fm-thr.wav;mode de vol thermique droit;piste jouée par une fonction spéciale d'EdgeTX (modes de vol…)
+4 - facultatif;SOUNDS/fr;geardn.wav;train sorti;piste jouée par une fonction spéciale d'EdgeTX (modes de vol…)
+4 - facultatif;SOUNDS/fr;gearup.wav;train rentré;piste jouée par une fonction spéciale d'EdgeTX (modes de vol…)
+4 - facultatif;SOUNDS/fr;lnding.wav;mode atterrissage activé;piste jouée par une fonction spéciale d'EdgeTX (modes de vol…)
+4 - facultatif;SOUNDS/fr;lowbat.wav;Batterie faible;piste jouée par une fonction spéciale d'EdgeTX (modes de vol…)
+4 - facultatif;SOUNDS/fr;lvlmod.wav;mode niveau;piste jouée par une fonction spéciale d'EdgeTX (modes de vol…)
+4 - facultatif;SOUNDS/fr;moteur.wav;température moteur;piste jouée par une fonction spéciale d'EdgeTX (modes de vol…)
+4 - facultatif;SOUNDS/fr;nrmmod.wav;mode normal activé;piste jouée par une fonction spéciale d'EdgeTX (modes de vol…)
+4 - facultatif;SOUNDS/fr;pitmod.wav;mode pit;piste jouée par une fonction spéciale d'EdgeTX (modes de vol…)
+4 - facultatif;SOUNDS/fr;spdmod.wav;mode grande vitesse activé;piste jouée par une fonction spéciale d'EdgeTX (modes de vol…)
+4 - facultatif;SOUNDS/fr;tctrl.wav;température contrôleur;piste jouée par une fonction spéciale d'EdgeTX (modes de vol…)
+4 - facultatif;SOUNDS/fr;thmmod.wav;mode thermique activé;piste jouée par une fonction spéciale d'EdgeTX (modes de vol…)
+4 - facultatif;SOUNDS/fr;trnoff.wav;fin écolage;piste jouée par une fonction spéciale d'EdgeTX (modes de vol…)
+4 - facultatif;SOUNDS/fr;trnon.wav;écolage;piste jouée par une fonction spéciale d'EdgeTX (modes de vol…)
+4 - facultatif;SOUNDS/fr;vrioff.wav;vario désactivé;piste jouée par une fonction spéciale d'EdgeTX (modes de vol…)
+4 - facultatif;SOUNDS/fr;vrion.wav;vario activé;piste jouée par une fonction spéciale d'EdgeTX (modes de vol…)

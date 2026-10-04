@@ -1,0 +1,13 @@
+# Sorties de compilation et de tests (régénérées par la CI)
+build/
+trimbox_s3/build/
+tests/native/test_proto
+tests/native/test_lap
+tests/native/test_logic
+tests/native/lap_cases.json
+tests/web/fakedev
+__pycache__/
+*.pyc
+# Fichiers système
+.DS_Store
+Thumbs.db
