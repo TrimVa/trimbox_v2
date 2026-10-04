@@ -19,6 +19,7 @@
 #include "core/recorder.h"
 #include "core/stillhold.h"
 #include "core/linearm.h"
+#include "core/airgate.h"
 #include "core/lapcore.h"
 #include "core/linecmd.h"
 #include "core/persist.h"
@@ -78,8 +79,12 @@ static tb::Parser g_rxWs(true);       // commandes reçues par WebSocket
 static bool     g_wifiAuto = WIFI_AUTO_DEFAULT;
 static bool     g_moving = false;     // la voiture roule (confirmé)
 static bool     g_stillEpoch = true;  // dernière solution : « à l'arrêt »
-static uint8_t  g_moveCnt = 0;
-static uint32_t g_stillSince = 0, g_lastPvtMs = 0;
+static uint32_t g_lastPvtMs = 0;
+// Roule / à l'arrêt, et décision d'allumer ou de couper les radios de la
+// console (core/airgate, testé sur PC).
+static airgate::Motion g_motion;
+static airgate::Gate   g_wifiGate(WIFI_AUTO_ON_S * 1000u);
+static airgate::Gate   g_bleGate(BLE_AUTO_ON_S * 1000u);
 static uint32_t g_btnDown = 0; static bool g_btnFired = false;
 static char     g_ssid[33];
 static uint32_t g_bootMs = 0, g_lastLed = 0;
@@ -285,22 +290,24 @@ static void wifiSet(bool want, const char* why){
   }
 }
 
-// Allumage après WIFI_AUTO_ON_S s d'arrêt, coupure IMMÉDIATE dès que la
-// voiture roule (3 solutions GNSS de suite au-dessus de 7,2 km/h), quel que
-// soit le mode : la radio de commande passe avant la console.
-static void serviceWifi(uint32_t now){
+// Wi-Fi ET Bluetooth : coupure IMMÉDIATE dès que la voiture roule (3
+// solutions GNSS de suite au-dessus de 7,2 km/h), quel que soit le mode : la
+// radio de commande passe avant la console. Rallumage après WIFI_AUTO_ON_S
+// (BLE_AUTO_ON_S) secondes d'arrêt continu (sous 5 km/h, ou sans fix).
+static void serviceRadios(uint32_t now){
   const bool stale = !g_havePvt || now - g_lastPvtMs > 2000;   // pas de GNSS : réputé à l'arrêt
-  const bool moving = !stale && g_moving;
-  const bool still = stale || g_stillEpoch;
-  if(moving){
-    g_stillSince = 0;
-    if(wifiap::on()) wifiSet(false, "la voiture roule");
-    return;
+  switch(g_wifiGate.step(now, stale, g_moving, g_stillEpoch, wifiap::on(), g_wifiAuto)){
+    case airgate::Act::Off: wifiSet(false, "la voiture roule"); break;
+    case airgate::Act::On:  wifiSet(true, "arrêt prolongé"); break;
+    default: break;
   }
-  if(still){ if(!g_stillSince) g_stillSince = now ? now : 1; }
-  else g_stillSince = 0;                       // entre 5 et 7,2 km/h : on attend
-  if(g_wifiAuto && !wifiap::on() && g_stillSince && now - g_stillSince >= WIFI_AUTO_ON_S * 1000u)
-    wifiSet(true, "arrêt prolongé");
+#if BLE_AUTO_OFF && !defined(TRIMBOX_QEMU)
+  switch(g_bleGate.step(now, stale, g_moving, g_stillEpoch, bridge::bleEnabled(), true)){
+    case airgate::Act::Off: bridge::bleEnable(false); Serial.println("[ble] coupé (la voiture roule)"); break;
+    case airgate::Act::On:  bridge::bleEnable(true);  Serial.println("[ble] rallumé (arrêt prolongé)"); break;
+    default: break;
+  }
+#endif
 }
 
 // Appui long sur BOOT : bascule marche / arrêt du Wi-Fi.
@@ -513,10 +520,9 @@ static void onPvt(const rec::Pvt& raw){
 
   // Mouvement, pour le point d'accès : sans fix, la voiture est réputée
   // à l'arrêt (on ne roule pas en course sans GNSS).
-  const bool movingEpoch = fix && p.gSpeed >= WIFI_MOVE_MMS;
-  g_moveCnt = movingEpoch ? (g_moveCnt < 255 ? g_moveCnt + 1 : 255) : 0;
-  g_moving = g_moveCnt >= WIFI_MOVE_EPOCHS;
-  g_stillEpoch = !(fix && p.gSpeed >= WIFI_STILL_MMS);
+  g_motion.epoch(fix, p.gSpeed);
+  g_moving = g_motion.moving;
+  g_stillEpoch = g_motion.still;
 
   uint8_t data[80];
   rec::buildData(data, p, m, 0 /* batterie : fournie par l'ESC plus tard */, g_cfg.gnss3dSpeed);
@@ -610,7 +616,8 @@ static void printBench(){
   Serial.printf("[banc] CRSF %.0f trames/s, %lu CRC faux, %lu télémétries (dont %lu date/heure), liaison %s", r.rcRateHz,
                 (unsigned long)r.badCrc, (unsigned long)r.txFrames, (unsigned long)r.timeFrames, r.linkUp ? "OK" : "absente");
   if(r.haveLink) Serial.printf(", LQ %u %%, RSSI -%u dBm", r.link.lq, r.link.rssi1);
-  Serial.printf("\n[banc] BLE %s, MTU %u, file %u octets libres\n", bridge::bleConnected() ? "connecté" : "libre", bridge::mtu(), (unsigned)bridge::freeSpace());
+  Serial.printf("\n[banc] BLE %s, %s, MTU %u, file %u octets libres\n", bridge::bleEnabled() ? "actif" : "COUPÉ (la voiture roule)",
+                bridge::bleConnected() ? "connecté" : "libre", bridge::mtu(), (unsigned)bridge::freeSpace());
   Serial.printf("[banc] firmware sur %s%s\n", ota::runningPartition(), ota::pendingValidation() ? " (EN VALIDATION)" : "");
   Serial.printf("[banc] Wi-Fi %s (« %s », auto %s), %u appareil(s), console %s, %lu page(s) servie(s)\n",
                 wifiap::on() ? "ALLUMÉ" : "éteint", g_ssid, g_wifiAuto ? "oui" : "non", wifiap::stations(),
@@ -706,6 +713,7 @@ void setup(){
   applyRecorderSettings();
   g_lap.setSink(onLapEvent, nullptr);
   { linearm::Settings as; as.startWindowMs = LINE_ARM_WINDOW_MS; as.headSpeedMms = LINE_MIN_SPEED_MMS; g_arm.configure(as); }
+  g_motion.moveMms = WIFI_MOVE_MMS; g_motion.moveEpochs = WIFI_MOVE_EPOCHS; g_motion.stillMms = WIFI_STILL_MMS;
   applyLines();
 
   g_imuOk  = imu::begin();
@@ -759,7 +767,7 @@ void loop(){
   const linecmd::Output o = radio::poll();
   if(o.cmd != linecmd::Cmd::None) onLineCommand(o);
   const uint32_t now = millis();
-  serviceWifi(now);
+  serviceRadios(now);
   {
     static bool wasPending = ota::pendingValidation(), wasReboot = false;
     ota::serviceValidation(g_storageOk);

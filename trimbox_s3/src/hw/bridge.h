@@ -16,6 +16,10 @@ namespace bridge {
 void begin(const char* name, const char* serial);
 bool connected();            // Bluetooth OU WebSocket
 bool bleConnected();
+// Radio Bluetooth de la console : coupée quand la voiture roule (annonces
+// arrêtées, console éventuelle déconnectée), rallumée à l'arrêt (v2 §7.1).
+void bleEnable(bool on);
+bool bleEnabled();
 uint16_t mtu();
 
 // --- file d'émission ---

@@ -15,6 +15,7 @@ static NimBLEServer* s_server = nullptr;
 static NimBLECharacteristic* s_tx = nullptr;
 static volatile bool s_connected = false;
 static volatile uint16_t s_mtu = 23, s_conn = 0xFFFF;
+static volatile bool s_enabled = true;      // annonces et connexions permises
 
 // ---- file d'émission (utilisée uniquement depuis la boucle principale) ----
 static uint8_t q_buf[TXQ_SIZE];
@@ -101,12 +102,22 @@ class ServerCb : public NimBLEServerCallbacks {
   }
   void onDisconnect(NimBLEServer*, NimBLEConnInfo&, int) override {
     s_connected = false; s_mtu = 23; s_conn = 0xFFFF;
-    NimBLEDevice::startAdvertising();
+    if(s_enabled) NimBLEDevice::startAdvertising();   // coupé (voiture qui roule) : on se tait
   }
   void onMTUChange(uint16_t m, NimBLEConnInfo&) override { s_mtu = m; }
 };
 
 bool connected(){ return s_connected || wifiap::wsConnected(); }
+bool bleEnabled(){ return s_enabled; }
+void bleEnable(bool on){
+  if(!s_server || on == s_enabled) return;   // pile non démarrée (émulateur) ou rien à faire
+  s_enabled = on;
+  if(on){ NimBLEDevice::startAdvertising(); return; }
+  NimBLEDevice::stopAdvertising();
+  // Une console restée connectée est déconnectée : plus aucune émission
+  // 2,4 GHz du module tant que la voiture roule.
+  if(s_connected && s_conn != 0xFFFF) s_server->disconnect(s_conn);
+}
 bool bleConnected(){ return s_connected; }
 uint16_t mtu(){ return s_mtu; }
 

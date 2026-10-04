@@ -1,4 +1,4 @@
-# TrimBox DIY S3 — firmware 2.0-a12
+# TrimBox DIY S3 — firmware 2.0-a13
 
 Première version du firmware ESP32-S3. Spécification : `CAHIER-DES-CHARGES.md`
 (v1) et `CAHIER-DES-CHARGES-V2.md`. État au 4 octobre 2026.
@@ -16,7 +16,8 @@ Première version du firmware ESP32-S3. Spécification : `CAHIER-DES-CHARGES.md`
 | Pose de ligne par la voie 8 (inter ou script Lua), en roulant ou à l'arrêt (ligne armée 10 s) | ✅ testé sous émulateur ; ⚠️ à essayer sur la voiture |
 | Enregistrement automatique (un roulage = une session) | ✅ testé (natif) ; ⚠️ à essayer en roulage |
 | Chronométrage embarqué (tours, dragster, chronos intermédiaires) | ✅ identique à la console à 1 ms (banc n°7) |
-| Point d'accès Wi-Fi automatique (arrêt 30 s → allumé, roule → coupé) | ✅ logique testée sous émulateur ; radio Wi-Fi non testée |
+| Point d'accès Wi-Fi automatique (arrêt 30 s → allumé, roule → coupé) | ✅ logique testée sur PC (`core/airgate`) et sous émulateur (stand → roulage → arrêt) ; radio Wi-Fi non testée |
+| Bluetooth coupé au roulage, rallumé après 30 s d'arrêt (`BLE_AUTO_OFF`) | ✅ logique testée sur PC (même `core/airgate`) ; ⚠️ à vérifier sur la carte (touche `b` : « BLE actif » / « COUPÉ ») |
 | Console embarquée (v1.7.3, thèmes et couleur d'accent compris) + WebSocket | ✅ testée dans Chromium avec le vrai serveur du firmware |
 | Mise à jour du firmware par Wi-Fi (OTA) + retour arrière automatique | ✅ envoi testé dans Chromium ; retour arrière testé sous émulateur avec le vrai chargeur de démarrage ; radio Wi-Fi non testée |
 | ESC XC-E8 (X-Bus) | ❌ **abandonné** : le port X-Bus est une entrée, aucune télémétrie (cahier des charges v2 §5) |

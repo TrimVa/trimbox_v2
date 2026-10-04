@@ -9,7 +9,7 @@
 #define DEVICE_NICKNAME   "Buggy 1"          // ≤ 16 caractères (v1 §9.4)
 #define BRAND             "TrimBox DIY S3"
 #define DEVICE_NAME       "TrimBox " DEVICE_NICKNAME
-#define FIRMWARE_VER      "2.0-a12"
+#define FIRMWARE_VER      "2.0-a13"
 #define HARDWARE_VER      "ESP32-S3-DevKitC-1 N16R8"
 #define MANUFACTURER      "TrimBox DIY"
 #define BUILD_STAMP       __DATE__ " " __TIME__
@@ -98,6 +98,13 @@
 #define WIFI_CHANNEL      6
 #define WIFI_TX_POWER     WIFI_POWER_8_5dBm
 #define BUTTON_LONG_MS    3000           // appui long sur BOOT : Wi-Fi marche / arrêt
+
+// ---------------------------------------------------------------- Bluetooth
+// Même règle que le Wi-Fi (core/airgate) : coupé dès que la voiture roule,
+// rallumé après BLE_AUTO_ON_S s d'arrêt. Au démarrage, il est actif tout de
+// suite. 0 : Bluetooth toujours actif (comportement 2.0-a12).
+#define BLE_AUTO_OFF      1
+#define BLE_AUTO_ON_S     30
 
 // ---------------------------------------------------------------- mise à jour
 #define OTA_VALIDATE_AFTER_S 15          // fonctionnement avant de confirmer un nouveau firmware

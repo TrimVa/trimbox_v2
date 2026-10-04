@@ -6,6 +6,7 @@
 #include "../../trimbox_s3/src/core/persist.h"
 #include "../../trimbox_s3/src/core/stillhold.h"
 #include "../../trimbox_s3/src/core/linearm.h"
+#include "../../trimbox_s3/src/core/airgate.h"
 #include <string.h>
 
 static void testRecorder(){
@@ -253,4 +254,73 @@ static void testAutoRecord(){
   CHECK(O.state() == recd::PAUSED, "sans F_AUTO : arrêt prolongé = pause");
 }
 
-int main(){ testRecorder(); testAutoRecord(); testLineCmd(); testPersist(); testStillHold(); testLineArm(); DONE("logique"); }
+// Radios de la console (core/airgate) : coupées au roulage, rallumées à l'arrêt.
+// Simulation à 25 Hz : une solution GNSS puis un tour de boucle toutes les 40 ms.
+static void testAirGate(){
+  using namespace airgate;
+  struct Sim {
+    Motion m; Gate g{30000}; bool on; bool autoOn = true; uint32_t t = 0; int offs = 0, ons = 0;
+    explicit Sim(bool startOn) : on(startOn) {}
+    void run(uint32_t ms, int32_t speedMms, bool fix = true, bool gnss = true){
+      for(uint32_t k = 0; k < ms; k += 40){
+        t += 40;
+        if(gnss) m.epoch(fix, speedMms);
+        const Act a = g.step(t, !gnss, m.moving, m.still, on, autoOn);
+        if(a == Act::Off){ on = false; offs++; }
+        if(a == Act::On){ on = true; ons++; }
+      }
+    }
+  };
+  // --- Wi-Fi : éteint au démarrage, voiture posée
+  Sim w(false);
+  w.run(29960, 0);
+  CHECK(!w.on, "Wi-Fi : pas allumé avant 30 s d'arrêt");
+  w.run(80, 0);
+  CHECK(w.on && w.ons == 1, "Wi-Fi : allumé après 30 s d'arrêt");
+  // deux solutions rapides seulement : pas « roule » (filtre 3 solutions)
+  w.run(80, 5000); w.run(40, 0);
+  CHECK(w.on, "Wi-Fi : 2 solutions rapides isolées ne coupent pas");
+  // la voiture roule : coupure à la 3e solution au-dessus de 7,2 km/h
+  w.run(120, 2100);
+  CHECK(!w.on && w.offs == 1, "Wi-Fi : coupé dès la 3e solution > 7,2 km/h (120 ms)");
+  // roulage long : jamais rallumé
+  w.run(120000, 8000);
+  CHECK(!w.on && w.ons == 1, "Wi-Fi : reste coupé pendant tout le roulage");
+  // allure lente (entre 5 et 7,2 km/h) : rien ne se rallume
+  w.run(60000, 1700);
+  CHECK(!w.on, "Wi-Fi : pas rallumé entre 5 et 7,2 km/h");
+  // arrêt : rallumé après 30 s, pas avant
+  w.run(29960, 300);
+  CHECK(!w.on, "Wi-Fi : toujours coupé à 29,96 s d'arrêt");
+  w.run(80, 300);
+  CHECK(w.on && w.ons == 2, "Wi-Fi : rallumé tout seul après 30 s d'arrêt");
+  // nouveau départ : coupé de nouveau
+  w.run(200, 6000);
+  CHECK(!w.on && w.offs == 2, "Wi-Fi : recoupé au départ suivant");
+  // coupé à la main (auto désactivé) : jamais rallumé seul, mais toujours coupé en roulant
+  Sim h(true); h.autoOn = false;
+  h.run(60000, 0);
+  CHECK(h.on, "auto désactivé, allumé à la main : reste allumé à l'arrêt");
+  h.run(200, 6000);
+  CHECK(!h.on, "auto désactivé : coupé quand même en roulant (sans condition)");
+  h.run(120000, 0);
+  CHECK(!h.on, "auto désactivé : pas de rallumage automatique");
+  // --- Bluetooth : actif au démarrage, rien ne bouge tant qu'on est arrêté
+  Sim b(true);
+  b.run(90000, 0);
+  CHECK(b.on && b.offs == 0 && b.ons == 0, "Bluetooth : actif au démarrage, sans attendre");
+  b.run(200, 9000);
+  CHECK(!b.on, "Bluetooth : coupé au roulage");
+  b.run(30040, 0);
+  CHECK(b.on, "Bluetooth : rallumé après 30 s d'arrêt");
+  // perte du fix en roulant : réputé à l'arrêt (on ne court pas sans GNSS)
+  Sim f(false); f.run(40000, 0); f.run(200, 6000);
+  CHECK(!f.on, "sans fix : coupé avant la perte");
+  f.run(30040, 6000, false);
+  CHECK(f.on, "fix perdu 30 s : réputé à l'arrêt, rallumé");
+  // plus aucune solution GNSS (module GPS muet) : réputé à l'arrêt
+  Sim g(false); g.run(30080, 0, true, false);
+  CHECK(g.on, "GNSS muet : rallumé après 30 s");
+}
+
+int main(){ testAirGate(); testRecorder(); testAutoRecord(); testLineCmd(); testPersist(); testStillHold(); testLineArm(); DONE("logique"); }

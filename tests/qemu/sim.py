@@ -26,6 +26,10 @@ IMG = sys.argv[1] if len(sys.argv) > 1 else ""
 PORTS = (5550, 5551)
 LAP_S = 12.0
 STILL_S = 33.0          # attente au stand avant de rouler
+# --arret : la voiture s'arrête ROLL_S secondes après le départ et reste
+# arrêtée : le Wi-Fi doit revenir tout seul 30 s plus tard.
+ROLL_S = 42.0
+STOP_AT = (STILL_S + ROLL_S) if "--arret" in sys.argv else float('inf')
 
 def fletcher(b):
     a = c = 0
@@ -73,8 +77,8 @@ def pos(t):
     return lat, lon, h % 360
 
 def nav_pvt(itow, t):
-    moving = t >= STILL_S
-    lat, lon, h = pos(max(0.0, t - STILL_S))
+    moving = STILL_S <= t < STOP_AT
+    lat, lon, h = pos(max(0.0, min(t, STOP_AT) - STILL_S))
     p = bytearray(92)
     struct.pack_into('<IHBBBBBB', p, 0, itow, 2026, 9, 20, 12, 0, 0, 0x37)
     p[20] = 3; p[21] = 0x01; p[23] = 14
@@ -223,7 +227,8 @@ if __name__ == "__main__":
     if not reboot:
         # Avec le script : pose À L'ARRÊT, 4 s avant le départ (ligne armée,
         # cap pris au démarrage). Sans : pose en roulant, 4 s après le départ.
-        txt, fm, ngps, acks = run(STILL_S + 52, pose_at=(STILL_S - 4.0) if lua else (STILL_S + 4.0), lua=lua)
+        dur = (STILL_S + ROLL_S + 36) if STOP_AT != float('inf') else (STILL_S + 52)
+        txt, fm, ngps, acks = run(dur, pose_at=(STILL_S - 4.0) if lua else (STILL_S + 4.0), lua=lua)
     else:
         txt, fm, ngps, acks = run(14)
     print(txt)
@@ -252,6 +257,11 @@ if __name__ == "__main__":
         print("=== Wi-Fi : allumé à l'arrêt :", on, "| coupé en roulant :", off,
               "| radio :", [m for m in seen if m.startswith('W ')])
         ok &= on and off and "W WIFI ON" in seen and "W WIFI OFF" in seen
+        if STOP_AT != float('inf'):
+            w = [m for m in seen if m.startswith('W ')]
+            back = w[-3:] == ['W WIFI ON', 'W WIFI OFF', 'W WIFI ON'] and txt.count("[wifi] allumé (arrêt prolongé)") >= 2
+            print("=== arrêt après roulage : Wi-Fi rallumé tout seul :", back)
+            ok &= back
     else:
         ok &= "session précédente interrompue" in txt and "départ posé" in txt
     if lua and not reboot:

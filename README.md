@@ -4,7 +4,7 @@ Enregistreur de télémétrie **GPS + inertiel** pour voitures radiocommandées,
 avec **chronométrage au tour** affiché et annoncé sur la radio, **console web**
 d'analyse et **mise à jour par Wi-Fi**. Construit autour d'un **ESP32-S3**.
 
-> **État :** firmware **2.0-a12**, console **1.7.11**. Tout est écrit et testé
+> **État :** firmware **2.0-a13**, console **1.7.11**. Tout est écrit et testé
 > sur PC, dans un navigateur et dans un émulateur ESP32-S3. **Essais sur le
 > vrai matériel en cours** : GPS, IMU et script Lua sur la MT12 validés ; reste
 > le roulage. Voir [les bancs d'essai](#bancs-dessai-à-la-réception-du-matériel).
@@ -43,7 +43,7 @@ d'analyse et **mise à jour par Wi-Fi**. Construit autour d'un **ESP32-S3**.
 | **Chrono embarqué** | calculé dans le module à 25 Hz, temps interpolés entre deux mesures (précision de l'ordre de la milliseconde). Mode **circuit** (une ligne, un temps par tour) ou **dragster** (départ + arrivée, chronos 0-30 / 0-50 / 0-80 km/h et 25 / 50 / 100 m). |
 | **Pose de ligne depuis la radio** | voiture **arrêtée sur la ligne** : la commande arme la ligne, qui est posée dans le sens du départ dès que la voiture démarre (dans les 10 s) ; ce départ compte. Voiture **lancée** : la ligne est posée là où passe la voiture, perpendiculaire à sa trajectoire. Conservée d'une session à l'autre. |
 | **Télémétrie radio** | position GPS, vitesse, état, et un message par tour (temps + écart au meilleur) vers la MT12, qui **annonce les temps à voix haute**. |
-| **Console Bluetooth** | depuis la page GitHub du projet, sur Chrome Android. |
+| **Console Bluetooth** | depuis la page GitHub du projet, sur Chrome Android. Comme le Wi-Fi, le Bluetooth se coupe quand la voiture roule et revient 30 s après l'arrêt. |
 | **Console Wi-Fi** | le module ouvre son propre réseau quand la voiture est arrêtée depuis 30 s, et le coupe dès qu'elle roule. Fonctionne aussi sur **iPhone**, sans Internet. |
 | **Analyse** | tracé coloré par vitesse, zoom, tours et parcours, forces G, temps en l'air, statistiques au survol du tracé, comparaison de sessions. Les **lignes posées depuis la radio** sont reprises d'office, et les **tours calculés en course** par le module s'affichent à côté de ceux de la console. |
 | **Exports** | VBO (RaceChrono, Circuit Tools), CSV, GPX ; import de ces mêmes formats. |
@@ -141,8 +141,9 @@ Détail pas à pas : **[DEMARRAGE.md](DEMARRAGE.md)**. En résumé :
    30 s à l'arrêt. Chaque roulage donne une session. Les boutons *Démarrer*
    et *Arrêter* de la console restent disponibles, et la case **Démarrer et
    arrêter tout seul** permet de revenir à la commande manuelle.
-3. **Rouler.** Le Wi-Fi du module se coupe dès que la voiture dépasse 7 km/h,
-   pour ne pas gêner la radio.
+3. **Rouler.** Le Wi-Fi **et le Bluetooth** du module se coupent dès que la
+   voiture dépasse 7 km/h, pour ne pas gêner la radio ; ils reviennent seuls
+   30 s après l'arrêt.
 4. **Poser la ligne** (une fois par piste) : voiture **arrêtée sur la ligne**,
    sur la MT12 page *Lignes*, molette sur « Poser DEPART », **ENT**, puis
    **démarrer dans les 10 s** : la ligne est posée dans le sens du départ, et
@@ -346,8 +347,10 @@ Les couleurs se superposent : rouge + bleu = violet (enregistrement en cours, co
   écartés à la lecture.
 - **Effacement de la mémoire** : impossible pendant un enregistrement, et
   non annulable une fois lancé (il ne dure que quelques secondes).
-- **Wi-Fi coupé en roulant**, quel que soit le réglage : la liaison de
-  commande 2,4 GHz passe avant la console.
+- **Wi-Fi et Bluetooth coupés en roulant**, quel que soit le réglage : la
+  liaison de commande 2,4 GHz passe avant la console. Rallumage automatique
+  après 30 s d'arrêt (`BLE_AUTO_OFF 0` dans `config.h` pour garder le
+  Bluetooth en permanence).
 - **Chien de garde** : si le programme se fige plus de 5 s, la carte
   redémarre seule.
 - **Protocole** : trames avec somme de contrôle, réassemblage tolérant aux

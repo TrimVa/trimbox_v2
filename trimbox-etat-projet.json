@@ -4,11 +4,11 @@
   "description": "Enregistreur de télémétrie GPS (25 Hz) et inertielle pour voitures RC, sur ESP32-S3 (v2). Enregistrement autonome sur la flash interne de 16 Mo, chronométrage au tour calculé dans le module, télémétrie CRSF vers une RadioMaster MT12 (script Lua : affichage, annonces vocales, pose de ligne), console web par Bluetooth ou par le Wi-Fi du module, mise à jour OTA avec retour arrière. La v1 (Seeed XIAO nRF52840 Sense) est décrite dans 'v1_historique'.",
   "date_export": "2026-10-04",
   "versions": {
-    "firmware_s3": "2.0-a12 (essais materiel : GPS et IMU OK, script Lua valide sur MT12 ; roulage a faire)",
+    "firmware_s3": "2.0-a13 (Bluetooth coupe au roulage comme le Wi-Fi ; essais materiel : GPS et IMU OK, script Lua et mixage CH8 valides sur MT12 ; roulage a faire)",
     "console_web": "1.7.11",
     "console_date": "4 octobre 2026",
     "script_lua": "trmbox.lua 2.3 : VALIDE sur MT12 (affichage, tours, ecarts, meilleur tour, annonces vocales, accuses de pose). Correction majeure 2.3 : le bac a sable Lua d'EdgeTX pour un script de TELEMETRIE n'expose PAS la bibliotheque « table » ; table.insert/remove/concat faisaient planter la radio (« attempt to index a nil value (field 'table') ») a chaque tour recu. Tout est desormais en Lua de base (decalage manuel de la liste des 4 derniers tours, concatenation de chaines pour la file CRSF brute) ; ipairs retire par precaution. Page Lignes : 3 actions (Poser DEPART, Poser ARRIVEE, Effacer lignes) ; l'action « Tester le son » a ete supprimee, les annonces etant validees. Vitesse filtree sous 3 km/h, tension batterie du recepteur (Batt/RxBt/VFAS/A1), date/heure GPS locale (capteur Date), 12 mots dans /SOUNDS/trimbox/ (ou trmbox/ ou fr/trimbox/), bips de repli sans fichiers.",
-    "cahier_des_charges_v2": "2.5 (4 octobre 2026 : relecture de coherence 2.4, puis console 1.7.11 en 2.5)",
+    "cahier_des_charges_v2": "2.6 (4 octobre 2026)",
     "cahier_des_charges_v1": "1.0",
     "firmware_v1": "1.0"
   },
@@ -164,8 +164,8 @@
   ],
   "travail_en_cours": {
     "demande": "Firmware v2 ESP32-S3",
-    "statut": "2.0-a12 + console 1.7.10 : enregistrement automatique (recd::F_AUTO 0x20, actif par defaut) : demarrage apres 3 epoques au-dessus de statSpeed avec fix, fermeture de session apres statInterval a l arret (STOPPED, pas PAUSED) ; case dans la console ; pose de ligne a l arret (core/linearm : ligne armee, cap pris au demarrage dans les 10 s, posee 0,5 m devant, points rejoues dans le chrono = depart arrete compte ; K ARME DEPART/ARRIVEE, K DELAI) ; script Lua : molette = choix de l action sur Lignes, ENT court = executer, effacement confirme, dossiers de voix multiples, GV9 ecrite pour les 9 modes de vol, affichage de CH8 et alerte CH8 immobile si le mixage manque ; analyse d une session vide expliquee (nb de points, fix), plus de Vmin Infinity, IMU absente affichee en tirets ; IMU validee sur materiel avec tools/imu_test (|a|=0,99 g) ; pilote rendu robuste (sonde 100 kHz puis 400, 5 essais, SW_RESET, relecture des registres, WHO_AM_I 0x6B accepte, nouvel essai toutes les 2 s si absente, commande serie m) ; trame CRSF 0x03 date/heure GPS a 1 Hz (ExpressLRS >= 4.1, capteur Date EdgeTX), affichee par le script Lua en heure locale (France, heure d ete auto) ; fond satellite en Wi-Fi via la 4G du telephone (reste actif, message et nouvel essai toutes les 10 s ; ouvrir la console dans Chrome, pas dans la fenetre de portail captif) ; durees memoire au format 00h00min (arrondi inferieur), sources Bluetooth et Demo masquees quand la console est servie par le point d acces ; maintien a l'arret (core/stillhold, position figee et vitesse 0 quand la voiture est immobile), lisibilite des pastilles, cadrage minimal 25 m, temps en l'air ignore sans IMU, repli du fond satellite hors Internet. Premiers essais materiel : GPS OK (fix 3D, 13 sat, ~20 Hz). IMU validee avec tools/imu_test ; restent les bancs v2 §9 en roulage. Piste X-Bus CLOSE : la prise PLine du XC-E8 est une entree (essais analyseur + sonde ESP32, voir CAHIER-DES-CHARGES-V2 §5 et annexe A). [2.3] Script Lua corrige : plus aucun appel table.* ni ipairs (plantage radio a chaque chrono recu), action « Tester le son » retiree ; bancs Lua durcis (table = nil avant chargement) et nouveaux tests (liste roulante des 4 tours, reception par la file CRSF brute, choix du dossier de voix). Suites au vert : natifs 61/30/2401, Lua 4036, console_check 28, tests/web, QEMU sim.py --lua OK. [2.4, 4 octobre 2026] Relecture de coherence de la documentation : CDC v2 2.4 (batterie octet 67 toujours 0, pose de ligne a l'arret decrite en §4.5, coupure Wi-Fi au roulage en §10.2, chaine de compilation reelle en §9.1, restes de l'objectif ESC marques reserves, etat reel de la console en §6.4, avancement des bancs §9), README, LISEZMOI firmware et Lua, DEMARRAGE, schema de cablage regenere (legende X-Bus retiree, version a12), commentaire GPIO 5/6 dans config.h. Aucun changement de code fonctionnel. [Console 1.7.11, 4 octobre 2026] EXPECT_LEN 0x28/0x29 ; telechargement avec l'octet 0x02 si le modele FF F0 contient S3 ; emplacements 0x29 rattaches a leur session (moduleEvents) et encart « Chronos du module » (tours/parcours au millieme, chronos intermediaires, ecart avec la console) ; FF F1 lu a la connexion d'un module S3, lignes posees d'office dans l'analyse si a moins de 30 m du trace (makeLineAt/lineFrom, meme geometrie que makeLine), bouton « Lignes du module » ; demo = module S3 (SIM_TOTAL 154333). Fonctions protegees non modifiees (feed : seule EXPECT_LEN etendue, comme prevu par CDC v2 §6.3).",
-    "prochaine_etape": "1) Recompiler sur GitHub et mettre le firmware a jour par Wi-Fi (console 1.7.11 embarquee). 2) Configurer le mixage CH8 (source MAX, poids GV9, ajouter) sur la MT12 et verifier la pose de ligne depuis la radio, a l'arret et lancee. 3) Roulage : enregistrement automatique, tours radio vs « Chronos du module » vs console, boitier imprime (bancs v2 §9 n°1, 2, 5, 6, 8)."
+    "statut": "2.0-a12 + console 1.7.10 : enregistrement automatique (recd::F_AUTO 0x20, actif par defaut) : demarrage apres 3 epoques au-dessus de statSpeed avec fix, fermeture de session apres statInterval a l arret (STOPPED, pas PAUSED) ; case dans la console ; pose de ligne a l arret (core/linearm : ligne armee, cap pris au demarrage dans les 10 s, posee 0,5 m devant, points rejoues dans le chrono = depart arrete compte ; K ARME DEPART/ARRIVEE, K DELAI) ; script Lua : molette = choix de l action sur Lignes, ENT court = executer, effacement confirme, dossiers de voix multiples, GV9 ecrite pour les 9 modes de vol, affichage de CH8 et alerte CH8 immobile si le mixage manque ; analyse d une session vide expliquee (nb de points, fix), plus de Vmin Infinity, IMU absente affichee en tirets ; IMU validee sur materiel avec tools/imu_test (|a|=0,99 g) ; pilote rendu robuste (sonde 100 kHz puis 400, 5 essais, SW_RESET, relecture des registres, WHO_AM_I 0x6B accepte, nouvel essai toutes les 2 s si absente, commande serie m) ; trame CRSF 0x03 date/heure GPS a 1 Hz (ExpressLRS >= 4.1, capteur Date EdgeTX), affichee par le script Lua en heure locale (France, heure d ete auto) ; fond satellite en Wi-Fi via la 4G du telephone (reste actif, message et nouvel essai toutes les 10 s ; ouvrir la console dans Chrome, pas dans la fenetre de portail captif) ; durees memoire au format 00h00min (arrondi inferieur), sources Bluetooth et Demo masquees quand la console est servie par le point d acces ; maintien a l'arret (core/stillhold, position figee et vitesse 0 quand la voiture est immobile), lisibilite des pastilles, cadrage minimal 25 m, temps en l'air ignore sans IMU, repli du fond satellite hors Internet. Premiers essais materiel : GPS OK (fix 3D, 13 sat, ~20 Hz). IMU validee avec tools/imu_test ; restent les bancs v2 §9 en roulage. Piste X-Bus CLOSE : la prise PLine du XC-E8 est une entree (essais analyseur + sonde ESP32, voir CAHIER-DES-CHARGES-V2 §5 et annexe A). [2.3] Script Lua corrige : plus aucun appel table.* ni ipairs (plantage radio a chaque chrono recu), action « Tester le son » retiree ; bancs Lua durcis (table = nil avant chargement) et nouveaux tests (liste roulante des 4 tours, reception par la file CRSF brute, choix du dossier de voix). Suites au vert : natifs 61/30/2401, Lua 4036, console_check 28, tests/web, QEMU sim.py --lua OK. [2.4, 4 octobre 2026] Relecture de coherence de la documentation : CDC v2 2.4 (batterie octet 67 toujours 0, pose de ligne a l'arret decrite en §4.5, coupure Wi-Fi au roulage en §10.2, chaine de compilation reelle en §9.1, restes de l'objectif ESC marques reserves, etat reel de la console en §6.4, avancement des bancs §9), README, LISEZMOI firmware et Lua, DEMARRAGE, schema de cablage regenere (legende X-Bus retiree, version a12), commentaire GPIO 5/6 dans config.h. Aucun changement de code fonctionnel. [Console 1.7.11, 4 octobre 2026] EXPECT_LEN 0x28/0x29 ; telechargement avec l'octet 0x02 si le modele FF F0 contient S3 ; emplacements 0x29 rattaches a leur session (moduleEvents) et encart « Chronos du module » (tours/parcours au millieme, chronos intermediaires, ecart avec la console) ; FF F1 lu a la connexion d'un module S3, lignes posees d'office dans l'analyse si a moins de 30 m du trace (makeLineAt/lineFrom, meme geometrie que makeLine), bouton « Lignes du module » ; demo = module S3 (SIM_TOTAL 154333). Fonctions protegees non modifiees (feed : seule EXPECT_LEN etendue, comme prevu par CDC v2 §6.3). [2.0-a13, 4 octobre 2026] Mixage CH8 configure sur la MT12 (utilisateur). Logique roule/arret extraite dans core/airgate (testee sur PC) et appliquee au Wi-Fi ET au Bluetooth (coupure au roulage, rallumage apres 30 s d'arret ; BLE_AUTO_OFF). Nouveau scenario QEMU --arret. Firmware compile : trimbox_s3-app.bin (OTA) et trimbox_s3-complet.bin.",
+    "prochaine_etape": "1) Mettre le firmware 2.0-a13 par Wi-Fi (trimbox_s3-app.bin) ; verifier « [banc] BLE actif » puis « COUPE » en roulant (touche b). 2) Roulage : pose de ligne depuis la radio (a l'arret et lancee), enregistrement automatique, tours radio vs « Chronos du module » vs console, Wi-Fi et Bluetooth qui reviennent au stand, boitier imprime (bancs v2 §9 n°1, 2, 5, 6, 8)."
   },
   "pistes_non_traitees": [
     "Firmware : FF 29 n'est pas emis en direct (seulement au telechargement) ; la console sait deja l'afficher dans le journal si un jour il l'est.",
@@ -188,16 +188,15 @@
       "QEMU : point d'acces allume apres 30 s d'arret, coupe des que la voiture roule (logique ; radio Wi-Fi non emulee)",
       "OTA : tests natifs (controles, envoi HTTP, refus explique, coupure), Chromium (vrai .bin envoye depuis la console, refus d'un fichier quelconque), QEMU ota_rollback.py (version saine validee et conservee ; version qui plante -> retour app0, vrai chargeur)",
       "Lua : tests/lua/test_trmbox.lua (API EdgeTX simulee) ; sim.py --lua : chaine complete script -> GV9 -> CH8 -> firmware QEMU -> tours annonces ; faux ELRS 'dernier message seulement' : aucun tour perdu",
-      "console 1.7.11 : tests/web (faux module : FF F1 lu a la connexion, ligne posee d'office, telechargement 0x02, tours du module 15,000 s, ecart 0 ms avec la console) ; console_check 56 verifications (ligne relue dans le module = ligne posee sur le trace)"
+      "console 1.7.11 : tests/web (faux module : FF F1 lu a la connexion, ligne posee d'office, telechargement 0x02, tours du module 15,000 s, ecart 0 ms avec la console) ; console_check 56 verifications (ligne relue dans le module = ligne posee sur le trace)",
+      "2.0-a13 : core/airgate (Wi-Fi + Bluetooth) teste sur PC (testAirGate, 18 verifications) ; QEMU sim.py --arret : W WIFI ON -> W WIFI OFF au roulage -> W WIFI ON tout seul 30 s apres l'arret ; suites completes au vert (natifs 61/30/2419, Lua 4036, console_check 56, tests/web avec le vrai .bin, QEMU sim, --lua, --arret, --reboot, ota_rollback)"
     ],
     "non_teste": [
       "Bluetooth et Wi-Fi reels en conditions de piste (pas dans QEMU)",
       "IMU dans le firmware complet (capteur valide seul avec tools/imu_test)",
       "roulage : pose de ligne, enregistrement automatique, chrono radio vs console"
     ],
-    "a_faire": [
-      "Recompiler (GitHub Actions) pour integrer la console 1.7.11 au firmware : le trimbox_s3-app.bin du 28 septembre sert encore la 1.7.10."
-    ],
+    "a_faire": [],
     "pieges_emulateur": "QIO decale les lectures de 2 octets (DIO pour QEMU), UART2 non emule, RMT bloque rgbLedWrite",
     "wifi": "AP TrimBox-<pseudo>, mdp WIFI_PASS (trimbox-rc par defaut), 192.168.4.1, portail captif DNS. Auto : allume apres 30 s a l'arret (<5 km/h ou sans fix), coupe apres 3 solutions >7,2 km/h. BOOT 3 s / touche w / FF F2 (0 off, 1 on, 2 auto). Messages radio W WIFI ON/OFF. WebSocket prioritaire sur BLE.",
     "ota": "POST /update (console 1.7.4 section Mise a jour, secours GET /update). Controles core/otacheck : 0xE9, puce 9, taille <= partition, marque TRIMBOX-S3-FIRMWARE-MARK-v1 ; SHA-256 par esp_ota_end. Conditions : enregistrement arrete, a l'arret, pas de telechargement/effacement. Rollback : verifyRollbackLater()=true, validation apres autotest (memoire) + 15 s ; enableLoopWDT (5 s). Messages radio U REDEMARRAGE / U VALIDATION / U MAJ OK. Ne jamais changer partitions.csv par OTA.",
@@ -206,7 +205,9 @@
       "GPS : fix 3D, 13 satellites, ~20 Hz",
       "IMU : tools/imu_test, |a| = 0,99 g au repos",
       "CRSF : messages du chrono et accuses de pose recus sur la MT12"
-    ]
+    ],
+    "radios": "core/airgate : Motion (roule = 3 solutions > 7,2 km/h avec fix ; arret = < 5 km/h ou sans fix) + Gate (coupure immediate au roulage, sans condition ; rallumage apres 30 s d'arret si auto). Wi-Fi : g_wifiAuto (desactive par une coupure manuelle). Bluetooth : BLE_AUTO_OFF 1 / BLE_AUTO_ON_S 30, actif au demarrage ; coupure = stopAdvertising + deconnexion de la console ; pas de message radio.",
+    "compilation_locale": "Compile le 4 octobre 2026 hors CI (arduino-cli 1.3.1, esp32:esp32@3.3.12, NimBLE 2.5.1) : 1 261 543 o (62 % de app0), 149 772 o de RAM. ctags factice (le .ino ne declare que setup/loop). Table de partitions identique : mise a jour OTA possible."
   },
   "lua": {
     "fichier": "lua/trmbox.lua -> SCRIPTS/TELEMETRY/trmbox.lua (6 caracteres max)",
@@ -217,10 +218,10 @@
       "getValue('FM') renvoie bien une chaine",
       "touches et navigation MT12",
       "lisibilite de l'affichage",
-      "annonces vocales (fichiers /SOUNDS/trimbox/)"
+      "annonces vocales (fichiers /SOUNDS/trimbox/)",
+      "mixage CH8 (source MAX, poids GV9, ajouter) configure sur le modele (4 octobre 2026)"
     ],
     "a_valider": [
-      "mixage CH8 (source MAX, poids GV9, ajouter) configure sur le modele",
       "pose de ligne a l'arret sur la voiture",
       "enregistrement automatique en roulage"
     ]
@@ -295,8 +296,8 @@
   "fichiers": [
     {
       "chemin": ".github/workflows/build-s3.yml",
-      "octets": 8034,
-      "sha1": "699a898bdc1e"
+      "octets": 8241,
+      "sha1": "bd873c506afb"
     },
     {
       "chemin": ".gitignore",
@@ -305,8 +306,8 @@
     },
     {
       "chemin": "CAHIER-DES-CHARGES-V2.md",
-      "octets": 46675,
-      "sha1": "0b37d45fef23"
+      "octets": 48055,
+      "sha1": "ba46d78b7e92"
     },
     {
       "chemin": "CAHIER-DES-CHARGES.md",
@@ -320,8 +321,8 @@
     },
     {
       "chemin": "README.md",
-      "octets": 26534,
-      "sha1": "f1f65a9e2e07"
+      "octets": 26833,
+      "sha1": "f1d546ea11e0"
     },
     {
       "chemin": "docs/boitier/LISEZMOI.md",
@@ -405,8 +406,8 @@
     },
     {
       "chemin": "tests/native/test_logic.cpp",
-      "octets": 13843,
-      "sha1": "2898dac9028a"
+      "octets": 17121,
+      "sha1": "159db9a14319"
     },
     {
       "chemin": "tests/native/test_proto.cpp",
@@ -420,8 +421,8 @@
     },
     {
       "chemin": "tests/qemu/sim.py",
-      "octets": 12172,
-      "sha1": "9df408f7d5ca"
+      "octets": 12819,
+      "sha1": "82f1882de8e0"
     },
     {
       "chemin": "tests/web/.gitignore",
@@ -510,8 +511,8 @@
     },
     {
       "chemin": "trimbox_s3/LISEZMOI.md",
-      "octets": 9869,
-      "sha1": "40f4524dbbc4"
+      "octets": 10140,
+      "sha1": "a7f36e587b9f"
     },
     {
       "chemin": "trimbox_s3/partitions.csv",
@@ -520,8 +521,8 @@
     },
     {
       "chemin": "trimbox_s3/src/app.cpp",
-      "octets": 36194,
-      "sha1": "529286daab27"
+      "octets": 36750,
+      "sha1": "70aa29eb17e4"
     },
     {
       "chemin": "trimbox_s3/src/app.h",
@@ -530,13 +531,23 @@
     },
     {
       "chemin": "trimbox_s3/src/config.h",
-      "octets": 6021,
-      "sha1": "374c44e4ac8a"
+      "octets": 6381,
+      "sha1": "2ac06a66badd"
     },
     {
       "chemin": "trimbox_s3/src/console_gz.h",
       "octets": 282664,
       "sha1": "73b98fc6db28"
+    },
+    {
+      "chemin": "trimbox_s3/src/core/airgate.cpp",
+      "octets": 801,
+      "sha1": "f4edfda19e8a"
+    },
+    {
+      "chemin": "trimbox_s3/src/core/airgate.h",
+      "octets": 2075,
+      "sha1": "513d89ccc762"
     },
     {
       "chemin": "trimbox_s3/src/core/bytes.h",
@@ -680,13 +691,13 @@
     },
     {
       "chemin": "trimbox_s3/src/hw/bridge.cpp",
-      "octets": 5485,
-      "sha1": "bdec8426b06c"
+      "octets": 6090,
+      "sha1": "15200ec2f584"
     },
     {
       "chemin": "trimbox_s3/src/hw/bridge.h",
-      "octets": 1458,
-      "sha1": "67c740921183"
+      "octets": 1663,
+      "sha1": "23d726306ec4"
     },
     {
       "chemin": "trimbox_s3/src/hw/gnss.cpp",
@@ -755,7 +766,7 @@
     },
     {
       "chemin": "trimbox-etat-projet.json",
-      "octets": 35020,
+      "octets": 36498,
       "sha1": "(ce fichier)"
     }
   ]

@@ -1,9 +1,10 @@
 # TrimBox DIY v2 — Cahier des charges
 
-**Version du document :** 2.5 — 4 octobre 2026
-**Statut :** firmware 2.0-a12 et script Lua (2.3) écrits, testés sur PC, dans un navigateur et sous émulateur. Premiers essais sur matériel : **GPS validé** (fix 3D, 13 satellites, ~20 Hz) ; **IMU validée** avec `tools/imu_test` (|a| = 0,99 g au repos) ; **script Lua validé sur la MT12** (affichage, tours, annonces vocales, accusés de pose). **Objectif 5 (X-Bus de l'ESC) abandonné** : le port est une entrée, voir §5.
+**Version du document :** 2.6 — 4 octobre 2026
+**Statut :** firmware 2.0-a13 et script Lua (2.3) écrits, testés sur PC, dans un navigateur et sous émulateur. Premiers essais sur matériel : **GPS validé** (fix 3D, 13 satellites, ~20 Hz) ; **IMU validée** avec `tools/imu_test` (|a| = 0,99 g au repos) ; **script Lua validé sur la MT12** (affichage, tours, annonces vocales, accusés de pose). **Objectif 5 (X-Bus de l'ESC) abandonné** : le port est une entrée, voir §5.
 **[2.4]** Relecture de cohérence : texte aligné sur le code 2.0-a12 (batterie, pose de ligne à l'arrêt, Wi-Fi, chaîne de compilation, restes de l'objectif ESC).
 **[2.5]** Console 1.7.11 : lignes du module (`FF F1`) et chronos calculés en course (`0x29`) exploités (§6.4).
+**[2.6]** Firmware 2.0-a13 : le **Bluetooth** suit la même règle que le Wi-Fi — coupé au roulage, rallumé à l'arrêt (§7.1).
 Les choix faits pendant l'implémentation sont signalés par **[2.1]**, **[2.3]**…
 (numéro de version du document où le point est apparu).
 **Prérequis :** `CAHIER-DES-CHARGES.md` (v1). Ce document **ne le remplace pas** :
@@ -444,7 +445,7 @@ transport ne change pas la nature du flux d'octets.
 | Classe/ID | Sens | Long. | Rôle |
 |---|---|---|---|
 | `FF 28` | → console | 80 | Réservé (lot ESC, §5) : jamais émis |
-| `FF 29` | → console | 80 | Franchissement, tour, parcours ou chrono intermédiaire. **[2.5]** Émis en téléchargement seulement (`FF 23` + `0x02`) : le firmware 2.0-a12 ne l'envoie pas en direct |
+| `FF 29` | → console | 80 | Franchissement, tour, parcours ou chrono intermédiaire. **[2.5]** Émis en téléchargement seulement (`FF 23` + `0x02`) : le firmware 2.0-a13 ne l'envoie pas en direct |
 | `FF F1` | ↔ | 0 / 28 | Lecture / écriture de `LineConfig` sans `magic`, `seq`, `crc` (4 octets d'en-tête + 6 × i32) |
 | `FF F2` | ↔ | 0 / 1 → 4 | **[2.1]** Wi-Fi. Requête vide → `[allumé, auto, nb appareils, console WebSocket connectée]`. `0` : couper et désactiver l'automatique ; `1` : allumer maintenant (NACK si la voiture roule) ; `2` : automatique seul |
 
@@ -524,6 +525,23 @@ est arrêtée**, pour que la console soit là sans rien toucher au stand.
   `FF F2`. Couper à la main désactive l'automatique jusqu'au prochain
   forçage ou redémarrage (`WIFI_AUTO_DEFAULT`).
 - La radio est prévenue : messages `W WIFI ON` / `W WIFI OFF` (§4.4).
+- **[2.6] Bluetooth : même règle** (`core/airgate`, partagé avec le Wi-Fi).
+  Actif dès la mise sous tension ; dès que la voiture roule, les annonces
+  s'arrêtent et une console connectée est déconnectée ; il revient après
+  `BLE_AUTO_ON_S` (30 s) d'arrêt. Pas de message radio (la file `FM` est
+  réservée au chrono), état visible par la commande série `b`.
+  `BLE_AUTO_OFF 0` dans `config.h` rend le Bluetooth permanent (2.0-a12).
+  Conséquence acceptée : plus de données en direct par Bluetooth pendant le
+  roulage ; la session se télécharge au stand.
+- **[2.6] Cas limites** : coupé à la main (bouton, touche `w`, `FF F2` 0), le
+  Wi-Fi ne revient plus seul jusqu'au prochain forçage ou redémarrage, mais
+  il est toujours coupé en roulant. Sans solution GNSS depuis 2 s, ou sans
+  fix, la voiture est réputée à l'arrêt : les radios reviennent après 30 s,
+  même si elle roule encore sans GPS.
+- Bancs : `tests/native` (`testAirGate`, 18 vérifications : coupure à la 3e
+  solution, rien entre 5 et 7,2 km/h, rallumage à 30 s, auto désactivé,
+  Bluetooth) ; `tests/qemu/sim.py --arret` (stand → roulage → arrêt : `W WIFI
+  ON`, `W WIFI OFF`, puis `W WIFI ON` tout seul).
 - Plus de coupure « 10 min sans client » ni « au démarrage d'un
   enregistrement » (2.0) : démarrer un enregistrement depuis la console Wi-Fi
   couperait sa propre réponse. Le mouvement suffit.
@@ -717,7 +735,8 @@ de voie par le module, même « pour simplifier le câblage ».
 
 Un point d'accès Wi-Fi actif à quelques centimètres d'un récepteur ExpressLRS
 en 2,4 GHz peut dégrader la liaison de commande. D'où la coupure automatique
-dès que la voiture roule, et sans condition (§7.1). **[2.4]** La coupure « au
+dès que la voiture roule, et sans condition (§7.1) ; **[2.6]** le Bluetooth
+aussi. **[2.4]** La coupure « au
 démarrage de l'enregistrement » de la 2.0 a été abandonnée. Le Crossfire (868/915 MHz) n'est pas
 concerné, mais la règle s'applique quand même : un seul comportement,
 quel que soit le système radio.

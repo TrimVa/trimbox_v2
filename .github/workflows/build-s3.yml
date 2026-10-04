@@ -163,6 +163,10 @@ jobs:
         run: |
           cp buildq/trimbox_s3.ino.merged.bin flash_lua.bin
           python3 tests/qemu/sim.py flash_lua.bin --lua
+      - name: Stand → roulage → arrêt (Wi-Fi rallumé tout seul)
+        run: |
+          cp buildq/trimbox_s3.ino.merged.bin flash_arret.bin
+          python3 tests/qemu/sim.py flash_arret.bin --arret
       - name: Coupure d'alimentation (redémarrage sur la même flash)
         run: python3 tests/qemu/sim.py flash.bin --reboot
       - name: Mise à jour qui plante → retour à la version précédente
