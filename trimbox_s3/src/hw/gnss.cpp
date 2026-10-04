@@ -42,7 +42,7 @@ static int valset1(uint32_t key, uint32_t val){ ubx::ValSet v; v.add(key, val); 
 
 static void signals(bool galileo){
   // Constellations superflues désactivées AVANT de demander 25 Hz, sinon
-  // le module refuse la cadence (v1 §4.8). Le changement de signaux fait
+  // le module refuse la cadence (§4.8). Le changement de signaux fait
   // redémarrer le moteur GNSS : on laisse 1 s avant la suite.
   ubx::ValSet v;
   v.add(ubx::key::SIGNAL_GPS_ENA, 1);

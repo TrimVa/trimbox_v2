@@ -1,7 +1,7 @@
 # TrimBox DIY S3 — firmware 2.0-a13
 
-Première version du firmware ESP32-S3. Spécification : `CAHIER-DES-CHARGES.md`
-(v1) et `CAHIER-DES-CHARGES-V2.md`. État au 4 octobre 2026.
+Firmware ESP32-S3. Spécification : `CAHIER-DES-CHARGES.md` (à la racine du
+dépôt). État au 4 octobre 2026.
 
 ## Ce qui est fait, ce qui ne l'est pas
 
@@ -20,7 +20,7 @@ Première version du firmware ESP32-S3. Spécification : `CAHIER-DES-CHARGES.md`
 | Bluetooth coupé au roulage, rallumé après 30 s d'arrêt (`BLE_AUTO_OFF`) | ✅ logique testée sur PC (même `core/airgate`) ; ⚠️ à vérifier sur la carte (touche `b` : « BLE actif » / « COUPÉ ») |
 | Console embarquée (v1.7.3, thèmes et couleur d'accent compris) + WebSocket | ✅ testée dans Chromium avec le vrai serveur du firmware |
 | Mise à jour du firmware par Wi-Fi (OTA) + retour arrière automatique | ✅ envoi testé dans Chromium ; retour arrière testé sous émulateur avec le vrai chargeur de démarrage ; radio Wi-Fi non testée |
-| ESC XC-E8 (X-Bus) | ❌ **abandonné** : le port X-Bus est une entrée, aucune télémétrie (cahier des charges v2 §5) |
+| ESC XC-E8 (X-Bus) | ❌ **abandonné** : le port X-Bus est une entrée, aucune télémétrie (§13) |
 | Script Lua MT12 (`lua/trmbox.lua`) | ✅ testé avec l'API EdgeTX simulée, en chaîne complète sous émulateur, et **validé sur la MT12** |
 
 ## Câblage de banc (alimentation par l'USB de la carte)
@@ -147,7 +147,7 @@ Puis *Télémétrie → Découvrir les capteurs* : GPS, vitesse, satellites et
 
 ## Bancs d'essai à faire en recevant le matériel
 
-Dans l'ordre (v2 §9). Envoyez-moi la sortie de `b` à chaque étape.
+Dans l'ordre (§11.2). Envoyez-moi la sortie de `b` à chaque étape.
 
 1. **Carte seule** : le journal affiche la version, `mémoire : 0 / 154333`.
    Le GPS et l'IMU sont signalés absents : normal.

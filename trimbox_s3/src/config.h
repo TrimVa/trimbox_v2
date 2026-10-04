@@ -1,12 +1,12 @@
 // ============================================================================
 //  TrimBox DIY S3 — configuration de compilation
-//  Cahier des charges v2. Les valeurs numériques ne sont PAS indicatives
+//  Cahier des charges. Les valeurs numériques ne sont PAS indicatives
 //  (v1, « Comment utiliser ce document ») : ne pas les changer sans raison.
 // ============================================================================
 #pragma once
 
 // ---------------------------------------------------------------- identité
-#define DEVICE_NICKNAME   "Buggy 1"          // ≤ 16 caractères (v1 §9.4)
+#define DEVICE_NICKNAME   "Buggy 1"          // ≤ 16 caractères (§12.1)
 #define BRAND             "TrimBox DIY S3"
 #define DEVICE_NAME       "TrimBox " DEVICE_NICKNAME
 #define FIRMWARE_VER      "2.0-a13"
@@ -15,7 +15,7 @@
 #define BUILD_STAMP       __DATE__ " " __TIME__
 
 // ---------------------------------------------------------------- brochage
-// v2 §2.3. INTERDITES : 35-37 (PSRAM octale), 19-20 (USB), 0/3/45/46 en
+// §2.3. INTERDITES : 35-37 (PSRAM octale), 19-20 (USB), 0/3/45/46 en
 // sortie (configuration au démarrage). ADC : uniquement l'ADC1 (GPIO 1-10).
 #define PIN_GNSS_RX       18    // ← TX du module GNSS
 #define PIN_GNSS_TX       17    // → RX du module GNSS
@@ -23,7 +23,7 @@
 #define GPS_EN_ACTIVE     HIGH  // niveau qui ALLUME le GNSS (selon le montage)
 #define PIN_CRSF_RX       16    // ← TX du récepteur (sortie série du ER5C-i)
 #define PIN_CRSF_TX       15    // → RX du récepteur
-#define PIN_XBUS_RX        5    // libre : X-Bus de l'ESC abandonné (port en entrée, v2 §5)
+#define PIN_XBUS_RX        5    // libre : X-Bus de l'ESC abandonné (port en entrée, §13)
 #define PIN_XBUS_TX        6    // libre (idem) ; ni l'une ni l'autre n'est utilisée
 #define PIN_IMU_SDA        8
 #define PIN_IMU_SCL        9
@@ -44,11 +44,11 @@
 
 // ---------------------------------------------------------------- GNSS
 #define GNSS_BAUD         115200
-#define GNSS_DYN_MODEL    7     // Airborne 2g (v1 §4.8)
+#define GNSS_DYN_MODEL    7     // Airborne 2g (§4.8)
 #define MAX_NAVIGATION_RATE 25
 
 // ---------------------------------------------------------------- IMU
-#define ACCEL_RANGE_G     16    // ±16 g OBLIGATOIRE (v1 §9.11)
+#define ACCEL_RANGE_G     16    // ±16 g OBLIGATOIRE (§12.8)
 // 1 = moyenne des échantillons IMU (416 Hz) sur la période GNSS : filtre
 //     anti-repliement, les vibrations du châssis ne « tombent » plus au
 //     hasard sur l'échantillon retenu.
@@ -86,9 +86,9 @@
 #define LINE_ARM_WINDOW_MS        10000 // en dessous : ligne armée, démarrer dans les 10 s
 
 // ---------------------------------------------------------------- Wi-Fi
-// Point d'accès de la console embarquée (v2 §7). Il s'allume de lui-même
+// Point d'accès de la console embarquée (§6). Il s'allume de lui-même
 // quand la voiture est arrêtée depuis WIFI_AUTO_ON_S secondes, et se coupe
-// dès qu'elle roule (radio 2,4 GHz : v2 §10.2).
+// dès qu'elle roule (radio 2,4 GHz : §12.10).
 #define WIFI_PASS         "trimbox-rc"   // 8 caractères minimum — À PERSONNALISER
 #define WIFI_AUTO_DEFAULT 1              // 1 : automatique dès le démarrage ; 0 : jamais seul
 #define WIFI_AUTO_ON_S    30             // arrêt continu avant activation
@@ -110,9 +110,9 @@
 #define OTA_VALIDATE_AFTER_S 15          // fonctionnement avant de confirmer un nouveau firmware
 
 // ---------------------------------------------------------------- sécurité
-#define AUTO_RESUME_RECORDING 0   // v1 §4.5 : jamais de reprise après coupure
+#define AUTO_RESUME_RECORDING 0   // §4.5 : jamais de reprise après coupure
 #define MIN_UPTIME_BEFORE_SLEEP_S 120
 
 // ---------------------------------------------------------------- mémoire
 #define TXQ_SIZE          4096
-#define LIVE_RESERVE      (88 + 256)  // v1 §4.2
+#define LIVE_RESERVE      (88 + 256)  // §4.2

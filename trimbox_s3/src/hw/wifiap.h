@@ -1,5 +1,5 @@
 // ============================================================================
-//  Point d'accès Wi-Fi du module : console embarquée + WebSocket (v2 §7).
+//  Point d'accès Wi-Fi du module : console embarquée + WebSocket (§6).
 //  L'activation (automatique à l'arrêt, coupure dès que la voiture roule)
 //  est décidée par l'application ; ce module ne fait qu'exécuter.
 // ============================================================================

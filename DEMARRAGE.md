@@ -69,9 +69,10 @@ ligne ne part. Voix : copier les 12 mots dans `SOUNDS/trimbox/`
 
 ## Reprendre le développement avec une IA
 
-Fournir `trimbox-etat-projet.json`, `CAHIER-DES-CHARGES.md`,
-`CAHIER-DES-CHARGES-V2.md`, puis les fichiers concernés. Chapitres
-prioritaires : v1 §9 et v2 §10 (pièges connus). Toute modification de la
+Fournir `trimbox-etat-projet.json` et `CAHIER-DES-CHARGES.md`, puis les
+fichiers concernés (ou l'archive de reprise complète, avec son
+`REPRISE-IA.md`). Chapitres prioritaires du cahier des charges : §0 (règles
+dures) et §12 (pièges connus). Toute modification de la
 console : incrémenter `CONSOLE_VER`, puis `python3 tools/embed_console.py`.
 Les tests (`tests/`) doivent rester verts.
 
@@ -82,4 +83,4 @@ Deux règles dures à rappeler à l'assistant :
   par une vérification de syntaxe ;
 - **script Lua** : `lua/trmbox.lua` ne doit **jamais** utiliser `table.*` ni
   `ipairs` — EdgeTX ne les fournit pas aux scripts de télémétrie et la radio
-  plante au premier tour reçu (CDC v2 §10.14).
+  plante au premier tour reçu (§12.22).

@@ -6,7 +6,7 @@
 --
 --  Le module fait tout le calcul (chrono à 25 Hz) ; ce script AFFICHE,
 --  ANNONCE et COMMANDE. Messages reçus dans le capteur « FM » (trame CRSF
---  mode de vol), un préfixe par nature (cahier des charges v2 §4.4) :
+--  mode de vol), un préfixe par nature (§5.4) :
 --    S <état> <lignes>   état : REC / PAUSE / STOP / NOFIX ; lignes C, D ou -
 --    L<n> <temps>[±écart] tour (ou parcours) n, écart au meilleur précédent
 --    R <chrono> <temps>  chrono intermédiaire (dragster)

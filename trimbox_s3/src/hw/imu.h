@@ -1,6 +1,6 @@
 // ============================================================================
 //  Centrale inertielle LSM6DS3 / LSM6DS3TR-C en I2C (module générique).
-//  Accéléromètre ±16 g (v1 §9.11), gyroscope ±2000 °/s, 416 Hz.
+//  Accéléromètre ±16 g (§12.8), gyroscope ±2000 °/s, 416 Hz.
 // ============================================================================
 #pragma once
 #include <stdint.h>

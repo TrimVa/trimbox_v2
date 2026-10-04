@@ -1,5 +1,5 @@
 // ============================================================================
-//  Configuration persistante en DOUBLE EXEMPLAIRE (v1 §4.4, v2 §3.4).
+//  Configuration persistante en DOUBLE EXEMPLAIRE (§4.4, §4.4).
 //  Sérialisation explicite octet par octet (pas de memcpy de structure :
 //  le format sur flash ne doit pas dépendre du compilateur).
 // ============================================================================

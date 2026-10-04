@@ -67,7 +67,7 @@ bool start(){
   WiFi.mode(WIFI_AP);
   WiFi.softAPConfig(AP_IP, AP_IP, AP_MASK);
   // Canal fixe, 2 clients au plus ; puissance réduite : la portée d'un
-  // stand suffit et on limite la gêne pour une radio 2,4 GHz (v2 §10.2).
+  // stand suffit et on limite la gêne pour une radio 2,4 GHz (§12.10).
   if(!WiFi.softAP(s_ssid, s_pass, WIFI_CHANNEL, 0, 2)){ WiFi.mode(WIFI_OFF); return false; }
   WiFi.setTxPower(WIFI_TX_POWER);
   s_server.begin();

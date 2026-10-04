@@ -154,7 +154,7 @@ text(LX + 14, LY + 24, 'Légende', 15, weight='700')
 items = [('5 V', C['v5'], None), ('3,3 V', C['v33'], None), ('Masse (GND)', C['gnd'], None),
          ('GPS UART (TX / RX)', C['gtx'], None), ('IMU I2C (SDA / SCL)', C['sda'], None),
          ('CRSF récepteur (TX / RX)', C['ctx'], None), ('Voies PWM du récepteur', C['pwm'], None)]
-# ESC : rien à relier au module (prise X-Bus = entrée, cahier des charges v2 §5).
+# ESC : rien à relier au module (prise X-Bus = entrée, §13).
 for i, (lab, col, dash) in enumerate(items):
     y = LY + 48 + i * 23
     wire([(LX + 16, y), (LX + 60, y)], col, 3.5, dash)

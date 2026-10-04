@@ -1,4 +1,4 @@
-// Automate d'enregistrement (v1 §4.6) et pose de ligne par la voie (v2 §4.5).
+// Automate d'enregistrement (§4.6) et pose de ligne par la voie (§5.5).
 #include "t.h"
 #include "../../trimbox_s3/src/core/recorder.h"
 #include "../../trimbox_s3/src/core/linecmd.h"

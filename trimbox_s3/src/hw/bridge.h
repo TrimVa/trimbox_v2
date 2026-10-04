@@ -1,11 +1,11 @@
 // ============================================================================
 //  Liaison avec la console : Bluetooth (service Nordic UART) ou WebSocket
 //  (point d'accès Wi-Fi, prioritaire quand il est connecté), et file
-//  d'émission UNIQUE (v1 §4.2).
+//  d'émission UNIQUE (§4.2).
 //
 //  TOUTES les trames sortantes passent par la file, données en direct
 //  comprises : deux chemins de sortie concurrents permettraient à un paquet
-//  de s'insérer au milieu d'une réponse fragmentée (v1 §9.5).
+//  de s'insérer au milieu d'une réponse fragmentée (§12.2).
 // ============================================================================
 #pragma once
 #include <stdint.h>
@@ -17,7 +17,7 @@ void begin(const char* name, const char* serial);
 bool connected();            // Bluetooth OU WebSocket
 bool bleConnected();
 // Radio Bluetooth de la console : coupée quand la voiture roule (annonces
-// arrêtées, console éventuelle déconnectée), rallumée à l'arrêt (v2 §7.1).
+// arrêtées, console éventuelle déconnectée), rallumée à l'arrêt (§6.1).
 void bleEnable(bool on);
 bool bleEnabled();
 uint16_t mtu();

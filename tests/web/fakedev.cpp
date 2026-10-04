@@ -155,7 +155,7 @@ int main(int argc, char** argv){
             rec::buildData(d, pvtAt(t), m, 80, false);
             reply(tb::ID_HIST, d, 80);
             // Chrono du module : franchissement puis tour, juste après le point
-            // pendant lequel il a été calculé (v2 §6.2, emplacement 0x29).
+            // pendant lequel il a été calculé (§3.11, emplacement 0x29).
             while(dl.ext && t >= crossT(dl.k)){
               uint8_t e[80] = {0};
               put_le32(e, 400000000u + (uint32_t)llround(crossT(dl.k)*1000)); e[4] = 0; e[5] = 0; put_le16(e+6, (uint16_t)dl.k);

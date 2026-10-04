@@ -1,6 +1,6 @@
 // ============================================================================
 //  Protocole TrimBox (trames B5 62, format hérité RaceBox rév. 8)
-//  Cahier des charges v1 §3, v2 §6.
+//  Cahier des charges §3.
 // ============================================================================
 #pragma once
 #include <stdint.h>
@@ -43,7 +43,7 @@ struct Frame {
 };
 
 // Réassembleur de trames — même règle que feed() dans la console
-// (v1 §5.2 et §9.5) : en cas de longueur incohérente ou de somme de contrôle
+// (cahier des charges §8.3 et §12.2) : en cas de longueur incohérente ou de somme de contrôle
 // fausse, on avance de DEUX octets, JAMAIS de la longueur annoncée.
 class Parser {
 public:

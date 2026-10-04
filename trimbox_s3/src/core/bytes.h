@@ -1,7 +1,7 @@
 // ============================================================================
 //  Lecture / écriture d'entiers dans un tampon d'octets.
 //
-//  DEUX BOUTISMES COEXISTENT DANS CE FIRMWARE (cahier des charges v2 §10.4) :
+//  DEUX BOUTISMES COEXISTENT DANS CE FIRMWARE (§12.12) :
 //   - protocole TrimBox (console) et UBX (GNSS) : LITTLE-endian  -> *_le
 //   - CRSF (radio)                               : BIG-endian     -> *_be
 //  Ne jamais copier une structure C par memcpy vers une trame : toujours

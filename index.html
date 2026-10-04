@@ -742,7 +742,7 @@ const CLS = 0xFF;
 const ID_BUILD=0xF0;   // extension propriétaire : identification du firmware
 const ID_LIVE=0x01, ID_ACK=0x02, ID_NACK=0x03, ID_HIST=0x21, ID_STATUS=0x22,
       ID_DOWNLOAD=0x23, ID_ERASE=0x24, ID_CONFIG=0x25, ID_STATE=0x26, ID_UNLOCK=0x30;
-// Messages ajoutés par la v2 (firmware ESP32-S3, cahier des charges v2 §6.3).
+// Messages ajoutés par la v2 (firmware ESP32-S3, §3.4).
 // 0x28 est réservé (lot ESC, objectif abandonné) : jamais émis, ignoré.
 const ID_ESC=0x28, ID_LAP=0x29, ID_LINES=0xF1;
 
@@ -950,7 +950,7 @@ function dispatch(cls, id, p){
     case ID_BUILD:    onBuild(p); break;
     case ID_LAP:      onLapSlot(p); break;
     case ID_LINES:    onLines(p); break;
-    case ID_ESC:      break;                  // réservé (v2 §5) : ignoré sans bruit
+    case ID_ESC:      break;                  // réservé (§13) : ignoré sans bruit
     case ID_ACK:      onAck(p); break;
     case ID_NACK:     onNack(p); break;
     default: log(`← message inconnu 0x${id.toString(16)}`, 'err');
@@ -1076,7 +1076,7 @@ function onHistory(r){
   }
 }
 /* Événement de chrono calculé en course par le module (emplacement 0x29,
-   v2 §6.2). Reçu seulement si le téléchargement a été demandé avec 0x02.
+   §3.11). Reçu seulement si le téléchargement a été demandé avec 0x02.
    pos = nombre de points déjà reçus : sert à le rattacher à sa session. */
 function parseLapSlot(p){
   const d = new DataView(p.buffer, p.byteOffset, p.byteLength);
@@ -1122,7 +1122,7 @@ function finishDownload(){
 
 /* ==========================================================================
    Firmware S3 : lignes posées depuis la radio (FF F1) et chronos calculés
-   en course (emplacements 0x29). Cahier des charges v2 §6.3 et §6.4.
+   en course (emplacements 0x29). Cahier des charges §3.4 et §8.7.
    ========================================================================== */
 /* Réponse à FF F1 (28 octets) : [0] version, [1] mode (0 aucune, 1 circuit,
    2 dragster), [2] voie de commande, [3] réservé, puis départ et arrivée :
@@ -1173,7 +1173,7 @@ function applyModuleLines(explicit){
 
 /* Tours et parcours calculés en course par le module, comparés à ceux que
    la console recalcule à partir du tracé. Même algorithme des deux côtés
-   (v2 §10.8) : l'écart doit rester de l'ordre de la milliseconde. */
+   (§12.16) : l'écart doit rester de l'ordre de la milliseconde. */
 function paintModule(){
   const box = $('modBox');
   const evs = (sessions[selectedSession] || {}).moduleEvents || [];
@@ -3140,7 +3140,7 @@ function onDisconnectedReal(){
    qu'un vrai appareil, sans passer par le Bluetooth ni le format de trame.
    Activée uniquement quand demoMode vaut true.
    ========================================================================== */
-const SIM_TOTAL = 154333;         // capacité du firmware S3 : 12 500 992 o / 81 o (v2 §2.4)
+const SIM_TOTAL = 154333;         // capacité du firmware S3 : 12 500 992 o / 81 o (§2.4)
 let simUsed = 0, simTimer = null, simT = 0, simLap = 0;
 
 /* Piste simulée : un circuit RC d'environ 45 × 28 m, avec une longue ligne

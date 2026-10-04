@@ -1,6 +1,6 @@
 // ============================================================================
 //  Liaison radio CRSF avec le récepteur ExpressLRS (RadioMaster ER5C-i).
-//  v2 §4 : télémétrie GPS + messages texte vers la MT12, lecture de la voie
+//  §5 : télémétrie GPS + messages texte vers la MT12, lecture de la voie
 //  de pose de ligne.
 // ============================================================================
 #pragma once

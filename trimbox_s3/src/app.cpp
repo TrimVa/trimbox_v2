@@ -1,7 +1,7 @@
 // ============================================================================
 //  TrimBox DIY S3 — application
 //
-//  Boucle principale NON BLOQUANTE, dans cet ordre strict (v1 §4.1) : le
+//  Boucle principale NON BLOQUANTE, dans cet ordre strict (§4.1) : le
 //  protocole passe avant tout le reste, pour qu'aucune commande ne reste
 //  sans réponse.
 //    1. commandes de secours (port série USB)
@@ -39,7 +39,7 @@
 namespace app {
 
 // ---------------------------------------------------------------------------
-//  État — tout est déclaré ici, en tête (leçon de v1 §9.9, valable aussi en C++
+//  État — tout est déclaré ici, en tête (leçon de §12.6, valable aussi en C++
 //  pour la lisibilité : aucune variable d'état dispersée dans le fichier).
 // ---------------------------------------------------------------------------
 static persist::RecConfig  g_cfg;
@@ -74,7 +74,7 @@ static Hist     g_hist[64]; static uint8_t g_histN = 0, g_histHead = 0;
 
 static int32_t  g_prevBestMs = 0;     // pour l'écart au meilleur tour
 
-// Point d'accès Wi-Fi automatique (v2 §7.1)
+// Point d'accès Wi-Fi automatique (§6.1)
 static tb::Parser g_rxWs(true);       // commandes reçues par WebSocket
 static bool     g_wifiAuto = WIFI_AUTO_DEFAULT;
 static bool     g_moving = false;     // la voiture roule (confirmé)
@@ -95,7 +95,7 @@ static uint32_t g_bootMs = 0, g_lastLed = 0;
 static void ack(uint8_t id){ uint8_t p[2] = {tb::CLS, id}; bridge::send(tb::CLS, tb::ID_ACK, p, 2); }
 static void nack(uint8_t id){ uint8_t p[2] = {tb::CLS, id}; bridge::send(tb::CLS, tb::ID_NACK, p, 2); }
 
-// Temps en millisecondes → "21.345" (entiers uniquement, v2 §4.4).
+// Temps en millisecondes → "21.345" (entiers uniquement, §5.4).
 static void fmtMs(char* out, size_t cap, int32_t ms, bool sign){
   const char* s = ms < 0 ? "-" : (sign ? "+" : "");
   const uint32_t a = (uint32_t)(ms < 0 ? -ms : ms);
@@ -323,7 +323,7 @@ static void serviceButton(uint32_t now){
 }
 
 // ---------------------------------------------------------------------------
-//  Mise à jour par Wi-Fi : conditions (v2 §7.2)
+//  Mise à jour par Wi-Fi : conditions (§7)
 // ---------------------------------------------------------------------------
 static const char* otaGate(){
   if(g_rec.state() != recd::STOPPED) return "arrêtez d'abord l'enregistrement";
@@ -390,7 +390,7 @@ static void onCommand(const tb::Frame& f){
     }
     case tb::ID_ERASE:
       // Refusé pendant un enregistrement ou un téléchargement. Une fois lancé,
-      // il n'est PAS annulable (v1 §9.7).
+      // il n'est PAS annulable (§12.4).
       if(!g_storageOk || g_rec.state() != recd::STOPPED || g_dl.active || storage::erasing()){ nack(tb::ID_ERASE); break; }
       storage::eraseBegin(); g_erasePct = 255;
       Serial.println("[mem] effacement");
@@ -592,7 +592,7 @@ static void onPvt(const rec::Pvt& raw){
 }
 
 // ---------------------------------------------------------------------------
-//  Port série de secours (v1 §4.7)
+//  Port série de secours (§4.7)
 // ---------------------------------------------------------------------------
 static void printInfo(){
   Serial.printf("\n== %s « %s » %s — %s ==\n", BRAND, DEVICE_NICKNAME, FIRMWARE_VER, BUILD_STAMP);
@@ -701,7 +701,7 @@ void setup(){
   if(!g_storageOk) Serial.printf("[mem] %s\n", storage::lastError());
   else if(*storage::lastError()) Serial.printf("[mem] %s\n", storage::lastError());
   if(g_storageOk && !storage::loadRecConfig(g_cfg)){ g_cfg = persist::RecConfig(); saveCfg(); }
-  // Pas de reprise automatique (v1 §4.5) : « actif » au démarrage signifie
+  // Pas de reprise automatique (§4.5) : « actif » au démarrage signifie
   // que la session précédente s'est mal terminée (coupure d'alimentation).
   if(g_cfg.enabled && !AUTO_RESUME_RECORDING){
     Serial.println("[rec] session précédente interrompue : l'appareil repart À L'ARRÊT");
@@ -737,7 +737,7 @@ void setup(){
 #endif
   // Chien de garde de la boucle : si elle se fige plus de 5 s, la carte
   // redémarre. Juste après une mise à jour, ce redémarrage déclenche le
-  // retour à la version précédente (v2 §7.2). Aucune opération de la boucle
+  // retour à la version précédente (§7). Aucune opération de la boucle
   // ne dure plus de 3 s (reconfiguration GNSS, la plus longue).
   enableLoopWDT();
 }

@@ -1,4 +1,4 @@
-// Bancs de chronométrage (v1 §8.3 n°2 et 3, v2 §9 n°7).
+// Bancs de chronométrage (§10.2 n°2 et 3, §11.2 n°7).
 // Écrit aussi lap_cases.json, relu par console_check.js qui rejoue les MÊMES
 // points dans les fonctions de la console : les deux implémentations doivent
 // donner les mêmes temps à 1 ms près.
@@ -83,7 +83,7 @@ static void benchCircuit(){
     jsonCase(name, pts, where[w], -1, c);
   }
 
-  // Ligne longue de 18 m (v1 §9.6) : le garde-fou d'ancrage doit empêcher
+  // Ligne longue de 18 m (§12.3) : le garde-fou d'ancrage doit empêcher
   // le double comptage. La demi-longueur passe à 9 m, la tolérance suit.
   {
     lap::Engine E; Collect c; E.setSink(sink, &c);

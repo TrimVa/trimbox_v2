@@ -15,7 +15,7 @@
 #include <vector>
 
 static void testTbStream(){
-  // Banc v1 §8.3 n°1 : 500 trames avec des « B5 62 » dans les charges,
+  // Banc §10.2 n°1 : 500 trames avec des « B5 62 » dans les charges,
   // 3 octets perdus au milieu. Attendu : ≥ 99 % de trames valides.
   std::vector<uint8_t> s;
   srand(1);
@@ -65,7 +65,7 @@ static void testCrsf(){
   CHECK(same, "voies identiques après décodage");
   CHECK(crsf::channelPercent(1811) == 100 && crsf::channelPercent(172) == -100 && crsf::channelPercent(992) == 0, "pourcentages");
 
-  // trame GPS : big-endian (v2 §10.4)
+  // trame GPS : big-endian (§12.12)
   uint8_t f[64];
   size_t n = crsf::buildGps(f, 453456789, -12345678, 13889 /*50 km/h*/, 9000000 /*90°*/, 150000, 12);
   CHECK(n == 19 && f[0] == 0xC8 && f[1] == 17 && f[2] == 0x02, "en-tête GPS");

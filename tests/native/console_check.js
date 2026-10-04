@@ -1,5 +1,5 @@
 // ============================================================================
-//  Banc v2 §9 n°7 — même algorithme, deux implémentations (v2 §10.8).
+//  Banc §11.2 n°7 — même algorithme, deux implémentations (§12.16).
 //  Rejoue les points générés par test_lap dans les fonctions EXTRAITES de la
 //  console (index.html, sans modification) et compare aux événements du
 //  firmware. Échec si un temps diffère de plus de 1 ms.

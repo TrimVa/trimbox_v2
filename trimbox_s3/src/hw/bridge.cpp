@@ -130,7 +130,7 @@ void begin(const char* name, const char* serial){
 
   NimBLEService* nus = s_server->createService(UUID_NUS);
   // Longueur maximale d'écriture : NimBLE accepte jusqu'à 512 octets par
-  // défaut. (Sur la v1, Bluefruit plafonnait à 20 sans setMaxLen : v1 §9.5a.)
+  // défaut. (Sur la v1, Bluefruit plafonnait à 20 sans setMaxLen : §12.2.)
   NimBLECharacteristic* rx = nus->createCharacteristic(UUID_RX, NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::WRITE_NR);
   rx->setCallbacks(new RxCb());
   s_tx = nus->createCharacteristic(UUID_TX, NIMBLE_PROPERTY::NOTIFY);

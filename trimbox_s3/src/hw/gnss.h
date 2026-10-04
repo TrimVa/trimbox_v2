@@ -1,5 +1,5 @@
 // ============================================================================
-//  Récepteur GNSS u-blox M10 (HGLRC M100 Mini) sur UART1.  v1 §4.8.
+//  Récepteur GNSS u-blox M10 (HGLRC M100 Mini) sur UART1.  §4.8.
 // ============================================================================
 #pragma once
 #include <stdint.h>

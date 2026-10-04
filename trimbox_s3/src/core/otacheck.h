@@ -1,5 +1,5 @@
 // ============================================================================
-//  Contrôle d'un firmware reçu par Wi-Fi, AU FIL DE L'EAU (v2 §7.2).
+//  Contrôle d'un firmware reçu par Wi-Fi, AU FIL DE L'EAU (§7).
 //  Sans dépendance : testé sur PC.
 //
 //  Trois vérifications avant d'accepter l'image :

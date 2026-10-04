@@ -1,5 +1,5 @@
 // ============================================================================
-//  Pose de ligne par une voie radio (v2 §4.5).
+//  Pose de ligne par une voie radio (§5.5).
 //   haut  (> +60 %) maintenu 0,5 s        → ligne de DÉPART (ou unique)
 //   bas   (< −60 %) maintenu 0,5 à 3 s    → ligne d'ARRIVÉE (au relâchement)
 //   bas   maintenu 3 s                    → EFFACEMENT des lignes

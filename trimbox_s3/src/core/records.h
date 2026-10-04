@@ -1,6 +1,6 @@
 // ============================================================================
-//  Enregistrements de 80 octets (v1 §3.5) et emplacements mémoire (v1 §4.3,
-//  v2 §5.4 / §6.2).
+//  Enregistrements de 80 octets (cahier des charges §3.5)
+//  et emplacements mémoire (§3.11).
 // ============================================================================
 #pragma once
 #include <stdint.h>
@@ -50,7 +50,7 @@ struct Imu {                    // valeurs déjà mises à l'échelle du protoco
 // `speed3d` : remplace la vitesse sol par la vitesse 3D (option FF 27).
 void buildData(uint8_t out[PAYLOAD], const Pvt& p, const Imu& imu, uint8_t battery, bool speed3d);
 
-// Contrôles de v1 §4.5.4 : un enregistrement interrompu par une coupure
+// Contrôles de §4.5 : un enregistrement interrompu par une coupure
 // contient des octets restés à 0xFF, qui produiraient des valeurs absurdes.
 bool validData(const uint8_t payload[PAYLOAD]);
 

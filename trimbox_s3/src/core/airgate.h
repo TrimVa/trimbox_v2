@@ -1,6 +1,6 @@
 // ============================================================================
 //  Radios de la console (Wi-Fi et Bluetooth) : coupées quand la voiture roule,
-//  rallumées après un arrêt prolongé (cahier des charges v2 §7.1 et §10.2).
+//  rallumées après un arrêt prolongé (cahier des charges §6.1 et §12.10).
 //
 //  La radio de commande (ExpressLRS 2,4 GHz) passe avant la console : dès que
 //  la voiture roule, les émetteurs 2,4 GHz du module se taisent, quel que soit

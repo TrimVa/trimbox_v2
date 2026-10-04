@@ -1,5 +1,5 @@
 // ============================================================================
-//  Serveur HTTP + WebSocket minimal, SANS dépendance (v2 §6.1, §7.3).
+//  Serveur HTTP + WebSocket minimal, SANS dépendance (cahier des charges §3.2, §6.4).
 //
 //  Une connexion TCP = un objet Conn. La couche matérielle (hw/wifiap) lui
 //  passe les octets reçus et lui fournit une fonction d'écriture ; tout le

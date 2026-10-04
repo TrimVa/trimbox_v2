@@ -1,10 +1,10 @@
 // ============================================================================
 //  CRSF (Crossfire / ExpressLRS) — le module se présente au récepteur comme
-//  un contrôleur de vol. Cahier des charges v2 §4.
+//  un contrôleur de vol. Cahier des charges §5.
 //
 //  Trame : [adresse] [longueur] [type] [charge…] [CRC8 D5]
 //          longueur = 1 (type) + taille(charge) + 1 (CRC)
-//  ATTENTION : entiers en BIG-endian (v2 §10.4).
+//  ATTENTION : entiers en BIG-endian (§12.12).
 // ============================================================================
 #pragma once
 #include <stdint.h>

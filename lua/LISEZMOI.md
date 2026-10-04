@@ -191,7 +191,7 @@ console, c'est ce réglage.
 ## Validation sur la vraie radio
 
 **Validé sur la MT12 (2.3)** : `getValue("FM")` renvoie bien le texte (banc
-v2 §9 n°4), touches et navigation (événements virtuels `EVT_VIRTUAL_*`),
+§11.2 n°4), touches et navigation (événements virtuels `EVT_VIRTUAL_*`),
 lisibilité de l'affichage, annonces vocales et accusés de pose. Le script
 lit aussi la file CRSF brute (`crossfireTelemetryPop`) si EdgeTX y dépose
 ces trames.

@@ -1,5 +1,5 @@
 // ============================================================================
-//  Automate d'enregistrement — filtres de v1 §3.6 et §4.6.
+//  Automate d'enregistrement — filtres du cahier des charges §3.6 et §4.6.
 //  Sans dépendance matérielle : testé sur PC.
 // ============================================================================
 #pragma once

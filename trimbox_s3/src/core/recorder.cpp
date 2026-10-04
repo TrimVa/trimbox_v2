@@ -80,7 +80,7 @@ Result Recorder::epoch(uint32_t now, bool fix, int32_t gSpeed){
   // PAUSED
   const bool resume = fix && (pauseReason_ != rec::REASON_STATIONARY || !slow);
   if(resume){
-    // La reprise est NOTIFIÉE mais PAS stockée (v1 §4.6).
+    // La reprise est NOTIFIÉE mais PAS stockée (§4.6).
     st_ = RECORDING; still_ = false;
     r.changed = true; r.storeChange = false;
     r.reason = pauseReason_ == rec::REASON_STATIONARY ? rec::REASON_MOVING : rec::REASON_FIX;

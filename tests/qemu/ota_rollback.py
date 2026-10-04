@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Banc du retour arrière après mise à jour (v2 §7.2), sous émulateur.
+Banc du retour arrière après mise à jour (§7), sous émulateur.
 
 On fabrique l'état exact que laisse une mise à jour Wi-Fi réussie :
   - version actuelle dans app0 ;

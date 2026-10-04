@@ -1,6 +1,6 @@
 // ============================================================================
-//  Chronométrage embarqué — PORTAGE À L'IDENTIQUE de la console (v1 §5.3,
-//  §5.4 ; v2 §4.6 et §10.8).
+//  Chronométrage embarqué — PORTAGE À L'IDENTIQUE de la console (cahier des
+//  charges §8.4, §8.6 ; §5.6 et §12.16).
 //
 //  Chaîne de traitement, dans cet ordre, exactement comme computeStats() :
 //    1. plausibilité + fix ≥ 2 + |lat| > 0,0001

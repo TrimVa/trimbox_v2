@@ -1,5 +1,5 @@
 # ============================================================================
-#  TrimBox DIY S3 — tests et compilation en ligne (cahier des charges v2 §9.1)
+#  TrimBox DIY S3 — tests et compilation en ligne (§10.1)
 #
 #  1. tests natifs de la logique (chrono, protocoles, automate, config A/B)
 #     + comparaison du chrono firmware avec celui de la console (index.html)

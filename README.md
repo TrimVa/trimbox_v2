@@ -4,7 +4,7 @@ Enregistreur de télémétrie **GPS + inertiel** pour voitures radiocommandées,
 avec **chronométrage au tour** affiché et annoncé sur la radio, **console web**
 d'analyse et **mise à jour par Wi-Fi**. Construit autour d'un **ESP32-S3**.
 
-> **État :** firmware **2.0-a13**, console **1.7.12**. Tout est écrit et testé
+> **État :** firmware **2.0-a13**, console **1.7.13**. Tout est écrit et testé
 > sur PC, dans un navigateur et dans un émulateur ESP32-S3. **Essais sur le
 > vrai matériel en cours** : GPS, IMU et script Lua sur la MT12 validés ; reste
 > le roulage. Voir [les bancs d'essai](#bancs-dessai-à-la-réception-du-matériel).
@@ -178,6 +178,10 @@ mise à jour du firmware (en Wi-Fi), thème clair / sombre et **couleur
 d'accent** au choix (bouton palette), installable comme une application
 (PWA). L'en-tête affiche la version de la console et celle du firmware de la
 carte connectée.
+
+La mise en page s'adapte à l'écran : une colonne sur téléphone (dès 320 px),
+une colonne plus large sur tablette, et **deux colonnes sur ordinateur**
+(l'appareil à gauche, l'analyse et la carte à droite).
 
 **Fond satellite en Wi-Fi.** Le point d'accès de la TrimBox n'a pas
 Internet : les images satellite passent par la **4G du téléphone**. Pour cela :
@@ -413,9 +417,9 @@ tests/web/                       console dans un navigateur, avec le serveur du 
 tests/lua/                       script Lua avec l'API EdgeTX simulée
 tests/qemu/                      firmware complet dans l'émulateur ESP32-S3
 .github/workflows/build-s3.yml   compilation et tests à chaque envoi
-CAHIER-DES-CHARGES.md            spécification v1 (protocole, console, pièges)
-CAHIER-DES-CHARGES-V2.md         spécification v2 (ESP32-S3, radio, Wi-Fi, OTA)
+CAHIER-DES-CHARGES.md            spécification complète (matériel, protocole, firmware, radio, console, pièges)
 trimbox-etat-projet.json         état du projet, pour reprendre avec une IA
+REPRISE-IA.md                    marche à suivre pour reprendre le développement avec une IA
 ```
 
 ---
@@ -460,10 +464,7 @@ Il faut être **connecté à GitHub** pour télécharger un artefact.
   (Max.Brake, Max.Rev, Acc, DragBrake) sont eux aussi des entrées, et
   *ProtocolId* n'est qu'un numéro d'appareil sur le bus. Il n'y a donc pas de
   télémétrie à lire sur cette prise. La tension de batterie remonte déjà par
-  la radio. Détail des essais : annexe A du cahier des charges v2.
-- **Console embarquée dans le firmware** : la console 1.7.11 n'est intégrée
-  au firmware qu'à la prochaine compilation (GitHub Actions) ; le
-  `trimbox_s3-app.bin` du 28 septembre sert encore la 1.7.10.
+  la radio. Détail des essais : cahier des charges §13.
 - **Batterie** : la tension s'affiche sur la radio (capteur du récepteur), pas
   dans la console (octet batterie toujours à 0).
 - **Premier flash** : nécessite un ordinateur, une seule fois.
@@ -490,9 +491,9 @@ Dans l'ordre, en notant la sortie de la touche `b` à chaque étape
 | [DEMARRAGE.md](DEMARRAGE.md) | mise en ligne, premier flash, mises à jour |
 | [trimbox_s3/LISEZMOI.md](trimbox_s3/LISEZMOI.md) | câblage, flash, moniteur série, bancs d'essai |
 | [lua/LISEZMOI.md](lua/LISEZMOI.md) | installation du script, mixage, utilisation |
-| [CAHIER-DES-CHARGES.md](CAHIER-DES-CHARGES.md) | spécification v1 : protocole, console, **pièges connus (§9)** |
-| [CAHIER-DES-CHARGES-V2.md](CAHIER-DES-CHARGES-V2.md) | spécification v2 : matériel, radio, Wi-Fi, mise à jour, **pièges (§10)** |
+| [CAHIER-DES-CHARGES.md](CAHIER-DES-CHARGES.md) | spécification complète du projet : matériel, protocole, firmware, radio, Wi-Fi et Bluetooth, mise à jour, console, script Lua, tests, **règles dures (§0)** et **pièges connus (§12)** |
 | [trimbox-etat-projet.json](trimbox-etat-projet.json) | état du projet, à fournir à une IA pour reprendre le travail |
+| [REPRISE-IA.md](REPRISE-IA.md) | marche à suivre et texte à coller pour reprendre avec une IA |
 
 Le format de trame dérive de la documentation du protocole BLE RaceBox
 (révision 8). Aucune compatibilité avec l'application RaceBox officielle n'est

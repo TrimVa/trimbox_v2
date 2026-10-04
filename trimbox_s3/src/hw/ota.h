@@ -1,5 +1,5 @@
 // ============================================================================
-//  Mise à jour du firmware par Wi-Fi (v2 §7.2).
+//  Mise à jour du firmware par Wi-Fi (§7).
 //
 //  Réception au fil de l'eau dans la partition OTA inactive, contrôles
 //  (core/otacheck + SHA-256 de l'image par esp_ota_end), bascule, redémarrage.
