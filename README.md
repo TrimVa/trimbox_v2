@@ -4,7 +4,7 @@ Enregistreur de télémétrie **GPS + inertiel** pour voitures radiocommandées,
 avec **chronométrage au tour** affiché et annoncé sur la radio, **console web**
 d'analyse et **mise à jour par Wi-Fi**. Construit autour d'un **ESP32-S3**.
 
-> **État :** firmware **2.0-a14**, console **1.7.17**. Tout est écrit et testé
+> **État :** firmware **2.0-a15**, console **1.7.18**. Tout est écrit et testé
 > sur PC, dans un navigateur et dans un émulateur ESP32-S3. **Essais sur le
 > vrai matériel en cours** : GPS, IMU et script Lua sur la MT12 validés ; reste
 > le roulage. Voir [les bancs d'essai](#bancs-dessai-à-la-réception-du-matériel).
@@ -125,7 +125,8 @@ Détail pas à pas : **[DEMARRAGE.md](DEMARRAGE.md)**. En résumé :
    https://espressif.github.io/esptool-js/ (Chrome ou Edge), adresse **0x0**,
    prise **USB** de la carte.
 4. **Vérifier** : 30 s après la mise sous tension, le Wi-Fi
-   `TrimBox-Buggy-1` apparaît (mot de passe `trimbox-rc`) ; http://192.168.4.1/
+   `TrimBox-Buggy-1` apparaît (mot de passe `trimbox-rc`, à changer dans
+   *Réglages → Véhicule et point d'accès*) ; http://192.168.4.1/
    affiche la console et la version du firmware en haut à droite.
 5. **Radio** : copier `lua/trmbox.lua` sur la MT12 et régler le mixage de CH8
    ([lua/LISEZMOI.md](lua/LISEZMOI.md)).
@@ -296,8 +297,8 @@ Dans **`trimbox_s3/src/config.h`** :
 
 | Réglage | Par défaut | Rôle |
 |---|---|---|
-| `DEVICE_NICKNAME` | `"Buggy 1"` | nom du module (16 caractères max) : `TrimBox Buggy 1` en Bluetooth, `TrimBox-Buggy-1` en Wi-Fi |
-| `WIFI_PASS` | `"trimbox-rc"` | mot de passe du Wi-Fi du module (**à changer**, 8 caractères min.) |
+| `DEVICE_NICKNAME` | `"Buggy 1"` | nom du véhicule **par défaut** (16 caractères max) : `TrimBox Buggy 1` en Bluetooth, `TrimBox-Buggy-1` en Wi-Fi ; se change ensuite dans la console |
+| `WIFI_PASS` | `"trimbox-rc"` | mot de passe Wi-Fi **par défaut** (8 à 63 caractères) ; se change dans la console |
 | `WIFI_AUTO_DEFAULT` | `1` | Wi-Fi automatique à l'arrêt (0 : seulement à la demande) |
 | `WIFI_AUTO_ON_S` | `30` | secondes d'arrêt avant l'ouverture du Wi-Fi |
 | `CRSF_LINE_CHANNEL_DEFAULT` | `8` | voie radio de pose de ligne |
@@ -307,8 +308,9 @@ Dans **`trimbox_s3/src/config.h`** :
 Les autres valeurs du fichier ont été fixées par mesure ou par contrainte
 matérielle : ne pas les modifier sans raison (voir les cahiers des charges).
 
-Plusieurs voitures : un pseudo différent par module suffit à les distinguer
-(Bluetooth, Wi-Fi et console).
+Plusieurs voitures : un nom de véhicule différent par module suffit à les
+distinguer (Bluetooth, Wi-Fi et console). Il se change dans la console,
+*Réglages → Véhicule et point d'accès*, sans recompiler.
 
 ---
 
@@ -326,6 +328,7 @@ Moniteur série à **115 200 bauds**, sur la prise **USB** de la carte
 | `b` | banc d'essai : cadence GPS, IMU, radio, Bluetooth, Wi-Fi, partition du firmware |
 | `m` | mesures de la centrale inertielle en direct (10 lignes, mg et c°/s) |
 | `z` | configuration par défaut (données conservées) |
+| `x` | nom du véhicule et mot de passe Wi-Fi d'origine (mot de passe oublié) |
 | `?` | aide |
 
 **Bouton BOOT**, appui long de 3 s : Wi-Fi marche / arrêt.

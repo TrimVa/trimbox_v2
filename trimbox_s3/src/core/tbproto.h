@@ -27,6 +27,7 @@ enum : uint8_t {
   ID_BUILD    = 0xF0,  // ↔ 0 / texte (extension maison)
   ID_LINES    = 0xF1,  // ↔ 0 / 28 (v2)
   ID_WIFI     = 0xF2,  // ↔ 0 / 1  (v2)
+  ID_IDENT    = 0xF3,  // ↔ 0 / 80 ; réponse 17 (nom du véhicule, mot de passe Wi-Fi)
 };
 
 constexpr size_t HEADER = 6, TRAILER = 2, OVERHEAD = HEADER + TRAILER;

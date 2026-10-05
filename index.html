@@ -254,12 +254,16 @@ button.go{background:var(--ok);color:#08281F}
 /* ---------- formulaire ---------- */
 label{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.05em;
       color:var(--mute);margin:var(--sp3) 0 4px}
-select,input[type=number],input[type=text]{
+select,input[type=number],input[type=text],input[type=password]{
   width:100%;font-family:var(--mono);font-size:15px;padding:9px 11px;min-height:42px;
   border:1px solid var(--line);border-radius:var(--rad-sm);background:var(--panel-2);color:var(--ink)}
 select:focus-visible,input:focus-visible{outline:2px solid var(--violet-glow);outline-offset:1px}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 var(--sp3)}
 .checks{margin-top:var(--sp3);display:grid;gap:8px}
+.pwrow{display:flex;gap:var(--sp2);align-items:stretch}
+.pwrow>input{flex:1;min-width:0}
+.pwrow>button{flex:none;min-width:0;padding:0 14px}
+.hint.bad{color:var(--rec-text)}
 .checks label{display:flex;align-items:center;gap:10px;font-family:var(--body);font-size:14px;
       letter-spacing:0;color:var(--ink);margin:0;cursor:pointer}
 .checks input{width:19px;height:19px;accent-color:var(--violet);flex:none}
@@ -379,7 +383,7 @@ button.tool.active{background:var(--violet);color:var(--on-violet);box-shadow:no
 .wrap>.modebar.wide{order:3}
 #secConnect{order:4}  #secLive{order:5}  #secMem{order:6}
 #secAnalysis{order:7} #anEmpty{order:7} #secImport{order:8} #secSessions{order:9} #secCompare{order:10}
-#secRec{order:11}     #secFw{order:12}    #secLog{order:13}
+#secRec{order:11}     #secIdent{order:11}  #secFw{order:12}    #secLog{order:13}
 
 /* Grilles de valeurs : le fond de la grille prend la couleur des cases et
    chaque case trace son propre filet (outline dans l'interstice de 1 px) :
@@ -543,7 +547,7 @@ button.tool.active{background:var(--violet);color:var(--on-violet);box-shadow:no
   <h2>Appareil</h2>
   <button class="wide" id="btnConnect">Connecter</button>
   <div id="devInfo" class="readout hide" style="margin-top:12px">
-    <div class="cell"><span class="k">Pseudo</span><span class="v" id="dNick" style="font-size:14px">—</span></div>
+    <div class="cell"><span class="k">Véhicule</span><span class="v" id="dNick" style="font-size:14px">—</span></div>
     <div class="cell"><span class="k">Modèle</span><span class="v" id="dModel" style="font-size:14px">—</span></div>
     <div class="cell"><span class="k">Série</span><span class="v" id="dSerial" style="font-size:14px">—</span></div>
     <div class="cell"><span class="k">Firmware</span><span class="v" id="dFw" style="font-size:14px">—</span></div>
@@ -631,6 +635,25 @@ button.tool.active{background:var(--violet);color:var(--on-violet);box-shadow:no
     <button class="ghost" id="btnStop">Arrêter</button>
   </div>
   <p class="hint">Les réglages sont conservés par l'appareil et repris après une coupure d'alimentation.</p>
+</section>
+
+<!-- ================= VÉHICULE ET POINT D'ACCÈS ================= -->
+<section id="secIdent" class="hide" data-pane="reglages">
+  <h2>Véhicule et point d'accès</h2>
+  <p class="note" style="margin-top:0">Le nom du véhicule nomme aussi le point d'accès
+  Wi-Fi et le module Bluetooth. Le module redémarre pour appliquer les changements
+  (enregistrement arrêté, voiture à l'arrêt).</p>
+  <label for="fVeh">Nom du véhicule</label>
+  <input type="text" id="fVeh" maxlength="16" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Buggy 1">
+  <p class="hint" id="vehNames">—</p>
+  <label for="fWifiPass">Nouveau mot de passe du point d'accès</label>
+  <div class="pwrow">
+    <input type="password" id="fWifiPass" maxlength="63" autocomplete="new-password" autocapitalize="off" spellcheck="false" placeholder="inchangé">
+    <button class="ghost" id="btnShowPass" type="button" aria-pressed="false">Afficher</button>
+  </div>
+  <p class="hint" id="passInfo">8 à 63 caractères, sans accent. Laisser vide pour le garder.</p>
+  <button class="wide" id="btnIdent" type="button" style="margin-top:12px" disabled>Enregistrer et redémarrer le module</button>
+  <p class="note" id="identMsg"></p>
 </section>
 
 <!-- ================= MISE À JOUR DU FIRMWARE (Wi-Fi) ================= -->
@@ -847,6 +870,8 @@ const ID_LIVE=0x01, ID_ACK=0x02, ID_NACK=0x03, ID_HIST=0x21, ID_STATUS=0x22,
 // Messages ajoutés par la v2 (firmware ESP32-S3, §3.4).
 // 0x28 est réservé (lot ESC, objectif abandonné) : jamais émis, ignoré.
 const ID_ESC=0x28, ID_LAP=0x29, ID_LINES=0xF1;
+// Identité du module (2.0-a15) : nom du véhicule et mot de passe Wi-Fi.
+const ID_IDENT=0xF3;
 
 const RATE_HZ = {0:25, 1:10, 2:5, 3:1, 4:20};
 
@@ -873,6 +898,10 @@ let fwUpd = null;
 // (FF F1). Firmware ESP32-S3 = version 2 ou plus ; les versions 2.0-a1 à
 // 2.0-a13 annonçaient le modèle « TrimBox DIY S3 », encore reconnu.
 let fwModel = '', fwVerAnn = '';
+// Identité lue dans le module (FF F3) : {name, passCustom}. identPending :
+// changement envoyé, en attente de l'accusé. identUnsupported : firmware
+// sans FF F3 (v1, ou S3 antérieur à 2.0-a15).
+let identCur = null, identPending = null, identUnsupported = false;
 // Lignes posées depuis la radio, lues dans le module (FF F1). Conservées
 // après une déconnexion : le point d'accès se coupe dès que la voiture
 // roule, les lignes restent valables pour analyser la session.
@@ -959,7 +988,7 @@ function refreshConfig(){ return send(CLS, ID_CONFIG).catch(e => log(e.message, 
 /* Longueur attendue pour les messages que nous savons interpréter. Une trame
    dont la longueur ne correspond pas est forcément un faux départ tombé au
    milieu de données binaires. */
-const EXPECT_LEN = {0x01:80, 0x02:2, 0x03:2, 0x21:80, 0x22:12, 0x26:12, 0x28:80, 0x29:80};
+const EXPECT_LEN = {0x01:80, 0x02:2, 0x03:2, 0x21:80, 0x22:12, 0x26:12, 0x28:80, 0x29:80, 0xF3:17};
 
 function feed(chunk){
   const merged = new Uint8Array(rxBuf.length + chunk.length);
@@ -1054,6 +1083,7 @@ function dispatch(cls, id, p){
     case ID_BUILD:    onBuild(p); break;
     case ID_LAP:      onLapSlot(p); break;
     case ID_LINES:    onLines(p); break;
+    case ID_IDENT:    onIdent(p); break;
     case ID_ESC:      break;                  // réservé (§13) : ignoré sans bruit
     case ID_ACK:      onAck(p); break;
     case ID_NACK:     onNack(p); break;
@@ -3182,6 +3212,8 @@ function onBuild(p){
   const [model, ver, stamp, gRange, nick] = txt.split('|');
   fwModel = model || ''; fwVerAnn = ver || '';
   if(isS3()) setTimeout(() => send(CLS, ID_LINES).catch(()=>{}), 150);
+  if(isS3()) setTimeout(() => send(CLS, ID_IDENT).catch(()=>{}), 300);
+  else { identCur = null; identUnsupported = true; paintIdent(); }
   if(nick) $('dNick').textContent = nick;
   if(stamp){
     $('dBuild').textContent = stamp + (gRange ? ` · accél. ±${gRange} g` : '');
@@ -3200,6 +3232,105 @@ function onBuild(p){
   }
 }
 
+/* ---------- véhicule et point d'accès (FF F3) ----------
+   Même règles que le firmware (core/ident) : nom de 1 à 16 caractères
+   (lettres sans accent, chiffres, espace, - _ .), mot de passe WPA2 de 8 à
+   63 caractères ASCII. Le nom donne « TrimBox-<nom> » (Wi-Fi, espaces →
+   tirets) et « TrimBox <nom> » (Bluetooth). */
+const VEH_RE = /^[A-Za-z0-9_.-]+( [A-Za-z0-9_.-]+)*$/;
+const vehOk  = n => n.length >= 1 && n.length <= 16 && VEH_RE.test(n);
+const passOk = p => /^[\x20-\x7E]{8,63}$/.test(p);
+const ssidOf = n => 'TrimBox-' + n.replace(/ /g, '-');
+const bleOf  = n => 'TrimBox ' + n;
+
+function identMsg(text, kind){
+  $('identMsg').textContent = text || '';
+  $('identMsg').style.color = kind === 'ok' ? 'var(--ok-text)' : kind === 'err' ? 'var(--rec-text)' : '';
+}
+
+/* État du formulaire : aperçu des noms, erreurs, bouton. */
+function paintIdent(){
+  const name = $('fVeh').value.trim(), pass = $('fWifiPass').value;
+  const nOk = vehOk(name), pOk = !pass || passOk(pass);
+  $('vehNames').classList.toggle('bad', !!name && !nOk);
+  $('vehNames').textContent = !name ? '—'
+    : nOk ? `Wi-Fi « ${ssidOf(name)} » · Bluetooth « ${bleOf(name)} »`
+    : '16 caractères au plus : lettres sans accent, chiffres, espace (un seul, pas aux extrémités), - _ .';
+  $('passInfo').classList.toggle('bad', !pOk);
+  $('passInfo').textContent = !pOk
+    ? `${pass.length < 8 ? 'Trop court' : pass.length > 63 ? 'Trop long' : 'Caractère refusé'} : 8 à 63 caractères, sans accent.`
+    : identCur ? `Mot de passe actuel : ${identCur.passCustom ? 'personnalisé' : 'celui d’origine'}. Laisser vide pour le garder.`
+    : '8 à 63 caractères, sans accent. Laisser vide pour le garder.';
+  const changed = identCur && (name !== identCur.name || !!pass);
+  $('btnIdent').disabled = !identCur || !!identPending || !nOk || !pOk || !changed;
+  if(identUnsupported && !identCur)
+    identMsg('Ce firmware ne permet pas de renommer le module : installez la version 2.0-a15 ou plus récente (Réglages → Mise à jour, en Wi-Fi).');
+}
+
+function onIdent(p){
+  let n = 0; while(n < 16 && p[n]) n++;
+  identCur = {name: String.fromCharCode(...p.slice(0, n)), passCustom: !!(p[16] & 1)};
+  identUnsupported = false;
+  $('fVeh').value = identCur.name;
+  $('fWifiPass').value = '';
+  $('dNick').textContent = identCur.name;
+  identMsg('');
+  paintIdent();
+}
+
+async function saveIdent(){
+  if(!identCur) return;
+  const name = $('fVeh').value.trim(), pass = $('fWifiPass').value;
+  if(!vehOk(name) || (pass && !passOk(pass))) return;
+  const mask = (name !== identCur.name ? 1 : 0) | (pass ? 2 : 0);
+  if(!mask) return;
+  const lines = [];
+  if(mask & 1) lines.push(`Nom : « ${name} »`, `Wi-Fi : « ${ssidOf(name)} »`, `Bluetooth : « ${bleOf(name)} »`);
+  if(mask & 2) lines.push('Nouveau mot de passe Wi-Fi : ' + pass);
+  const after = wifiMode
+    ? 'Ensuite, reconnectez le téléphone ou l’ordinateur au réseau « ' + ssidOf(name) + ' »' +
+      (mask & 2 ? ' avec le nouveau mot de passe' : '') + ', puis rouvrez http://192.168.4.1.'
+    : 'Ensuite, reconnectez la console : le module apparaîtra sous « ' + bleOf(name) + ' ».';
+  if(!confirm(`Enregistrer et redémarrer le module ?\n\n${lines.join('\n')}\n\n${after}`)) return;
+  identPending = {name, mask, pass: !!(mask & 2)};
+  paintIdent();
+  if(demoMode){                    // démonstration : rien n'est envoyé
+    setTimeout(onIdentAck, 300); return;
+  }
+  const pl = new Uint8Array(80);
+  pl[0] = mask;
+  for(let i = 0; i < name.length; i++) pl[1 + i] = name.charCodeAt(i);
+  if(mask & 2) for(let i = 0; i < pass.length; i++) pl[17 + i] = pass.charCodeAt(i);
+  identMsg('Envoi…');
+  try{ await send(CLS, ID_IDENT, pl); }
+  catch(e){ identPending = null; identMsg(e.message, 'err'); paintIdent(); }
+}
+
+function onIdentAck(){
+  if(!identPending) return;
+  const P = identPending; identPending = null;
+  identCur = {name: P.name, passCustom: !!(P.pass || (identCur && identCur.passCustom))};
+  $('fWifiPass').value = '';
+  $('dNick').textContent = P.name;
+  paintIdent();
+  if(demoMode){ identMsg('✓ Enregistré (démonstration : aucun module n’est modifié).', 'ok'); return; }
+  identMsg(wifiMode
+    ? `✓ Enregistré. Le module redémarre : reconnectez-vous au réseau « ${ssidOf(P.name)} »` +
+      `${P.pass ? ' avec le nouveau mot de passe' : ''}, puis rouvrez http://192.168.4.1.`
+    : `✓ Enregistré. Le module redémarre : reconnectez la console, il apparaît sous « ${bleOf(P.name)} ».`, 'ok');
+  log(`identité enregistrée : « ${P.name} »${P.pass ? ', nouveau mot de passe Wi-Fi' : ''} ; redémarrage du module`, 'ok');
+}
+
+function onIdentNack(){
+  if(identPending){
+    identPending = null;
+    identMsg('Refusé par le module : arrêtez l’enregistrement, voiture à l’arrêt, sans téléchargement ni effacement en cours. Juste après une mise à jour, attendez 15 s qu’elle soit validée.', 'err');
+  } else {
+    identCur = null; identUnsupported = true;
+  }
+  paintIdent();
+}
+
 /* ---------- accusés ---------- */
 function onAck(p){
   const id = p.length>1 ? p[1] : 0;
@@ -3207,12 +3338,14 @@ function onAck(p){
   if(id===ID_DOWNLOAD) finishDownload();
   if(id===ID_ERASE){ hideOp(); sessions=[]; $('secAnalysis').classList.add('hide'); paintSessions(); refreshStatus(); }
   if(id===ID_CONFIG){ setTimeout(refreshConfig, 250); setTimeout(refreshStatus, 400); }
+  if(id===ID_IDENT) onIdentAck();
 }
 function onNack(p){
   const id = p.length>1 ? p[1] : 0;
   log(`← REFUSÉ (0x${id.toString(16).toUpperCase()})`, 'err');
   hideOp();
   if(id===ID_DOWNLOAD){ dl=null; $('tape').classList.remove('scanning'); }
+  if(id===ID_IDENT) onIdentNack();
   if(id===ID_LINES && linesWanted){ linesWanted = false;
     $('anHelp').textContent = 'Le module ne sait pas renvoyer ses lignes (firmware v1 ?).'; }
 }
@@ -3624,6 +3757,7 @@ function connectDemo(){
   $('dBuild').textContent  = 'appareil simulé · accél. ±16 g';
   $('devInfo').classList.remove('hide');
   setConnected(true);
+  onIdent(new Uint8Array([...'Buggy 1'].map(c => c.charCodeAt(0)).concat(new Array(10).fill(0))));
   log('mode démonstration : aucun matériel connecté', 'ok');
   log('appareil simulé : TrimBox · série 1234567890', 'ok');
 
@@ -3714,7 +3848,7 @@ function setConnected(on){
   $('connText').textContent = on ? (demoMode ? 'démonstration' : wifiMode ? 'connecté · Wi-Fi' : 'connecté') : 'hors ligne';
   $('connText').style.color = on ? (demoMode ? 'var(--violet-glow)' : 'var(--ok)') : '';
   $('brandDot').classList.toggle('live', on);
-  ['secLive','secMem','secRec','secLog'].forEach(i=>$(i).classList.toggle('hide', !on));
+  ['secLive','secMem','secRec','secIdent','secLog'].forEach(i=>$(i).classList.toggle('hide', !on));
   $('secFw').classList.toggle('hide', !(on && wifiMode));
   $('btnConnect').classList.toggle('hide', on);
   $('btnDisconnect').classList.toggle('hide', !on);
@@ -3723,6 +3857,7 @@ function setConnected(on){
     showFwVersion('');
     $('dBuild').textContent = '—';
     $('dNick').textContent  = '—';
+    identCur = null; identPending = null; paintIdent();
     $('tape').classList.remove('scanning');
     hideOp();
   }
@@ -4071,7 +4206,7 @@ $('tabs').addEventListener('keydown', ev => {
 // Sur ordinateur, le journal a la place de s'afficher ouvert dans son onglet.
 if(matchMedia('(min-width:1100px)').matches) $('secLog').open = true;
 
-const CONSOLE_VER  = '1.7.17';
+const CONSOLE_VER  = '1.7.18';
 const CONSOLE_DATE = '20 septembre 2026';
 // En-tête : deux lignes courtes, « console v… » puis « firmware … » ; la
 // date de la console reste consultable au survol / appui long.
@@ -4080,6 +4215,15 @@ $('appVer').title = CONSOLE_DATE;
 
 $('btnClearLog').onclick = () => $('log').innerHTML = '';
 $('btnFw').onclick = fwUpload;
+$('fVeh').addEventListener('input', paintIdent);
+$('fWifiPass').addEventListener('input', paintIdent);
+$('btnIdent').onclick = saveIdent;
+$('btnShowPass').onclick = () => {
+  const show = $('fWifiPass').type === 'password';
+  $('fWifiPass').type = show ? 'text' : 'password';
+  $('btnShowPass').textContent = show ? 'Masquer' : 'Afficher';
+  $('btnShowPass').setAttribute('aria-pressed', String(show));
+};
 
 /* --- import de fichiers --- */
 $('btnImport').onclick = () => $('fileIn').click();

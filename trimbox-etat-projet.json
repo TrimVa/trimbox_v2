@@ -4,8 +4,8 @@
   "description": "Enregistreur de telemetrie GPS (25 Hz) et inertielle pour voitures RC, sur ESP32-S3-DevKitC-1 N16R8. Enregistrement autonome sur la flash interne de 16 Mo (154 333 points, 01h42min a 25 Hz), chronometrage au tour calcule dans le module avec lignes posees depuis la radio, telemetrie CRSF vers une RadioMaster MT12 (script Lua : affichage, annonces vocales, pose de ligne), console web par Bluetooth (GitHub Pages) ou par le Wi-Fi du module (console integree au firmware), mise a jour OTA par Wi-Fi avec retour arriere. Wi-Fi et Bluetooth coupes quand la voiture roule.",
   "date_export": "2026-10-05",
   "versions": {
-    "firmware": "2.0-a14",
-    "console_web": "1.7.17",
+    "firmware": "2.0-a15",
+    "console_web": "1.7.18",
     "script_lua": "trmbox.lua 2.3",
     "cahier_des_charges": "3.0 (document unique ESP32-S3, remplace les anciens v1 et v2 ; annexe A = correspondance des anciens renvois)",
     "core_esp32": "esp32:esp32@3.3.12",
@@ -27,7 +27,7 @@
     ],
     "pourquoi": "Trois corruptions par un LLM local, toutes presentees comme des 'optimisations', syntaxiquement plausibles et indetectables sans execution (CDC §12.23).",
     "validation_console": "Valider toute modification en EXECUTANT la page : tests/web/console_web_test.py (Chromium + vrai serveur du firmware) et tests/native/console_check.js. Une verification de syntaxe seule a deja laisse passer plusieurs bugs graves.",
-    "versionnage_console": "Incrementer CONSOLE_VER a CHAQUE modification (actuellement 1.7.17, prochaine 1.7.18), puis python3 tools/embed_console.py (regenere trimbox_s3/src/console_gz.h).",
+    "versionnage_console": "Incrementer CONSOLE_VER a CHAQUE modification (actuellement 1.7.18, prochaine 1.7.19), puis python3 tools/embed_console.py (regenere trimbox_s3/src/console_gz.h).",
     "lua": "INTERDIT d'utiliser table.insert / table.remove / table.concat ni ipairs dans lua/trmbox.lua : EdgeTX n'expose pas la bibliotheque 'table' aux scripts de telemetrie (plantage radio au premier tour recu). Garde-fou : les bancs Lua posent table = nil avant de charger le script.",
     "partitions": "trimbox_s3/partitions.csv ne change JAMAIS dans une mise a jour Wi-Fi (OTA) : la table n'est reecrite que par un flash cable.",
     "securite": "Le module ne pilote jamais la voiture (direction et ESC sur le recepteur). Wi-Fi et Bluetooth coupes sans condition quand la voiture roule.",
@@ -52,8 +52,8 @@
       "Mixage CH8 configure sur la MT12 (4 octobre 2026)"
     ],
     "a_valider_sur_materiel": [
-      "Console 1.7.17 : verifier la disposition en onglets et la selection de portion dans la comparaison sur l'ecran reel (Firefox et Chrome, souris et doigt)",
-      "Firmware 2.0-a14 installe (OTA) : 'b' doit afficher BLE actif a l'arret puis COUPE en roulant",
+      "Console 1.7.18 : renommer le vehicule et changer le mot de passe Wi-Fi depuis Reglages (en Wi-Fi puis en Bluetooth), verifier le nouveau SSID et le nom Bluetooth apres redemarrage, et la touche x du port serie ; verifier la disposition en onglets et la selection de portion dans la comparaison sur l'ecran reel (Firefox et Chrome, souris et doigt)",
+      "Firmware 2.0-a15 installe (OTA) : 'b' doit afficher BLE actif a l'arret puis COUPE en roulant",
       "IMU dans le firmware complet (touche m)",
       "Pose de ligne depuis la radio, a l'arret (ligne armee 10 s) et lancee",
       "Enregistrement automatique en roulage (une session par roulage)",
@@ -85,10 +85,11 @@
     "Console 1.7.16 : comparaison, profil gradue en metres depuis le depart (et non plus en fraction du parcours), survol avec vitesse de chaque session, portion selectionnee en glissant (pointer events, touch-action pan-y) avec tableau par session (duree + ecart au meilleur, V max/moy/mini, G, air, points) et portion surlignee sur les trajectoires ; appui simple ou 'Effacer' pour retirer. tests/web : selection, tableau, profil immobile, effacement (demande utilisateur).",
     "Renommage : le projet s'appelle TrimBox (et non plus TrimBox DIY / TrimBox DIY S3) dans la console, les documents, les outils et le firmware. Firmware 2.0-a14 : BRAND et MANUFACTURER = 'TrimBox' (FF F0, BLE 2A24/2A29). Console 1.7.17 : fonctions S3 decidees par la version annoncee (>= 2) ou un modele contenant 'S3' (anciennes 2.0-a1..a13). Nom de fichier trimbox-diy-console-demo.html conserve (redirection des anciens liens). Depot GitHub : TrimVa/trimbox_v2.",
     "tests/web : toute requete hors du module est refusee (regex sur l'hote) ; l'ancien filtre '**/arcgisonline.com/**' ne reconnaissait pas server.arcgisonline.com, si bien que sur GitHub (runner avec Internet) le message 'pas d'Internet' du satellite n'apparaissait jamais et le job 'Console embarquee' echouait. Le test verifie maintenant que les tuiles sont bien interceptees.",
-    "Voix : tools/sons/generer-mot.bat / .ps1, generation a la demande (texte et nom demandes, nom propose sans accent <= 8 caracteres, ecoute avant d'enregistrer, vitesse +/-10 %, cle Azure memorisable dans azure-cle.txt ignore par git). Teste sous PowerShell 7 contre un faux service Azure (SSML echappe, prosody, 401)."
+    "Voix : tools/sons/generer-mot.bat / .ps1, generation a la demande (texte et nom demandes, nom propose sans accent <= 8 caracteres, ecoute avant d'enregistrer, vitesse +/-10 %, cle Azure memorisable dans azure-cle.txt ignore par git). Teste sous PowerShell 7 contre un faux service Azure (SSML echappe, prosody, 401).",
+    "Firmware 2.0-a15 / console 1.7.18 : nom du vehicule et mot de passe du point d'acces modifiables depuis la console (Reglages > Vehicule et point d'acces). Message FF F3 (requete vide -> 17 o : nom + drapeau mot de passe personnalise ; ecriture 80 o : masque + nom 16 + mot de passe 63), core/ident (regles, testees), hw/identity (NVS, espace 'trimbox' ; partition cfg pleine, table de partitions inchangee), ACK puis redemarrage 1,5 s ; NACK si enregistrement, roulage, telechargement, effacement ou validation OTA en cours. SSID TrimBox-<nom>, Bluetooth 'TrimBox <nom>'. Touche serie 'x' : retour aux valeurs de config.h. Console : 'Pseudo' devient 'Vehicule' ; controle des saisies identique au firmware, apercu des noms, confirmation, consignes de reconnexion. tests/web : lecture, refus, envoi, redemarrage simule par fakedev, relecture."
   ],
   "prochaines_etapes": [
-    "1) Installer trimbox_s3-app.bin (2.0-a14, console 1.7.17) par la console Wi-Fi ; verifier la version au demarrage et la ligne BLE de 'b'.",
+    "1) Installer trimbox_s3-app.bin (2.0-a15, console 1.7.18) par la console Wi-Fi ; verifier la version au demarrage et la ligne BLE de 'b'.",
     "2) Roulage : pose de ligne depuis la radio, enregistrement automatique, tours radio / module / console, radios qui reviennent au stand.",
     "3) Bancs materiels restants (CDC §11.2) et boitier.",
     "4) Nettoyages console (pistes_non_traitees)."
@@ -110,7 +111,7 @@
     "trame": "B5 62 | classe FF | id | longueur LE (2) | charge | ckA ckB (Fletcher-8), entiers little-endian",
     "ble": "Nordic UART 6E400001/2/3-B5A3-F393-E0A9-E50E24DCCA9E, nom commencant par 'TrimBox'",
     "websocket": "ws://192.168.4.1/ws, memes trames",
-    "messages": "FF 01 direct, 02/03 ACK/NACK, 21 memoire, 22 etat, 23 telechargement (0x02 = avec emplacements v2), 24 effacement, 25 configuration (drapeau 0x20 = auto), 26 etat, 27 GNSS, 28 reserve, 29 chrono, 30 deverrouillage, F0 identification, F1 lignes, F2 Wi-Fi",
+    "messages": "FF 01 direct, 02/03 ACK/NACK, 21 memoire, 22 etat, 23 telechargement (0x02 = avec emplacements v2), 24 effacement, 25 configuration (drapeau 0x20 = auto), 26 etat, 27 GNSS, 28 reserve, 29 chrono, 30 deverrouillage, F0 identification, F1 lignes, F2 Wi-Fi, F3 nom du vehicule et mot de passe Wi-Fi (0 / 80 -> 17, depuis 2.0-a15)",
     "crsf": "big-endian ; emis 0x02 GPS 5 Hz, 0x03 date/heure 1 Hz, 0x21 messages texte (L, R, S, K, W, U) tenus 0,7 s chacun ; recu 0x16 voies (CH8 = pose de ligne), 0x14 liaison",
     "detail": "CAHIER-DES-CHARGES.md §3 et §5"
   },
@@ -213,23 +214,23 @@
     },
     {
       "chemin": "CAHIER-DES-CHARGES.md",
-      "octets": 74306,
-      "sha1": "27ad613aca26"
+      "octets": 76373,
+      "sha1": "d16df167902c"
     },
     {
       "chemin": "DEMARRAGE.md",
-      "octets": 3923,
-      "sha1": "9f1b4788bb97"
+      "octets": 4077,
+      "sha1": "3cb7b87be440"
     },
     {
       "chemin": "README.md",
-      "octets": 27421,
-      "sha1": "3fa5dc48fcc9"
+      "octets": 27740,
+      "sha1": "489687f3efb6"
     },
     {
       "chemin": "REPRISE-IA.md",
       "octets": 4060,
-      "sha1": "be677dc5ace5"
+      "sha1": "03ecb11f350c"
     },
     {
       "chemin": "docs/boitier/LISEZMOI.md",
@@ -258,8 +259,8 @@
     },
     {
       "chemin": "index.html",
-      "octets": 192907,
-      "sha1": "92f6335f7794"
+      "octets": 200560,
+      "sha1": "fe6caef0e6d3"
     },
     {
       "chemin": "lua/LISEZMOI.md",
@@ -368,8 +369,8 @@
     },
     {
       "chemin": "tests/native/test_logic.cpp",
-      "octets": 17115,
-      "sha1": "5e76f9cd197c"
+      "octets": 20303,
+      "sha1": "48409c42b9a7"
     },
     {
       "chemin": "tests/native/test_proto.cpp",
@@ -393,13 +394,13 @@
     },
     {
       "chemin": "tests/web/console_web_test.py",
-      "octets": 15355,
-      "sha1": "4ffb484f729c"
+      "octets": 17790,
+      "sha1": "32eb5705a518"
     },
     {
       "chemin": "tests/web/fakedev.cpp",
-      "octets": 10071,
-      "sha1": "efef1269cc2d"
+      "octets": 11226,
+      "sha1": "ce64d46eaa38"
     },
     {
       "chemin": "tools/embed_console.py",
@@ -488,8 +489,8 @@
     },
     {
       "chemin": "trimbox_s3/LISEZMOI.md",
-      "octets": 10082,
-      "sha1": "c79e0a844c18"
+      "octets": 10193,
+      "sha1": "4a24d7cade8d"
     },
     {
       "chemin": "trimbox_s3/partitions.csv",
@@ -498,8 +499,8 @@
     },
     {
       "chemin": "trimbox_s3/src/app.cpp",
-      "octets": 36714,
-      "sha1": "272a4d5e38a9"
+      "octets": 38841,
+      "sha1": "cef0546c574d"
     },
     {
       "chemin": "trimbox_s3/src/app.h",
@@ -508,13 +509,13 @@
     },
     {
       "chemin": "trimbox_s3/src/config.h",
-      "octets": 6336,
-      "sha1": "178b40369b9f"
+      "octets": 6541,
+      "sha1": "1f3adccda9ee"
     },
     {
       "chemin": "trimbox_s3/src/console_gz.h",
-      "octets": 319719,
-      "sha1": "abd7ae834f39"
+      "octets": 332300,
+      "sha1": "c772188569e0"
     },
     {
       "chemin": "trimbox_s3/src/core/airgate.cpp",
@@ -560,6 +561,16 @@
       "chemin": "trimbox_s3/src/core/httpws.h",
       "octets": 3939,
       "sha1": "d30249c1b656"
+    },
+    {
+      "chemin": "trimbox_s3/src/core/ident.cpp",
+      "octets": 2405,
+      "sha1": "59688200b757"
+    },
+    {
+      "chemin": "trimbox_s3/src/core/ident.h",
+      "octets": 2282,
+      "sha1": "4d065578f279"
     },
     {
       "chemin": "trimbox_s3/src/core/lapcore.cpp",
@@ -643,13 +654,13 @@
     },
     {
       "chemin": "trimbox_s3/src/core/tbproto.cpp",
-      "octets": 2434,
-      "sha1": "14b49fe9da3a"
+      "octets": 2487,
+      "sha1": "a2e2ed2be374"
     },
     {
       "chemin": "trimbox_s3/src/core/tbproto.h",
-      "octets": 2592,
-      "sha1": "3ae86977c8a7"
+      "octets": 2682,
+      "sha1": "385543b0a427"
     },
     {
       "chemin": "trimbox_s3/src/core/ubx.cpp",
@@ -685,6 +696,16 @@
       "chemin": "trimbox_s3/src/hw/gnss.h",
       "octets": 951,
       "sha1": "b396da02b0ce"
+    },
+    {
+      "chemin": "trimbox_s3/src/hw/identity.cpp",
+      "octets": 1205,
+      "sha1": "9f99043bd988"
+    },
+    {
+      "chemin": "trimbox_s3/src/hw/identity.h",
+      "octets": 902,
+      "sha1": "ca83140fd9e8"
     },
     {
       "chemin": "trimbox_s3/src/hw/imu.cpp",

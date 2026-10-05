@@ -7,6 +7,8 @@
 #include "../../trimbox_s3/src/core/stillhold.h"
 #include "../../trimbox_s3/src/core/linearm.h"
 #include "../../trimbox_s3/src/core/airgate.h"
+#include "../../trimbox_s3/src/core/ident.h"
+#include "../../trimbox_s3/src/core/tbproto.h"
 #include <string.h>
 
 static void testRecorder(){
@@ -323,4 +325,42 @@ static void testAirGate(){
   CHECK(g.on, "GNSS muet : rallumé après 30 s");
 }
 
-int main(){ testAirGate(); testRecorder(); testAutoRecord(); testLineCmd(); testPersist(); testStillHold(); testLineArm(); DONE("logique"); }
+
+// Identité (FF F3) : validation, noms dérivés, commande et réponse.
+static void testIdent(){
+  using namespace ident;
+  CHECK(validName("Buggy 1") && validName("A") && validName("Truggy_8.2-x") && validName("0123456789abcdef"), "noms valides");
+  CHECK(!validName("") && !validName(" Buggy") && !validName("Buggy ") && !validName("a  b"), "espaces refusés");
+  CHECK(!validName("0123456789abcdefg") && !validName("Bugg\xc3\xa9") && !validName("a|b") && !validName("a/b"), "longueur et caractères refusés");
+  CHECK(validPass("12345678") && validPass("mot de passe !#&") && !validPass("1234567") && !validPass("caf\xc3\xa9-latte"), "mots de passe");
+  char l[64]; for(int i = 0; i < 63; i++) l[i] = 'a'; l[63] = 0;
+  CHECK(validPass(l), "63 caractères admis"); { char m[65]; memcpy(m, l, 63); m[63] = 'a'; m[64] = 0; CHECK(!validPass(m), "64 refusés"); }
+  char ss[33], bl[32];
+  ssidFor("Buggy 1", ss); bleNameFor("Buggy 1", bl);
+  CHECK(!strcmp(ss, "TrimBox-Buggy-1") && !strcmp(bl, "TrimBox Buggy 1"), "noms dérivés : %s / %s", ss, bl);
+  ssidFor("0123456789abcdef", ss); bleNameFor("0123456789abcdef", bl);
+  CHECK(strlen(ss) == 24 && strlen(bl) == 24, "nom maximal : SSID %zu, Bluetooth %zu", strlen(ss), strlen(bl));
+  // aller-retour
+  Change c; c.mask = F_NAME | F_PASS; strcpy(c.name, "Truggy 2"); strcpy(c.pass, "piste-2026!");
+  uint8_t p[SET_BYTES]; encodeSet(c, p);
+  Change d; CHECK(decodeSet(p, SET_BYTES, d) && d.mask == 3 && !strcmp(d.name, "Truggy 2") && !strcmp(d.pass, "piste-2026!"), "aller-retour");
+  CHECK(!decodeSet(p, SET_BYTES - 1, d), "longueur fausse refusée");
+  // seul le nom : le champ mot de passe est ignoré, même vide
+  Change n; n.mask = F_NAME; strcpy(n.name, "Buggy 3"); encodeSet(n, p);
+  CHECK(decodeSet(p, SET_BYTES, d) && d.mask == F_NAME && !strcmp(d.name, "Buggy 3") && d.pass[0] == 0, "nom seul");
+  // valeurs invalides ou masque inconnu
+  n.mask = F_PASS; strcpy(n.pass, "court"); encodeSet(n, p); CHECK(!decodeSet(p, SET_BYTES, d), "mot de passe trop court refusé");
+  n.mask = F_NAME; strcpy(n.name, " x"); encodeSet(n, p); CHECK(!decodeSet(p, SET_BYTES, d), "nom invalide refusé");
+  n.mask = 0; strcpy(n.name, "x"); encodeSet(n, p); CHECK(!decodeSet(p, SET_BYTES, d), "masque vide refusé");
+  n.mask = 0x84; encodeSet(n, p); CHECK(!decodeSet(p, SET_BYTES, d), "masque inconnu refusé");
+  n.mask = F_NAME; strcpy(n.name, "ab"); encodeSet(n, p); p[1 + 5] = 'z'; CHECK(!decodeSet(p, SET_BYTES, d), "octets après le zéro refusés");
+  // réponse : nom + drapeau, jamais le mot de passe
+  uint8_t g[GET_BYTES]; encodeGet("Buggy 1", true, g);
+  CHECK(!memcmp(g, "Buggy 1", 7) && g[7] == 0 && g[16] == G_PASS_CUSTOM, "réponse FF F3");
+  // longueurs admises par le réassembleur
+  tb::Parser pr; uint8_t fr[96]; size_t k = tb::build(fr, tb::CLS, tb::ID_IDENT, p, SET_BYTES); pr.push(fr, k);
+  tb::Frame f; CHECK(pr.next(f) && f.id == tb::ID_IDENT && f.len == 80, "FF F3 de 80 octets accepté");
+  k = tb::build(fr, tb::CLS, tb::ID_IDENT, p, 20); pr.push(fr, k); CHECK(!pr.next(f), "FF F3 de 20 octets refusé");
+}
+
+int main(){ testIdent(); testAirGate(); testRecorder(); testAutoRecord(); testLineCmd(); testPersist(); testStillHold(); testLineArm(); DONE("logique"); }

@@ -24,6 +24,7 @@ bool Parser::lengthPlausible(uint8_t cls, uint8_t id, uint16_t len) const {
     case ID_UNLOCK:    return len == 4;
     case ID_LINES:     return len == 0 || len == 28;
     case ID_WIFI:      return len == 0 || len == 1;
+    case ID_IDENT:     return len == 0 || len == 80;
     default:           return len <= 64;   // inconnu : sera refusé par NACK
   }
 }

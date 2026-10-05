@@ -31,6 +31,8 @@
 #include "hw/radio.h"
 #include "hw/wifiap.h"
 #include "hw/ota.h"
+#include "hw/identity.h"
+#include "core/ident.h"
 #include <Arduino.h>
 #include <esp_sleep.h>
 #include <esp_mac.h>
@@ -87,6 +89,12 @@ static airgate::Gate   g_wifiGate(WIFI_AUTO_ON_S * 1000u);
 static airgate::Gate   g_bleGate(BLE_AUTO_ON_S * 1000u);
 static uint32_t g_btnDown = 0; static bool g_btnFired = false;
 static char     g_ssid[33];
+// Identité (nom du véhicule, mot de passe Wi-Fi), lue en NVS au démarrage.
+// Un changement par FF F3 est enregistré puis le module redémarre : le
+// point d'accès et le Bluetooth repartent sous le nouveau nom.
+static identity::Ident g_id;
+static char     g_bleName[32];
+static uint32_t g_restartAt = 0;          // millis() du redémarrage demandé (0 : aucun)
 static uint32_t g_bootMs = 0, g_lastLed = 0;
 
 // ---------------------------------------------------------------------------
@@ -400,7 +408,7 @@ static void onCommand(const tb::Frame& f){
       break;
     case tb::ID_BUILD: {
       char t[96];
-      const int n = snprintf(t, sizeof t, "%s|%s|%s|%d|%s", BRAND, FIRMWARE_VER, BUILD_STAMP, ACCEL_RANGE_G, DEVICE_NICKNAME);
+      const int n = snprintf(t, sizeof t, "%s|%s|%s|%d|%s", BRAND, FIRMWARE_VER, BUILD_STAMP, ACCEL_RANGE_G, g_id.name);
       bridge::send(tb::CLS, tb::ID_BUILD, (const uint8_t*)t, (uint16_t)n);
       break;
     }
@@ -425,6 +433,24 @@ static void onCommand(const tb::Frame& f){
       else if(m == 1){ if(g_moving){ nack(tb::ID_WIFI); break; } g_wifiAuto = true; ack(tb::ID_WIFI); wifiSet(true, "commande"); }
       else if(m == 2){ g_wifiAuto = true; ack(tb::ID_WIFI); }
       else nack(tb::ID_WIFI);
+      break;
+    }
+    case tb::ID_IDENT: {
+      if(f.len == 0){
+        uint8_t p[ident::GET_BYTES]; ident::encodeGet(g_id.name, g_id.passCustom, p);
+        bridge::send(tb::CLS, tb::ID_IDENT, p, sizeof p); break;
+      }
+      // Même conditions qu'une mise à jour (enregistrement arrêté, voiture à
+      // l'arrêt, ni téléchargement ni effacement), et pas pendant la
+      // validation d'une nouvelle version : le redémarrage la ferait annuler.
+      ident::Change c;
+      if(g_restartAt || otaGate() || ota::pendingValidation() || !ident::decodeSet(f.payload, f.len, c)){ nack(tb::ID_IDENT); break; }
+      if(!identity::save(c)){ nack(tb::ID_IDENT); break; }
+      if(c.mask & ident::F_NAME) Serial.printf("[id] nom du véhicule : « %s »\n", c.name);
+      if(c.mask & ident::F_PASS) Serial.println("[id] nouveau mot de passe Wi-Fi");
+      Serial.println("[id] enregistré ; redémarrage dans 1,5 s");
+      ack(tb::ID_IDENT);
+      g_restartAt = millis() + 1500;            // laisse partir l'accusé
       break;
     }
     default:
@@ -595,7 +621,8 @@ static void onPvt(const rec::Pvt& raw){
 //  Port série de secours (§4.7)
 // ---------------------------------------------------------------------------
 static void printInfo(){
-  Serial.printf("\n== %s « %s » %s — %s ==\n", BRAND, DEVICE_NICKNAME, FIRMWARE_VER, BUILD_STAMP);
+  Serial.printf("\n== %s « %s » %s — %s ==\n", BRAND, g_id.name, FIRMWARE_VER, BUILD_STAMP);
+  Serial.printf("Wi-Fi « %s » (mot de passe %s), Bluetooth « %s »\n", g_ssid, g_id.passCustom ? "personnalisé" : "par défaut", g_bleName);
   Serial.printf("mémoire : %lu / %lu emplacements (%u %%)%s\n", (unsigned long)storage::usedSlots(),
                 (unsigned long)storage::capacitySlots(), storage::fillPercent(), g_storageOk ? "" : " — INDISPONIBLE");
   Serial.printf("enregistrement : état %u, %lu points cette session\n", g_rec.state(), (unsigned long)g_rec.pointsStored());
@@ -654,7 +681,11 @@ static void serviceSerialCommands(){
         Serial.println("configuration par défaut (données conservées)");
         break;
       }
-      case '?': Serial.println("s arrêt d'urgence | r démarrer l'enregistrement | w Wi-Fi marche/arrêt | i état | b banc d'essai | m mesures IMU | z config par défaut | ? aide"); break;
+      case 'x':                                          // mot de passe Wi-Fi oublié
+        if(identity::reset()){ Serial.println("nom et mot de passe Wi-Fi d'origine (config.h) ; redémarrage"); g_restartAt = millis() + 500; }
+        else Serial.println("[id] effacement impossible");
+        break;
+      case '?': Serial.println("s arrêt d'urgence | r démarrer l'enregistrement | w Wi-Fi marche/arrêt | i état | b banc d'essai | m mesures IMU | z config par défaut | x nom et mot de passe Wi-Fi d'origine | ? aide"); break;
       default: break;
     }
   }
@@ -686,7 +717,10 @@ void setup(){
   delay(300);
   uint8_t mac[6]; esp_read_mac(mac, ESP_MAC_WIFI_STA);
   snprintf(g_serial, sizeof g_serial, "%02X%02X%02X%02X%02X%02X", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
-  Serial.printf("\n%s « %s » firmware %s, compilé le %s, partition %s\n", BRAND, DEVICE_NICKNAME, FIRMWARE_VER, BUILD_STAMP,
+  identity::load(g_id);
+  ident::ssidFor(g_id.name, g_ssid);
+  ident::bleNameFor(g_id.name, g_bleName);
+  Serial.printf("\n%s « %s » firmware %s, compilé le %s, partition %s\n", BRAND, g_id.name, FIRMWARE_VER, BUILD_STAMP,
                 ota::runningPartition());
 #ifdef TRIMBOX_CRASH_TEST
   // Variante de test UNIQUEMENT (tests/qemu/ota_rollback.py) : firmware qui
@@ -719,15 +753,13 @@ void setup(){
   g_imuOk  = imu::begin();
   g_gnssOk = gnss::begin(g_cfg.dataRate, g_cfg.gnssDynModel);
   radio::begin(g_lines.crsfChannel);
-  // SSID : « TrimBox-<pseudo> », espaces remplacés par des tirets.
-  snprintf(g_ssid, sizeof g_ssid, "TrimBox-%s", DEVICE_NICKNAME);
-  for(char* c = g_ssid; *c; c++) if(*c == ' ') *c = '-';
+  // SSID « TrimBox-<nom du véhicule> » (espaces → tirets), calculé plus haut.
   ota::begin(otaGate);          // avant wifiap::begin (qui référence son puits)
-  wifiap::begin(g_ssid, WIFI_PASS);
+  wifiap::begin(g_ssid, g_id.pass);
   if(ota::pendingValidation()) radio::event("U VALIDATION");
   pinMode(PIN_BUTTON, INPUT_PULLUP);
 #ifndef TRIMBOX_QEMU      // l'émulateur n'a pas de radio Bluetooth
-  bridge::begin(DEVICE_NAME, g_serial);
+  bridge::begin(g_bleName, g_serial);
 #endif
   radio::status(stateText());
   printInfo();
@@ -743,6 +775,11 @@ void setup(){
 }
 
 void loop(){
+  // Redémarrage demandé (nouvelle identité) : après l'envoi de l'accusé.
+  if(g_restartAt && (int32_t)(millis() - g_restartAt) >= 0){
+    Serial.println("[id] redémarrage"); Serial.flush();
+    ESP.restart();
+  }
 #ifndef TRIMBOX_QEMU
   serviceSerialCommands();                             // 1
 #else

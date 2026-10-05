@@ -17,6 +17,7 @@
 // ============================================================================
 #include "../../trimbox_s3/src/core/httpws.h"
 #include "../../trimbox_s3/src/core/tbproto.h"
+#include "../../trimbox_s3/src/core/ident.h"
 #include "../../trimbox_s3/src/core/records.h"
 #include "../../trimbox_s3/src/core/bytes.h"
 #include "../../trimbox_s3/src/console_gz.h"
@@ -42,6 +43,10 @@ static uint8_t g_recState = 0;
 static bool g_otaOk = false;
 static uint64_t g_rebootUntil = 0;
 static std::string g_stamp = "Sep 20 2026 12:00:00";
+// Identité (FF F3) : nom du véhicule et mot de passe Wi-Fi ; un changement
+// accepté provoque un « redémarrage » comme sur le vrai module.
+static std::string g_name = "Banc PC", g_pass = "trimbox-rc";
+static bool g_identReboot = false;
 static const char* otaBegin(void*, size_t len){
   if(g_recState) return "arrêtez d'abord l'enregistrement";
   return g_check.begin(len, 0x200000);
@@ -109,11 +114,12 @@ int main(int argc, char** argv){
     }
     // « Redémarrage » après une mise à jour acceptée : toutes les connexions
     // tombent, le module revient 2 s plus tard avec une nouvelle empreinte.
-    if(g_otaOk){
+    if(g_otaOk || g_identReboot){
       bool pending = false;
       for(auto* c : cl) if(!c->out.empty()) pending = true;
       if(!pending){
-        g_otaOk = false; g_rebootUntil = ms() + 2000; g_stamp = "Sep 21 2026 09:30:00";
+        if(g_otaOk) g_stamp = "Sep 21 2026 09:30:00";
+        g_otaOk = false; g_identReboot = false; g_rebootUntil = ms() + 2000;
         for(auto* c : cl){ close(c->fd); c->fd = -1; }
         printf("fakedev : mise à jour acceptée, redémarrage\n"); fflush(stdout);
       }
@@ -133,7 +139,7 @@ int main(int argc, char** argv){
         auto reply = [&](uint8_t id, const uint8_t* pl, uint16_t len){
           uint8_t fr[300]; size_t m = tb::build(fr, 0xFF, id, pl, len); c->conn.sendBinary(fr, m); };
         while(c->rx.next(f)){
-          if(f.id == tb::ID_BUILD){ std::string t = "TrimBox|2.0-a2|" + g_stamp + "|16|Banc PC"; reply(tb::ID_BUILD, (const uint8_t*)t.data(), (uint16_t)t.size()); }
+          if(f.id == tb::ID_BUILD){ std::string t = "TrimBox|2.0-a2|" + g_stamp + "|16|" + g_name; reply(tb::ID_BUILD, (const uint8_t*)t.data(), (uint16_t)t.size()); }
           else if(f.id == tb::ID_STATUS){ uint8_t s[12] = {recState ? (uint8_t)1 : (uint8_t)0, 1, 0, 0}; put_le32(s+4, N + 2); put_le32(s+8, 154333); reply(tb::ID_STATUS, s, 12); }
           else if(f.id == tb::ID_CONFIG && f.len == 0){ uint8_t s[12] = {recState, 0, 0x3F, 0}; put_le16(s+4, 1389); put_le16(s+6, 30); put_le16(s+8, 30); put_le16(s+10, 300); reply(tb::ID_CONFIG, s, 12); }
           else if(f.id == tb::ID_CONFIG){ recState = f.payload[0] ? 1 : 0; uint8_t s[12] = {recState}; reply(tb::ID_STATE, s, 12); uint8_t ak[2] = {0xFF, tb::ID_CONFIG}; reply(tb::ID_ACK, ak, 2); }
@@ -143,6 +149,18 @@ int main(int argc, char** argv){
             uint8_t s[28] = {1, 1, 8, 0}; int32_t la, lo; latlonAt(LINE_X, 0, la, lo);
             put_le32(s+4, (uint32_t)la); put_le32(s+8, (uint32_t)lo); put_le32(s+12, 9000000u);
             reply(tb::ID_LINES, s, 28); }
+          else if(f.id == tb::ID_IDENT && f.len == 0){
+            uint8_t s[ident::GET_BYTES]; ident::encodeGet(g_name.c_str(), g_pass != "trimbox-rc", s); reply(tb::ID_IDENT, s, sizeof s); }
+          else if(f.id == tb::ID_IDENT){
+            ident::Change ch;
+            if(g_identReboot || !ident::decodeSet(f.payload, f.len, ch)){ uint8_t nk[2] = {0xFF, f.id}; reply(tb::ID_NACK, nk, 2); }
+            else {
+              if(ch.mask & ident::F_NAME) g_name = ch.name;
+              if(ch.mask & ident::F_PASS) g_pass = ch.pass;
+              printf("fakedev : identité « %s », mot de passe « %s » ; redémarrage\n", g_name.c_str(), g_pass.c_str()); fflush(stdout);
+              uint8_t ak[2] = {0xFF, tb::ID_IDENT}; reply(tb::ID_ACK, ak, 2); g_identReboot = true;
+            }
+          }
           else { uint8_t nk[2] = {0xFF, f.id}; reply(tb::ID_NACK, nk, 2); }
         }
         // Téléchargement : un état, les points, un état, puis ACK.

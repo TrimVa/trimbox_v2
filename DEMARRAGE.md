@@ -47,7 +47,9 @@ rien : elle est dans le firmware.
 4. Adresse **`0x0`**, fichier `trimbox_s3-complet.bin`, **Program**
    (2 à 4 min), puis **RST**.
 5. 30 s plus tard, le Wi-Fi **`TrimBox-Buggy-1`** apparaît (mot de passe
-   `trimbox-rc`) : ouvrir http://192.168.4.1/ sur le téléphone.
+   `trimbox-rc`) : ouvrir http://192.168.4.1/ sur le téléphone. Changer
+   ensuite le nom du véhicule et le mot de passe dans *Réglages → Véhicule
+   et point d'accès* (le module redémarre sous le nouveau nom).
 
 Détails, câblage et bancs d'essai : `trimbox_s3/LISEZMOI.md`.
 

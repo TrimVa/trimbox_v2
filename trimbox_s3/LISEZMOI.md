@@ -1,4 +1,4 @@
-# TrimBox — firmware 2.0-a14
+# TrimBox — firmware 2.0-a15
 
 Firmware ESP32-S3. Spécification : `CAHIER-DES-CHARGES.md` (à la racine du
 dépôt). État au 4 octobre 2026.
@@ -96,7 +96,7 @@ les mises à jour se font **par Wi-Fi, depuis le téléphone** (ci-dessous).
 
 1. Voiture **arrêtée depuis 30 s** (ou juste allumée) : le module ouvre le
    réseau **`TrimBox-Buggy-1`**, mot de passe **`trimbox-rc`** (à changer dans
-   `src/config.h`, `WIFI_PASS`). La MT12 affiche `W WIFI ON`.
+   la console : *Réglages → Véhicule et point d'accès*). La MT12 affiche `W WIFI ON`.
 2. Connectez le téléphone à ce réseau. Il propose en général d'ouvrir la page
    tout seul (portail captif) ; sinon, ouvrez **http://192.168.4.1/**.
 3. La console se connecte seule, source **Wi-Fi**. Téléchargement nettement
@@ -141,6 +141,7 @@ Puis *Télémétrie → Découvrir les capteurs* : GPS, vitesse, satellites et
 | `b` | **banc d'essai** : cadence GNSS, IMU, CRSF (LQ, RSSI), Bluetooth, Wi-Fi, partition |
 | `m` | mesures de la centrale inertielle en direct (10 lignes, mg et c°/s) |
 | `z` | configuration par défaut (données conservées) |
+| `x` | nom du véhicule et mot de passe Wi-Fi d'origine (mot de passe oublié) |
 | `?` | aide |
 
 `b` indique aussi la partition en cours (`app0` / `app1`) et « EN VALIDATION » juste après une mise à jour.

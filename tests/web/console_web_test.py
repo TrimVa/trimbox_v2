@@ -10,6 +10,7 @@ Vérifie, sur la VRAIE page intégrée au firmware :
      lignes du module (FF F1) reprises d'office, chronos du module (0x29)
      affichés et comparés au calcul de la console ;
      comparaison : portion choisie en glissant sur le profil vitesse/distance ;
+     réglages : nom du véhicule et mot de passe Wi-Fi (FF F3), redémarrage ;
   5. coupure du point d'accès → reconnexion automatique ;
   6. choix de la couleur d'accent conservé (localStorage, origine du module) ;
   7. mise à jour du firmware : fichier quelconque refusé avec un message clair,
@@ -168,8 +169,32 @@ try:
         pg.reload(wait_until='domcontentloaded'); pg.wait_for_timeout(800)
         check(pg.evaluate("getComputedStyle(document.documentElement).getPropertyValue('--violet').trim()") == '#00b4d8',
               'couleur d\'accent conservée après rechargement')
-        # mise à jour du firmware
+        # véhicule et point d'accès (FF F3) : lecture, contrôles, envoi, redémarrage
         pg.wait_for_function("document.getElementById('connText').textContent.includes('Wi-Fi')", timeout=8000)
+        pg.wait_for_function("document.getElementById('fVeh').value === 'Banc PC'", timeout=5000)
+        check(pg.inner_text('#secIdent h2').startswith('Véhicule') and 'origine' in pg.inner_text('#passInfo'),
+              'réglages : nom du véhicule lu (FF F3) : ' + pg.input_value('#fVeh'))
+        lab = pg.evaluate("document.getElementById('dNick').previousElementSibling.textContent")
+        check(lab == 'Véhicule', f'fiche appareil : « {lab} » au lieu de « Pseudo »')
+        check(pg.is_disabled('#btnIdent'), 'bouton inactif tant que rien ne change')
+        pg.fill('#fVeh', 'Buggé'); check(pg.is_disabled('#btnIdent') and 'bad' in pg.get_attribute('#vehNames', 'class'), 'nom accentué refusé')
+        pg.fill('#fVeh', 'Truggy 2'); pg.fill('#fWifiPass', 'court')
+        check(pg.is_disabled('#btnIdent') and 'Trop court' in pg.inner_text('#passInfo'), 'mot de passe trop court refusé')
+        pg.fill('#fWifiPass', 'piste-2026!')
+        check(not pg.is_disabled('#btnIdent') and 'TrimBox-Truggy-2' in pg.inner_text('#vehNames')
+              and 'TrimBox Truggy 2' in pg.inner_text('#vehNames'), 'aperçu : ' + pg.inner_text('#vehNames'))
+        dlg = []
+        pg.once('dialog', lambda d: (dlg.append(d.message), d.accept()))
+        pg.click('#btnIdent')
+        pg.wait_for_function("document.getElementById('identMsg').textContent.includes('redémarre')", timeout=5000)
+        check(dlg and 'TrimBox-Truggy-2' in dlg[0], 'confirmation avant redémarrage')
+        check('TrimBox-Truggy-2' in pg.inner_text('#identMsg'), 'message : ' + pg.inner_text('#identMsg')[:90])
+        pg.wait_for_function("document.getElementById('connText').textContent.includes('hors ligne')", timeout=8000)
+        pg.wait_for_function("document.getElementById('connText').textContent.includes('Wi-Fi')", timeout=15000)
+        pg.wait_for_function("document.getElementById('dNick').textContent === 'Truggy 2' && document.getElementById('fVeh').value === 'Truggy 2' && document.getElementById('passInfo').textContent.includes('personnalisé')", timeout=8000)
+        check('personnalisé' in pg.inner_text('#passInfo') and pg.input_value('#fWifiPass') == '',
+              'après redémarrage : nouveau nom et mot de passe personnalisé (FF F0 / F3)')
+        # mise à jour du firmware
         check(pg.is_visible('#secFw'), 'section « Mise à jour du firmware » visible en Wi-Fi')
         junk = '/tmp/pas_un_firmware.bin'; open(junk, 'wb').write(os.urandom(300000))
         pg.set_input_files('#fwFile', junk); pg.click('#btnFw')

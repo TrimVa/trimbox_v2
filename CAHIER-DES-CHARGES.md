@@ -1,7 +1,7 @@
 # TrimBox — Cahier des charges
 
 **Version du document :** 3.0 — 4 octobre 2026
-**Cible :** firmware **2.0-a14** (ESP32-S3), console web **1.7.17**, script radio
+**Cible :** firmware **2.0-a15** (ESP32-S3), console web **1.7.18**, script radio
 `trmbox.lua` **2.3**.
 **Remplace :** les anciens `CAHIER-DES-CHARGES.md` (v1, carte XIAO nRF52840) et
 `CAHIER-DES-CHARGES-V2.md` (v2). Ce document est **autonome** : il ne décrit que
@@ -104,7 +104,7 @@ Fichiers annexes : `trimbox-sw.js` (service worker, optionnel),
 
 | Sujet | État |
 |---|---|
-| Firmware 2.0-a14 | Écrit, testé sur PC, dans un navigateur et sous émulateur ; compile (1,26 Mo, 62 % de la partition) |
+| Firmware 2.0-a15 | Écrit, testé sur PC, dans un navigateur et sous émulateur ; compile (1,26 Mo, 62 % de la partition) |
 | GPS sur la carte | ✅ fix 3D, 13 satellites, ~20 Hz |
 | IMU | ✅ capteur validé avec `tools/imu_test` (\|a\| = 0,99 g) ; à revérifier dans le firmware complet |
 | Script Lua sur la MT12 | ✅ affichage, tours, annonces vocales, accusés de pose ; ✅ mixage CH8 configuré |
@@ -213,7 +213,7 @@ log       data  0x41       0x414000   0xBEC000    journal, 12 500 992 octets
 
 Le format de trame dérive de la documentation du protocole BLE RaceBox
 (révision 8). Il est **conservé tel quel** car la console s'appuie dessus, avec
-des extensions maison (`FF F0` à `FF F2`, `FF 28` / `FF 29`). Aucune
+des extensions maison (`FF F0` à `FF F3`, `FF 28` / `FF 29`). Aucune
 compatibilité avec l'application RaceBox officielle n'est recherchée.
 
 ### 3.2 Transports
@@ -280,9 +280,10 @@ Tous les entiers du protocole sont en **little-endian** (à l'inverse du CRSF,
 | `FF F0` | ↔ | 0 / var. | Identification du firmware (§3.8) |
 | `FF F1` | ↔ | 0 / 28 | Lignes du module (§3.9) |
 | `FF F2` | ↔ | 0 / 1 → 4 | Wi-Fi (§3.10) |
+| `FF F3` | ↔ | 0 / 80 → 17 | Nom du véhicule et mot de passe Wi-Fi (§3.13, depuis 2.0-a15) |
 
 Longueurs attendues par la console (table `EXPECT_LEN`, §8.3) :
-`{0x01:80, 0x02:2, 0x03:2, 0x21:80, 0x22:12, 0x26:12, 0x28:80, 0x29:80}`.
+`{0x01:80, 0x02:2, 0x03:2, 0x21:80, 0x22:12, 0x26:12, 0x28:80, 0x29:80, 0xF3:17}`.
 
 ### 3.5 Message de données (80 octets)
 
@@ -352,7 +353,7 @@ Requête vide, réponse ASCII, champs séparés par `|` :
 
 ```
 MODÈLE|VERSION|DATE_COMPILATION|PLAGE_G|PSEUDO
-TrimBox|2.0-a14|Oct  4 2026 23:30:12|16|Buggy 1
+TrimBox|2.0-a15|Oct  4 2026 23:30:12|16|Buggy 1
 ```
 
 - La **version** décide côté console des fonctions du firmware S3 : à partir
@@ -421,6 +422,30 @@ en fin de téléchargement).
 **Effacement.** La console envoie `FF 24` → notifications `FF 24` (1 octet : %)
 → `FF 02` final. Refusé pendant un enregistrement ou un téléchargement ; une
 fois lancé, **non annulable** (§12.4).
+
+### 3.13 Véhicule et point d'accès `FF F3` (depuis 2.0-a15)
+
+- Requête vide → **17 octets** : `[0..15]` nom du véhicule (ASCII, complété de
+  zéros), `[16]` drapeaux (bit 0 : mot de passe Wi-Fi personnalisé). Le mot de
+  passe n'est **jamais** renvoyé.
+- Modification → **80 octets** : `[0]` masque (bit 0 nom, bit 1 mot de passe),
+  `[1..16]` nom, `[17..79]` mot de passe (champs complétés de zéros ; un champ
+  hors masque est ignoré). Règles (`core/ident`, identiques dans la console) :
+  nom de **1 à 16** caractères parmi lettres sans accent, chiffres, espace (un
+  seul, pas aux extrémités), `-`, `_`, `.` ; mot de passe WPA2 de **8 à 63**
+  caractères ASCII imprimables.
+- **NACK** si la valeur est invalide, si l'enregistrement n'est pas arrêté, si
+  la voiture roule, pendant un téléchargement ou un effacement, ou tant
+  qu'une nouvelle version est en validation (§7 : le redémarrage l'annulerait).
+- Sinon : enregistrement en **NVS** (espace `trimbox`, clés `name` et `pass` ;
+  la partition `cfg` est pleine et la table de partitions ne change jamais),
+  **ACK**, puis **redémarrage 1,5 s plus tard**. Le module repart sous
+  `TrimBox-<nom>` (Wi-Fi, espaces → `-`) et `TrimBox <nom>` (Bluetooth,
+  modèle et préfixe filtré par la console inchangés), avec le nouveau mot de
+  passe. `FF F0` annonce le nouveau nom.
+- Valeurs par défaut (NVS vide ou invalide) : `DEVICE_NICKNAME` et `WIFI_PASS`
+  de `config.h`. Mot de passe oublié : touche **`x`** du port série (retour
+  aux valeurs d'origine), ou modification par la console en **Bluetooth**.
 
 ---
 
@@ -570,6 +595,7 @@ fonctionner sans enregistrement, §12.20).
 | `b` | Banc d'essai : cadence GNSS, IMU, CRSF (LQ, RSSI), Bluetooth (actif / coupé), Wi-Fi, partition du firmware (« EN VALIDATION » après une mise à jour) |
 | `m` | Mesures de l'IMU en direct (10 lignes, mg et c°/s) |
 | `z` | Configuration par défaut (données conservées) |
+| `x` | Nom du véhicule et mot de passe Wi-Fi d'origine (`config.h`), puis redémarrage (§3.13) |
 | `?` | Aide |
 
 ### 4.8 GNSS
@@ -629,9 +655,9 @@ Les couleurs se superposent (rouge + bleu = violet). **Bouton BOOT, appui long
 
 | Réglage | Défaut | Rôle |
 |---|---|---|
-| `DEVICE_NICKNAME` | `"Buggy 1"` | ≤ 16 caractères (§12.1) : `TrimBox Buggy 1` en Bluetooth, `TrimBox-Buggy-1` en Wi-Fi |
-| `FIRMWARE_VER` | `"2.0-a14"` | Version annoncée (`FF F0`, journal) |
-| `WIFI_PASS` | `"trimbox-rc"` | Mot de passe WPA2 du point d'accès (8 caractères min.) — **à personnaliser** |
+| `DEVICE_NICKNAME` | `"Buggy 1"` | Nom du véhicule **par défaut**, ≤ 16 caractères (§12.1) : `TrimBox Buggy 1` en Bluetooth, `TrimBox-Buggy-1` en Wi-Fi. Modifiable depuis la console (§3.13) |
+| `FIRMWARE_VER` | `"2.0-a15"` | Version annoncée (`FF F0`, journal) |
+| `WIFI_PASS` | `"trimbox-rc"` | Mot de passe WPA2 **par défaut** du point d'accès (8 à 63 caractères) ; à changer depuis la console (Réglages, §3.13) |
 | `WIFI_AUTO_DEFAULT` | `1` | Wi-Fi automatique à l'arrêt |
 | `WIFI_AUTO_ON_S` | `30` | Arrêt continu avant allumage du Wi-Fi |
 | `BLE_AUTO_OFF` / `BLE_AUTO_ON_S` | `1` / `30` | Bluetooth coupé au roulage / rallumé après 30 s (§6.3) |
@@ -641,7 +667,7 @@ Les couleurs se superposent (rouge + bleu = violet). **Bouton BOOT, appui long
 | `AXIS_*` | à plat, x vers l'avant | Orientation de l'IMU |
 | `IMU_AVERAGE`, `STILL_HOLD` | `1`, `1` | §4.9, §4.10 |
 
-Plusieurs voitures : un pseudo différent par module suffit à les distinguer.
+Plusieurs voitures : un nom de véhicule différent par module suffit à les distinguer (Réglages de la console, sans recompiler).
 
 ---
 
@@ -786,7 +812,7 @@ système radio.
 
 ### 6.2 Point d'accès Wi-Fi
 
-- SSID `TrimBox-<pseudo>` (espaces → `-`), WPA2 `WIFI_PASS`, canal 6,
+- SSID `TrimBox-<nom du véhicule>` (espaces → `-`), WPA2 (mot de passe de §3.13, `WIFI_PASS` par défaut), canal 6,
   **2 appareils** au plus, puissance **8,5 dBm** (portée d'un stand), adresse
   `192.168.4.1`.
 - Juste allumé, le module est réputé à l'arrêt : le point d'accès apparaît
@@ -1006,7 +1032,8 @@ partir des positions. Aller-retour vérifié < 5 cm.
     *Analyse* (carte et profil à gauche, chiffres et tours à droite ; message
     d'attente sans session), *Sessions* (ouverture de fichiers, liste en
     grille ; le bouton « Choisir des fichiers… » est aligné sur la ligne « Tout
-    exporter », comparaison), *Réglages* (enregistrement autonome, mise à jour,
+    exporter », comparaison), *Réglages* (enregistrement autonome, véhicule et
+    point d'accès, mise à jour,
     journal ouvert) — à côté du choix de la source. Dans un onglet, les
     panneaux sont des tuiles qui se partagent la ligne (`flex-wrap`) : la ligne
     est toujours remplie. Chaque panneau porte `data-pane`, `body[data-tab]`
@@ -1036,7 +1063,7 @@ doit être réellement fonctionnel.
 
 ### 8.12 Versionnage
 
-Constante `CONSOLE_VER` (actuellement **1.7.17**), affichée dans l'en-tête,
+Constante `CONSOLE_VER` (actuellement **1.7.18**), affichée dans l'en-tête,
 incrémentée à **chaque** modification ; après `x.y.9`, passer à `x.y.10` (puis
 selon la convention en cours). Sert d'indicateur de cache. Après toute
 modification : `python3 tools/embed_console.py`.
@@ -1161,7 +1188,7 @@ Pièges de l'émulateur : §12.19 (variante `-DTRIMBOX_QEMU`, jamais flashée).
 
 Firmware :
 
-- [ ] Au démarrage, le journal affiche marque, pseudo, version (2.0-a14),
+- [ ] Au démarrage, le journal affiche marque, pseudo, version (2.0-a15),
       empreinte de compilation, `mémoire : n / 154333`.
 - [ ] `b` : GNSS 25 Hz dehors, IMU présente, CRSF « liaison OK », BLE actif.
 - [ ] Un roulage ouvre une session et la ferme 30 s après l'arrêt.
@@ -1215,7 +1242,7 @@ effacement) → roulage (pose de ligne, tours radio, comparaison console).
 
 ### 12.1 Longueur du nom Bluetooth
 
-Pseudo **≤ 16 caractères** : au-delà, la trame d'annonce déborde et le nom est
+Nom du véhicule **≤ 16 caractères** : au-delà, la trame d'annonce déborde et le nom est
 tronqué (et la console ne le trouve plus si le préfixe saute).
 
 ### 12.2 Réassemblage et longueur des écritures

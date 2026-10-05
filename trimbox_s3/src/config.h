@@ -6,10 +6,10 @@
 #pragma once
 
 // ---------------------------------------------------------------- identité
-#define DEVICE_NICKNAME   "Buggy 1"          // ≤ 16 caractères (§12.1)
+#define DEVICE_NICKNAME   "Buggy 1"          // nom du véhicule PAR DÉFAUT, ≤ 16 caractères (§12.1) ;
+                                             // modifiable depuis la console (Réglages), gardé en NVS
 #define BRAND             "TrimBox"
-#define DEVICE_NAME       "TrimBox " DEVICE_NICKNAME
-#define FIRMWARE_VER      "2.0-a14"
+#define FIRMWARE_VER      "2.0-a15"
 #define HARDWARE_VER      "ESP32-S3-DevKitC-1 N16R8"
 #define MANUFACTURER      "TrimBox"
 #define BUILD_STAMP       __DATE__ " " __TIME__
@@ -89,7 +89,8 @@
 // Point d'accès de la console embarquée (§6). Il s'allume de lui-même
 // quand la voiture est arrêtée depuis WIFI_AUTO_ON_S secondes, et se coupe
 // dès qu'elle roule (radio 2,4 GHz : §12.10).
-#define WIFI_PASS         "trimbox-rc"   // 8 caractères minimum — À PERSONNALISER
+#define WIFI_PASS         "trimbox-rc"   // mot de passe PAR DÉFAUT (8 à 63 caractères) ;
+                                         // modifiable depuis la console, « x » sur le port série pour y revenir
 #define WIFI_AUTO_DEFAULT 1              // 1 : automatique dès le démarrage ; 0 : jamais seul
 #define WIFI_AUTO_ON_S    30             // arrêt continu avant activation
 #define WIFI_STILL_MMS    1389           // « à l'arrêt » : sous 5 km/h (ou sans fix)
