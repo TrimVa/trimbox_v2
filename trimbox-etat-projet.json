@@ -5,7 +5,7 @@
   "date_export": "2026-10-05",
   "versions": {
     "firmware": "2.0-a13",
-    "console_web": "1.7.13",
+    "console_web": "1.7.14",
     "script_lua": "trmbox.lua 2.3",
     "cahier_des_charges": "3.0 (document unique ESP32-S3, remplace les anciens v1 et v2 ; annexe A = correspondance des anciens renvois)",
     "core_esp32": "esp32:esp32@3.3.12",
@@ -27,7 +27,7 @@
     ],
     "pourquoi": "Trois corruptions par un LLM local, toutes presentees comme des 'optimisations', syntaxiquement plausibles et indetectables sans execution (CDC §12.23).",
     "validation_console": "Valider toute modification en EXECUTANT la page : tests/web/console_web_test.py (Chromium + vrai serveur du firmware) et tests/native/console_check.js. Une verification de syntaxe seule a deja laisse passer plusieurs bugs graves.",
-    "versionnage_console": "Incrementer CONSOLE_VER a CHAQUE modification (actuellement 1.7.13, prochaine 1.7.14), puis python3 tools/embed_console.py (regenere trimbox_s3/src/console_gz.h).",
+    "versionnage_console": "Incrementer CONSOLE_VER a CHAQUE modification (actuellement 1.7.14, prochaine 1.7.15), puis python3 tools/embed_console.py (regenere trimbox_s3/src/console_gz.h).",
     "lua": "INTERDIT d'utiliser table.insert / table.remove / table.concat ni ipairs dans lua/trmbox.lua : EdgeTX n'expose pas la bibliotheque 'table' aux scripts de telemetrie (plantage radio au premier tour recu). Garde-fou : les bancs Lua posent table = nil avant de charger le script.",
     "partitions": "trimbox_s3/partitions.csv ne change JAMAIS dans une mise a jour Wi-Fi (OTA) : la table n'est reecrite que par un flash cable.",
     "securite": "Le module ne pilote jamais la voiture (direction et ESC sur le recepteur). Wi-Fi et Bluetooth coupes sans condition quand la voiture roule.",
@@ -52,6 +52,7 @@
       "Mixage CH8 configure sur la MT12 (4 octobre 2026)"
     ],
     "a_valider_sur_materiel": [
+      "Console 1.7.14 : verifier la disposition en onglets sur l'ecran reel (Firefox et Chrome)",
       "Firmware 2.0-a13 installe (OTA) : 'b' doit afficher BLE actif a l'arret puis COUPE en roulant",
       "IMU dans le firmware complet (touche m)",
       "Pose de ligne depuis la radio, a l'arret (ligne armee 10 s) et lancee",
@@ -78,7 +79,8 @@
     "Console 1.7.13 : mise en page adaptative (1 colonne telephone/tablette, 2 colonnes >= 1100 px via .colA/.colB en display:contents + order), courbes a resolution adaptee (fitCanvas), grilles de valeurs sans bloc vide colore, verification de mise en page dans tests/web.",
     "Firmware 2.0-a13 : core/airgate (roule / a l'arret) partage par le Wi-Fi et le Bluetooth ; Bluetooth coupe au roulage, rallume apres 30 s (BLE_AUTO_OFF, BLE_AUTO_ON_S) ; scenario QEMU --arret ; GPIO 5/6 liberes.",
     "Documentation : cahier des charges unique 3.0 (ESP32-S3 seulement), renvois du code convertis, README / LISEZMOI / DEMARRAGE alignes, schema de cablage regenere.",
-    "Voix : les 12 mots generes (WAV 16 bits mono 16 kHz, voix Azure du pack EdgeTX) ajoutes au depot dans lua/SOUNDS/trimbox/ (a copier a la racine de la carte SD)."
+    "Voix : les 12 mots generes (WAV 16 bits mono 16 kHz, voix Azure du pack EdgeTX) ajoutes au depot dans lua/SOUNDS/trimbox/ (a copier a la racine de la carte SD).",
+    "Console 1.7.14 : sur ordinateur (>= 1100 px), toute la largeur et onglets Appareil / Analyse / Sessions / Reglages (body[data-tab] + data-pane), panneaux en tuiles flex-wrap, analyse en deux zones (carte/profil a gauche, chiffres/tours a droite), message d'attente sans session, sessions en grille, journal ouvert dans Reglages. Telephone et tablette inchanges. tests/web verifie le contenu de chaque onglet et l'absence de defilement jusqu'a 2560 px. Retour utilisateur a l'origine : disposition 2 colonnes desequilibree sur ecran de 2000 px."
   ],
   "prochaines_etapes": [
     "1) Installer trimbox_s3-app.bin (2.0-a13, console 1.7.13) par la console Wi-Fi ; verifier la version au demarrage et la ligne BLE de 'b'.",
@@ -206,8 +208,8 @@
     },
     {
       "chemin": "CAHIER-DES-CHARGES.md",
-      "octets": 72339,
-      "sha1": "2c3046c1c826"
+      "octets": 73136,
+      "sha1": "665ad16acbb3"
     },
     {
       "chemin": "DEMARRAGE.md",
@@ -216,8 +218,8 @@
     },
     {
       "chemin": "README.md",
-      "octets": 27116,
-      "sha1": "8304307a3b43"
+      "octets": 27206,
+      "sha1": "fe71739df5e7"
     },
     {
       "chemin": "REPRISE-IA.md",
@@ -251,8 +253,8 @@
     },
     {
       "chemin": "index.html",
-      "octets": 173768,
-      "sha1": "d94ebf7b85e5"
+      "octets": 180921,
+      "sha1": "84f155f48b42"
     },
     {
       "chemin": "lua/LISEZMOI.md",
@@ -386,8 +388,8 @@
     },
     {
       "chemin": "tests/web/console_web_test.py",
-      "octets": 11619,
-      "sha1": "b84e73027efe"
+      "octets": 12552,
+      "sha1": "2ce21a4d27ef"
     },
     {
       "chemin": "tests/web/fakedev.cpp",
@@ -456,7 +458,7 @@
     },
     {
       "chemin": "trimbox-etat-projet.json",
-      "octets": 26461,
+      "octets": 27110,
       "sha1": "(ce fichier)"
     },
     {
@@ -496,8 +498,8 @@
     },
     {
       "chemin": "trimbox_s3/src/console_gz.h",
-      "octets": 291786,
-      "sha1": "88ab9d80dfe8"
+      "octets": 301802,
+      "sha1": "de39f4aacd00"
     },
     {
       "chemin": "trimbox_s3/src/core/airgate.cpp",

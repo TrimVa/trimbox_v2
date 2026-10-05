@@ -1,7 +1,7 @@
 # TrimBox DIY S3 — Cahier des charges
 
 **Version du document :** 3.0 — 4 octobre 2026
-**Cible :** firmware **2.0-a13** (ESP32-S3), console web **1.7.13**, script radio
+**Cible :** firmware **2.0-a13** (ESP32-S3), console web **1.7.14**, script radio
 `trmbox.lua` **2.3**.
 **Remplace :** les anciens `CAHIER-DES-CHARGES.md` (v1, carte XIAO nRF52840) et
 `CAHIER-DES-CHARGES-V2.md` (v2). Ce document est **autonome** : il ne décrit que
@@ -989,12 +989,22 @@ partir des positions. Aller-retour vérifié < 5 cm.
   - téléphone (< 700 px) : une colonne ; sous 440 px, l'état de connexion passe
     sous le titre et les valeurs longues sont réduites ;
   - tablette (700 à 1099 px) : une colonne plus large ;
-  - ordinateur (≥ 1100 px) : **deux colonnes** — à gauche l'appareil
-    (connexion, direct, mémoire, enregistrement, mise à jour, journal), à droite
-    l'analyse (carte, sessions, comparaison).
-  Les colonnes (`.colA`, `.colB`) sont en `display:contents` sur une colonne,
-  l'ordre étant fixé par `order`. Aucun défilement horizontal de 320 à 1440 px
-  (vérifié par `tests/web`).
+  - ordinateur (≥ 1100 px, depuis 1.7.14) : **toute la largeur de l'écran** et
+    une **barre d'onglets** — *Appareil* (connexion, direct, mémoire),
+    *Analyse* (carte et profil à gauche, chiffres et tours à droite ; message
+    d'attente sans session), *Sessions* (ouverture de fichiers, liste en
+    grille, comparaison), *Réglages* (enregistrement autonome, mise à jour,
+    journal ouvert) — à côté du choix de la source. Dans un onglet, les
+    panneaux sont des tuiles qui se partagent la ligne (`flex-wrap`) : la ligne
+    est toujours remplie. Chaque panneau porte `data-pane`, `body[data-tab]`
+    choisit l'onglet ; l'analyse d'une session ouvre l'onglet *Analyse*. Onglet
+    mémorisé (sauf *Analyse*), flèches gauche / droite au clavier. La carte
+    n'est jamais plus haute que l'écran.
+  Les regroupements (`.colA`, `.colB`, `.anMain`, `.anStats`, `.anBoxes`) sont
+  en `display:contents` sous 1100 px, l'ordre étant fixé par `order` : le
+  téléphone et la tablette affichent tout, sans onglets, comme avant. Aucun
+  défilement horizontal de 320 à 2560 px (vérifié par `tests/web`, qui vérifie
+  aussi le contenu de chaque onglet).
 - Les courbes (`#chart`, `#cmpChart`) adaptent leur résolution interne à leur
   taille affichée et à la densité de l'écran (`fitCanvas`, plafond ×2) ; textes
   et traits sont mis à l'échelle. Les conversions souris → canevas passent par
@@ -1013,7 +1023,7 @@ doit être réellement fonctionnel.
 
 ### 8.12 Versionnage
 
-Constante `CONSOLE_VER` (actuellement **1.7.13**), affichée dans l'en-tête,
+Constante `CONSOLE_VER` (actuellement **1.7.14**), affichée dans l'en-tête,
 incrémentée à **chaque** modification ; après `x.y.9`, passer à `x.y.10` (puis
 selon la convention en cours). Sert d'indicateur de cache. Après toute
 modification : `python3 tools/embed_console.py`.
@@ -1157,7 +1167,7 @@ Console :
 - [ ] Lignes du module posées d'office ; chronos du module = chronos console
       à quelques ms.
 - [ ] Les deux thèmes lisibles, infobulle comprise ; pas de défilement
-      horizontal sur téléphone ; deux colonnes sur ordinateur.
+      horizontal sur téléphone ; onglets sur ordinateur, sur toute la largeur.
 
 Radio :
 

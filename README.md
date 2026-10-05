@@ -4,7 +4,7 @@ Enregistreur de télémétrie **GPS + inertiel** pour voitures radiocommandées,
 avec **chronométrage au tour** affiché et annoncé sur la radio, **console web**
 d'analyse et **mise à jour par Wi-Fi**. Construit autour d'un **ESP32-S3**.
 
-> **État :** firmware **2.0-a13**, console **1.7.13**. Tout est écrit et testé
+> **État :** firmware **2.0-a13**, console **1.7.14**. Tout est écrit et testé
 > sur PC, dans un navigateur et dans un émulateur ESP32-S3. **Essais sur le
 > vrai matériel en cours** : GPS, IMU et script Lua sur la MT12 validés ; reste
 > le roulage. Voir [les bancs d'essai](#bancs-dessai-à-la-réception-du-matériel).
@@ -180,8 +180,9 @@ d'accent** au choix (bouton palette), installable comme une application
 carte connectée.
 
 La mise en page s'adapte à l'écran : une colonne sur téléphone (dès 320 px),
-une colonne plus large sur tablette, et **deux colonnes sur ordinateur**
-(l'appareil à gauche, l'analyse et la carte à droite).
+une colonne plus large sur tablette. Sur ordinateur, la console occupe **toute
+la largeur** avec des **onglets** *Appareil*, *Analyse*, *Sessions* et
+*Réglages* ; dans chaque onglet, les panneaux se partagent la ligne.
 
 **Fond satellite en Wi-Fi.** Le point d'accès de la TrimBox n'a pas
 Internet : les images satellite passent par la **4G du téléphone**. Pour cela :

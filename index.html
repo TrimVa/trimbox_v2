@@ -362,20 +362,19 @@ button.tool.active{background:var(--violet);color:var(--on-violet);box-shadow:no
    Mise en page adaptative (1.7.13)
    - téléphone (< 700 px) : une colonne, ordre d'origine ;
    - tablette (700 à 1099 px) : une colonne plus large ;
-   - ordinateur (≥ 1100 px) : deux colonnes — à gauche l'appareil (connexion,
-     direct, mémoire, enregistrement, mise à jour, journal), à droite
-     l'analyse (sessions, carte, comparaison).
-   Les deux colonnes (.colA, .colB) sont « transparentes » (display:contents)
-   tant qu'il n'y en a qu'une : l'ordre d'affichage est alors fixé par
+   - ordinateur (≥ 1100 px) : onglets, voir plus bas (1.7.14).
+   Les regroupements (.colA, .colB, .anMain…) sont « transparents »
+   (display:contents) : l'ordre d'affichage sur une colonne est fixé par
    « order », identique à celui des versions précédentes.
    ========================================================================== */
 .wrap{display:flex;flex-direction:column}
 .colA,.colB{display:contents}
 .wrap>header{order:1}
 #accentPanel{order:2}
+#tabs{order:3}
 .wrap>.modebar.wide{order:3}
 #secConnect{order:4}  #secLive{order:5}  #secMem{order:6}
-#secAnalysis{order:7} #secImport{order:8} #secSessions{order:9} #secCompare{order:10}
+#secAnalysis{order:7} #anEmpty{order:7} #secImport{order:8} #secSessions{order:9} #secCompare{order:10}
 #secRec{order:11}     #secFw{order:12}    #secLog{order:13}
 
 /* Grilles de valeurs : le fond de la grille prend la couleur des cases et
@@ -412,19 +411,74 @@ button.tool.active{background:var(--violet);color:var(--on-violet);box-shadow:no
   .wrap{max-width:800px}
 }
 
-/* Ordinateur : deux colonnes. */
+/* Ordinateur (≥ 1100 px) : ONGLETS (1.7.14). Toute la largeur de l'écran ;
+   une barre d'onglets Appareil / Analyse / Sessions / Réglages, et dans
+   chaque onglet des tuiles qui se partagent la ligne (flex-wrap : la ligne
+   est toujours remplie, quel que soit le nombre de panneaux visibles).
+   Chaque panneau porte data-pane ; body[data-tab] choisit l'onglet. Sous
+   1100 px, les onglets n'existent pas : tout s'affiche, comme avant. */
+.tabs{display:none}
+#anEmpty{display:none}
+.anMain,.anStats,.anBoxes{display:contents}
 @media (min-width:1100px){
-  .wrap{max-width:1440px;display:grid;column-gap:var(--sp4);align-items:start;
-    grid-template-columns:minmax(340px,410px) minmax(0,1fr);
-    grid-template-rows:auto auto auto 1fr}   /* la colonne d'analyse ne repousse pas la colonne appareil */
-  .wrap>header,#accentPanel{grid-column:1/-1}
-  .wrap>.modebar.wide{grid-column:1;grid-row:3}
-  .colA{display:block;grid-column:1;grid-row:4;min-width:0}
-  .colB{display:block;grid-column:2;grid-row:3/span 2;min-width:0}
+  .wrap{max-width:none;flex-direction:row;flex-wrap:wrap;align-content:flex-start;
+    column-gap:var(--sp3);padding:var(--sp4) clamp(16px,2vw,40px) 48px}
+  .wrap>*,.colA>*,.colB>*{flex:1 1 420px;min-width:0}
+  .wrap>header,#accentPanel,#secAnalysis,#anEmpty,#secCompare{flex:1 1 100%}
+  /* Ligne des onglets : barre d'onglets + choix de la source, côte à côte */
+  .tabs{display:flex;flex:1 1 calc(100% - 420px - var(--sp3));gap:4px;margin-top:var(--sp3);
+    background:var(--panel-2);border:1px solid var(--line);border-radius:999px;padding:4px}
+  .wrap>.modebar.wide{flex:0 0 420px;width:auto}
+  .tab{flex:1;font-family:var(--display);font-size:14px;font-weight:700;letter-spacing:.02em;
+    background:transparent;color:var(--mute);border-radius:999px;min-height:40px;padding:8px 18px}
+  .tab:hover:not(:disabled){color:var(--ink);background:rgba(var(--violet-rgb),.08);filter:none}
+  .tab[aria-selected="true"],.tab[aria-selected="true"]:hover:not(:disabled){
+    background:var(--violet);color:var(--on-violet);
+    box-shadow:0 2px 10px -2px rgba(var(--violet-rgb),.6)}
+  .tabn{font-family:var(--mono);font-size:11px;font-weight:600;margin-left:6px;opacity:.8}
+  /* Panneaux hors de l'onglet choisi : masqués */
+  body[data-tab="appareil"] [data-pane]:not([data-pane="appareil"]),
+  body[data-tab="analyse"]  [data-pane]:not([data-pane="analyse"]),
+  body[data-tab="sessions"] [data-pane]:not([data-pane="sessions"]),
+  body[data-tab="reglages"] [data-pane]:not([data-pane="reglages"]){display:none !important}
+  #secAnalysis.hide+#anEmpty{display:block}
+  #anEmpty{text-align:center;padding:56px var(--sp4)}
+  #anEmpty .note{font-size:15px;margin:0 auto 18px;max-width:560px}
+  #anEmpty .row{justify-content:center}
+  #anEmpty .row>button{flex:0 1 260px}
+  /* Onglet Analyse : carte et profil à gauche, chiffres et tours à droite */
+  #secAnalysis{display:grid;grid-template-columns:minmax(0,1fr) minmax(360px,460px);
+    grid-template-rows:auto auto 1fr;column-gap:var(--sp4);align-items:start}
+  #secAnalysis>h2{grid-column:1/-1}
+  .anMain{display:block;grid-column:1;grid-row:2/span 2;min-width:0}
+  .anStats{display:block;grid-column:2;grid-row:2}
+  .anBoxes{display:block;grid-column:2;grid-row:3;align-self:start}
+  .anMain>.modebar{margin-top:0}
+  .anBoxes>div:first-child{margin-top:var(--sp3) !important}
+  /* Carte : jamais plus haute que l'écran (le canevas garde ses proportions) */
+  .anMain .mapwrap{max-width:calc((100vh - 330px) * 900 / 620);min-width:420px;margin-left:auto;margin-right:auto}
+  .anStats .readout{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #devInfo{grid-template-columns:repeat(4,minmax(0,1fr))}
+  /* Onglet Sessions : l'ouverture de fichiers reste compacte, la liste des
+     sessions s'étale en grille */
+  #secImport{flex:0 1 420px;align-self:flex-start}
+  #sessionList{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:8px}
+  #sessionList .sessionRow{margin-bottom:0}
+  #sessionList .row>button{min-width:0}
+  /* Onglet Réglages : le journal devient un panneau à part entière */
+  #secLog{background:var(--panel);border:1px solid var(--line);border-radius:var(--rad);
+    padding:var(--sp3) var(--sp4) var(--sp4);margin-top:var(--sp3)}
+  #log{height:clamp(190px,52vh,600px)}
   #secAnalysis .speed{font-size:68px}
   #chart{height:170px !important}
-  #cmpChart{height:200px !important}
-  .colA #dSerial,.colA #dNick,.colA #dModel,.colA #dFw,.colA #lLat,.colA #lLon{font-size:12px !important}
+  #cmpChart{height:220px !important}
+  #secCompare .mapwrap{max-width:calc((100vh - 200px) * 900 / 560);margin-left:auto;margin-right:auto}
+  /* Très grand écran : textes et chiffres un peu plus grands */
+}
+@media (min-width:1700px){
+  .cell .v{font-size:21px}
+  .speed{font-size:72px}
+  section{padding:var(--sp4) 22px}
 }
 
 </style>
@@ -456,6 +510,14 @@ button.tool.active{background:var(--violet);color:var(--on-violet);box-shadow:no
   </div>
 </div>
 
+<!-- ================= ONGLETS (ordinateur seulement) ================= -->
+<nav class="tabs" id="tabs" role="tablist" aria-label="Vues de la console">
+  <button class="tab" role="tab" data-tab="appareil" aria-selected="true">Appareil</button>
+  <button class="tab" role="tab" data-tab="analyse" aria-selected="false">Analyse</button>
+  <button class="tab" role="tab" data-tab="sessions" aria-selected="false">Sessions<span class="tabn" id="tabnSessions"></span></button>
+  <button class="tab" role="tab" data-tab="reglages" aria-selected="false">Réglages</button>
+</nav>
+
 <!-- ================= SOURCE ================= -->
 <div class="modebar wide" role="group" aria-label="Source des données">
   <button class="seg on" id="srcReal" aria-pressed="true">Bluetooth</button>
@@ -467,7 +529,7 @@ button.tool.active{background:var(--violet);color:var(--on-violet);box-shadow:no
 <div class="colA">
 
 <!-- ================= CONNEXION ================= -->
-<section id="secConnect">
+<section id="secConnect" data-pane="appareil">
   <h2>Appareil</h2>
   <button class="wide" id="btnConnect">Connecter</button>
   <div id="devInfo" class="readout hide" style="margin-top:12px">
@@ -482,7 +544,7 @@ button.tool.active{background:var(--violet);color:var(--on-violet);box-shadow:no
 </section>
 
 <!-- ================= LIVE ================= -->
-<section id="secLive" class="hide">
+<section id="secLive" class="hide" data-pane="appareil">
   <h2>Données en direct</h2>
   <div class="speed"><span id="lSpeed">—</span><small>km/h</small></div>
   <div class="readout">
@@ -499,7 +561,7 @@ button.tool.active{background:var(--violet);color:var(--on-violet);box-shadow:no
 </section>
 
 <!-- ================= MÉMOIRE ================= -->
-<section id="secMem" class="hide">
+<section id="secMem" class="hide" data-pane="appareil">
   <h2>Mémoire</h2>
   <div class="tape" id="tape">
     <div class="fill" id="tapeFill"></div>
@@ -521,7 +583,7 @@ button.tool.active{background:var(--violet);color:var(--on-violet);box-shadow:no
 </section>
 
 <!-- ================= ENREGISTREMENT ================= -->
-<section id="secRec" class="hide">
+<section id="secRec" class="hide" data-pane="reglages">
   <h2>Enregistrement autonome</h2>
   <div style="margin-bottom:4px"><span class="badge off" id="recBadge"><i class="dot"></i><span>arrêté</span></span></div>
 
@@ -562,7 +624,7 @@ button.tool.active{background:var(--violet);color:var(--on-violet);box-shadow:no
 </section>
 
 <!-- ================= MISE À JOUR DU FIRMWARE (Wi-Fi) ================= -->
-<section id="secFw" class="hide">
+<section id="secFw" class="hide" data-pane="reglages">
   <h2>Mise à jour du firmware</h2>
   <p class="note" style="margin-top:0">Fichier <strong>trimbox_s3-app.bin</strong> (artefact
   <em>firmware-s3-app</em> de la compilation GitHub). Voiture et enregistrement à l'arrêt.
@@ -573,7 +635,7 @@ button.tool.active{background:var(--violet);color:var(--on-violet);box-shadow:no
   <p class="note" id="fwMsg"></p>
 </section>
 
-<details id="secLog" class="hide">
+<details id="secLog" class="hide" data-pane="reglages">
   <summary>Journal du protocole</summary>
   <div id="log"></div>
   <div class="row" style="margin-top:8px">
@@ -588,9 +650,10 @@ button.tool.active{background:var(--violet);color:var(--on-violet);box-shadow:no
 <div class="colB">
 
 <!-- ================= SESSIONS ================= -->
-<section id="secAnalysis" class="hide">
+<section id="secAnalysis" class="hide" data-pane="analyse">
   <h2>Analyse — <span id="anTitle" style="text-transform:none;letter-spacing:0;color:var(--ink)">—</span></h2>
 
+  <div class="anStats">
   <div class="speed"><span id="anVmax">—</span><small>km/h max</small></div>
 
   <div class="readout">
@@ -605,7 +668,9 @@ button.tool.active{background:var(--violet);color:var(--on-violet);box-shadow:no
     <div class="cell"><span class="k">Vertical min</span><span class="v" id="anVdn">—<small>g</small></span></div>
     <div class="cell"><span class="k" id="anAirK">Temps en l'air</span><span class="v" id="anAir">—<small>s</small></span></div>
   </div>
+  </div><!-- /anStats -->
 
+  <div class="anMain">
   <div class="modebar" role="group" aria-label="Type de parcours">
     <button class="seg on" id="modeCircuit" aria-pressed="true">Circuit</button>
     <button class="seg" id="modeDrag" aria-pressed="false">Dragster</button>
@@ -644,7 +709,9 @@ button.tool.active{background:var(--violet);color:var(--on-violet);box-shadow:no
 
   <canvas id="chart" width="900" height="220" style="width:100%;height:130px;margin-top:10px"></canvas>
   <p class="hint">Profil de vitesse. Survolez pour situer le point sur le tracé, glissez pour isoler une portion.</p>
+  </div><!-- /anMain -->
 
+  <div class="anBoxes">
   <div id="lapBox" class="hide" style="margin-top:14px">
     <h2 style="margin-bottom:8px">Tours</h2>
     <div id="lapList"></div>
@@ -677,10 +744,23 @@ button.tool.active{background:var(--violet);color:var(--on-violet);box-shadow:no
     <h2 style="margin-bottom:8px">Portion sélectionnée</h2>
     <div class="readout" id="secStats"></div>
   </div>
+  </div><!-- /anBoxes -->
+</section>
+
+<!-- Onglet Analyse sans session (ordinateur seulement) -->
+<section id="anEmpty" data-pane="analyse">
+  <h2 style="justify-content:center">Aucune session analysée</h2>
+  <p class="note">Téléchargez la mémoire du module (onglet Appareil) ou ouvrez des
+  enregistrements CSV, GPX ou VBO (onglet Sessions) : la carte, le profil de
+  vitesse et les tours s'affichent ici.</p>
+  <div class="row">
+    <button class="ghost" type="button" data-goto="appareil">Aller à l'appareil</button>
+    <button type="button" data-goto="sessions">Ouvrir des enregistrements</button>
+  </div>
 </section>
 
 <!-- ================= IMPORT ================= -->
-<section id="secImport">
+<section id="secImport" data-pane="sessions">
   <h2>Ouvrir des enregistrements</h2>
   <p class="note" style="margin-top:0">
     Rechargez des sessions exportées précédemment, au format CSV, GPX ou VBO,
@@ -691,7 +771,7 @@ button.tool.active{background:var(--violet);color:var(--on-violet);box-shadow:no
   <p class="hint" id="importMsg"></p>
 </section>
 
-<section id="secSessions" class="hide">
+<section id="secSessions" class="hide" data-pane="sessions">
   <h2>Sessions</h2>
   <div id="sessionList"></div>
   <div class="row" style="margin-top:12px">
@@ -703,7 +783,7 @@ button.tool.active{background:var(--violet);color:var(--on-violet);box-shadow:no
 </section>
 
 <!-- ================= COMPARAISON ================= -->
-<section id="secCompare" class="hide">
+<section id="secCompare" class="hide" data-pane="sessions">
   <h2>Comparaison — <span id="cmpCount" style="text-transform:none;letter-spacing:0;color:var(--ink)"></span></h2>
 
   <div class="cmpwrap">
@@ -2768,12 +2848,14 @@ function showAnalysis(idx){
   requestAnimationFrame(() => { if(anal) drawChart(); });
   document.querySelectorAll('.sessionRow').forEach((e,i)=>
     e.classList.toggle('sel', i===idx));
+  showTab('analyse');                       // ordinateur : l'analyse a son onglet
   $('secAnalysis').scrollIntoView({behavior:'smooth', block:'start'});
 }
 
 bindCanvas();
 
 function paintSessions(){
+  paintTabs();
   const box = $('sessionList');
   if(!sessions.length){
     box.innerHTML = '<p class="note">Aucune session en mémoire de l\'application.</p>';
@@ -3674,7 +3756,49 @@ $('btnGpxAll').onclick = () => { const r=allRecords(); r.length ? exportGpx(r,'t
 const META_DESC = 'TrimBox DIY — Console d\'analyse pour RC/GPS. Visualisez vos données de vitesse, distance, accélération en temps réel avec analyse de circuit et dragster.';
 const META_KEYWORDS = 'RC, GPS, TrimBox, analyse, vitesse, circuit, dragster, PWA';
 
-const CONSOLE_VER  = '1.7.13';
+/* ==========================================================================
+   Onglets (ordinateur, ≥ 1100 px — 1.7.14). L'onglet choisi est un simple
+   attribut de <body> : le CSS masque les panneaux des autres onglets. Sous
+   1100 px, la barre est cachée et tout s'affiche : rien à faire ici.
+   Choix mémorisé pour ce navigateur (confort, sans conséquence s'il manque).
+   ========================================================================== */
+const TABS = ['appareil', 'analyse', 'sessions', 'reglages'];
+function showTab(t){
+  if(!TABS.includes(t)) t = 'appareil';
+  document.body.dataset.tab = t;
+  document.querySelectorAll('#tabs .tab').forEach(b =>
+    b.setAttribute('aria-selected', String(b.dataset.tab === t)));
+  try{ localStorage.setItem('trimbox-tab', t); }catch(e){}
+  // Panneaux qui viennent d'apparaître : leurs canevas n'avaient pas de
+  // taille tant qu'ils étaient masqués.
+  requestAnimationFrame(() => {
+    if(t === 'analyse' && anal){ drawChart(); render(); }
+    if(t === 'sessions' && cmpSel.size >= 2) paintCompare();
+  });
+}
+function paintTabs(){
+  const n = sessions.length;
+  $('tabnSessions').textContent = n ? String(n) : '';
+}
+document.querySelectorAll('#tabs .tab').forEach(b => b.onclick = () => showTab(b.dataset.tab));
+document.querySelectorAll('[data-goto]').forEach(b => b.onclick = () => showTab(b.dataset.goto));
+$('tabs').addEventListener('keydown', ev => {
+  const k = TABS.indexOf(document.body.dataset.tab);
+  if(ev.key === 'ArrowRight' || ev.key === 'ArrowLeft'){
+    const t = TABS[(k + (ev.key === 'ArrowRight' ? 1 : TABS.length - 1)) % TABS.length];
+    showTab(t);
+    document.querySelector(`#tabs .tab[data-tab="${t}"]`).focus();
+    ev.preventDefault();
+  }
+});
+// Au chargement, aucune session n'est encore analysée : « Analyse » n'est pas
+// restauré (il n'afficherait que le message d'attente).
+{ let t0 = 'appareil'; try{ t0 = localStorage.getItem('trimbox-tab') || t0; }catch(e){}
+  showTab(t0 === 'analyse' ? 'appareil' : t0); }
+// Sur ordinateur, le journal a la place de s'afficher ouvert dans son onglet.
+if(matchMedia('(min-width:1100px)').matches) $('secLog').open = true;
+
+const CONSOLE_VER  = '1.7.14';
 const CONSOLE_DATE = '20 septembre 2026';
 // En-tête : deux lignes courtes, « console v… » puis « firmware … » ; la
 // date de la console reste consultable au survol / appui long.

@@ -154,8 +154,21 @@ try:
             pg.set_viewport_size({'width': w, 'height': 900}); pg.wait_for_timeout(250)
             sw = pg.evaluate('document.documentElement.scrollWidth')
             check(sw <= w, f'{w} px : pas de défilement horizontal (largeur {sw})')
-        cols = pg.evaluate("getComputedStyle(document.querySelector('.wrap')).gridTemplateColumns.split(' ').length")
-        check(cols == 2, f'1440 px : deux colonnes ({cols})')
+        # ordinateur : onglets ; chaque onglet n'affiche que ses panneaux
+        check(pg.is_visible('#tabs'), '1440 px : barre d\'onglets visible')
+        vis = lambda: pg.evaluate("['secConnect','anEmpty','secImport','secRec'].map(i => document.getElementById(i).offsetParent !== null)")
+        pg.click('.tab[data-tab="appareil"]'); a = vis()
+        pg.click('.tab[data-tab="analyse"]');  b2 = vis()
+        pg.click('.tab[data-tab="sessions"]'); c = vis()
+        pg.click('.tab[data-tab="reglages"]'); d2 = vis()
+        check(a == [True, False, False, False] and b2 == [False, True, False, False]
+              and c == [False, False, True, False] and d2 == [False, False, False, True],
+              f'onglets Appareil / Analyse / Sessions / Réglages : {a} {b2} {c} {d2}')
+        for w in (1920, 2560):
+            pg.set_viewport_size({'width': w, 'height': 1100}); pg.wait_for_timeout(250)
+            sw = pg.evaluate('document.documentElement.scrollWidth')
+            check(sw <= w, f'{w} px : toute la largeur, sans défilement horizontal ({sw})')
+        pg.click('.tab[data-tab="appareil"]')
         pg.set_viewport_size({'width': 412, 'height': 900}); pg.wait_for_timeout(250)
         pg.screenshot(path=os.environ.get('SHOT', '/tmp/console_wifi.png'), full_page=False)
         check(not errs, f'aucune erreur JavaScript {errs}')
