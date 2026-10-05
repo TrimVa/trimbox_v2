@@ -64,8 +64,8 @@ Ne jamais modifier `trimbox_s3/partitions.csv` dans une mise à jour Wi-Fi.
 
 Copier `lua/trmbox.lua` dans `SCRIPTS/TELEMETRY/` de la radio et régler le
 mixage de CH8 (source MAX, poids GV9, mode Ajouter) : sans lui, aucune pose de
-ligne ne part. Voix : copier les 12 mots dans `SOUNDS/trimbox/`
-(`tools/sons/generer-voix.bat`). Détails : `lua/LISEZMOI.md`.
+ligne ne part. Voix : copier le dossier `lua/SOUNDS` à la racine de la carte
+SD (les 12 mots sont fournis). Détails : `lua/LISEZMOI.md`.
 
 ## Reprendre le développement avec une IA
 

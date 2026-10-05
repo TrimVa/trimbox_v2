@@ -235,10 +235,11 @@ Mode d'emploi complet : **[lua/LISEZMOI.md](lua/LISEZMOI.md)**.
 - **Annonces vocales** : « meilleur tour », le temps du tour, l'écart avec le
   tour précédent (« moins 0,35 », « plus 1,00 », « égal »), et les accusés
   de pose de ligne (« départ posé », « vitesse trop faible »…). Les nombres
-  viennent du pack vocal de la radio ; les 12 mots du script sont à produire
-  et à copier dans `SOUNDS/trimbox/` : `tools/sons/generer-voix.bat` les fait
-  avec la voix Azure du pack EdgeTX (liste : `tools/sons/liste-sons-mt12.csv`).
-  Sans eux, des bips les remplacent.
+  viennent du pack vocal de la radio ; les 12 mots du script sont fournis dans
+  `lua/SOUNDS/trimbox/` (copier `lua/SOUNDS` à la racine de la carte SD). Ils
+  ont été produits par `tools/sons/generer-voix.bat` avec la voix Azure du pack
+  EdgeTX (liste : `tools/sons/liste-sons-mt12.csv`). Sans eux, des bips les
+  remplacent.
 - **Date et heure GPS** : le module envoie la trame CRSF `0x03` une fois par
   seconde. Il faut **ExpressLRS 4.1 ou plus récent** sur l'émetteur **et** sur
   le récepteur pour qu'elle soit relayée, et une version d'EdgeTX qui la
@@ -402,6 +403,7 @@ trimbox_s3/                      firmware ESP32-S3 (croquis Arduino)
     └── hw/                      pilotes : GPS, IMU, mémoire, Bluetooth,
                                  Wi-Fi, radio, mise à jour
 lua/trmbox.lua                   script de télémétrie MT12 (+ LISEZMOI.md)
+lua/SOUNDS/trimbox/              les 12 mots des annonces vocales (à copier sur la carte SD)
 index.html                       console web (GitHub Pages et firmware)
 trimbox-sw.js                    service worker (console hors ligne)
 trimbox-diy-console-demo.html    redirection des anciens liens vers la démo

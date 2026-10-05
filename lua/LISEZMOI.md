@@ -8,11 +8,12 @@ d'arrivée **depuis la radio**.
 
 1. Brancher la MT12 en USB, choisir *Stockage USB (carte SD)*.
 2. Copier `trmbox.lua` dans **`SCRIPTS/TELEMETRY/`** (le nom doit rester de
-   6 caractères au plus : limite d'EdgeTX pour ces écrans), ou décompresser
-   `carte-sd-mt12.zip` à la racine de la carte.
-3. **Voix (facultatif)** : copier les 12 mots du script dans
-   **`SOUNDS/trimbox/`** (voir *Annonces vocales* ci-dessous). Sans eux, le
-   script remplace chaque mot par un bip.
+   6 caractères au plus : limite d'EdgeTX pour ces écrans).
+3. **Voix** : copier le dossier **`lua/SOUNDS`** du dépôt à la racine de la
+   carte SD (il se fusionne avec le `SOUNDS` existant : seul
+   `SOUNDS/trimbox/` est ajouté). Les 12 mots y sont déjà, générés avec la voix
+   du pack français d'EdgeTX (WAV 16 bits, mono, 16 kHz). Sans eux, le script
+   remplace chaque mot par un bip.
 4. Sur la radio : *Radio → Général → Langue des voix* = **Français**.
 5. Sur la radio : **Modèle → Télémétrie → Découvrir les capteurs**, voiture
    et module allumés. Doivent apparaître notamment `GPS`, `GSpd`, `Sats`,
@@ -68,8 +69,9 @@ posée », « lignes effacées », ou refuse : « vitesse trop faible », « pas
 GPS », « commande refusée ».
 
 **Les nombres** sont dits par le pack vocal de la radio (`SOUNDS/fr/`).
-**Les mots** sont 12 fichiers à placer dans `SOUNDS/trimbox/`, à produire
-avec l'outil de synthèse vocale de ton choix :
+**Les mots** sont 12 fichiers de `SOUNDS/trimbox/`, fournis dans le dépôt
+(`lua/SOUNDS/trimbox/`). Pour les refaire, avec l'outil de synthèse vocale de
+ton choix :
 
 | Fichier | Texte |
 |---|---|

@@ -77,7 +77,8 @@
     "Console 1.7.12 : infobulle du trace lisible en theme clair (couleurs fixes, contraste >= 7:1).",
     "Console 1.7.13 : mise en page adaptative (1 colonne telephone/tablette, 2 colonnes >= 1100 px via .colA/.colB en display:contents + order), courbes a resolution adaptee (fitCanvas), grilles de valeurs sans bloc vide colore, verification de mise en page dans tests/web.",
     "Firmware 2.0-a13 : core/airgate (roule / a l'arret) partage par le Wi-Fi et le Bluetooth ; Bluetooth coupe au roulage, rallume apres 30 s (BLE_AUTO_OFF, BLE_AUTO_ON_S) ; scenario QEMU --arret ; GPIO 5/6 liberes.",
-    "Documentation : cahier des charges unique 3.0 (ESP32-S3 seulement), renvois du code convertis, README / LISEZMOI / DEMARRAGE alignes, schema de cablage regenere."
+    "Documentation : cahier des charges unique 3.0 (ESP32-S3 seulement), renvois du code convertis, README / LISEZMOI / DEMARRAGE alignes, schema de cablage regenere.",
+    "Voix : les 12 mots generes (WAV 16 bits mono 16 kHz, voix Azure du pack EdgeTX) ajoutes au depot dans lua/SOUNDS/trimbox/ (a copier a la racine de la carte SD)."
   ],
   "prochaines_etapes": [
     "1) Installer trimbox_s3-app.bin (2.0-a13, console 1.7.13) par la console Wi-Fi ; verifier la version au demarrage et la ligne BLE de 'b'.",
@@ -205,18 +206,18 @@
     },
     {
       "chemin": "CAHIER-DES-CHARGES.md",
-      "octets": 72296,
-      "sha1": "278c38fbc18e"
+      "octets": 72339,
+      "sha1": "2c3046c1c826"
     },
     {
       "chemin": "DEMARRAGE.md",
-      "octets": 3918,
-      "sha1": "ee2fb3e687b2"
+      "octets": 3930,
+      "sha1": "0c96bc107387"
     },
     {
       "chemin": "README.md",
-      "octets": 26966,
-      "sha1": "b06a329c47bc"
+      "octets": 27116,
+      "sha1": "8304307a3b43"
     },
     {
       "chemin": "REPRISE-IA.md",
@@ -255,8 +256,68 @@
     },
     {
       "chemin": "lua/LISEZMOI.md",
-      "octets": 10727,
-      "sha1": "04fac51f69a3"
+      "octets": 10865,
+      "sha1": "89d47f8b73b8"
+    },
+    {
+      "chemin": "lua/SOUNDS/trimbox/arme.wav",
+      "octets": 77244,
+      "sha1": "934ba5e1f983"
+    },
+    {
+      "chemin": "lua/SOUNDS/trimbox/arrivee.wav",
+      "octets": 58444,
+      "sha1": "e9b4b919ea91"
+    },
+    {
+      "chemin": "lua/SOUNDS/trimbox/delai.wav",
+      "octets": 61244,
+      "sha1": "2059e8a15e7e"
+    },
+    {
+      "chemin": "lua/SOUNDS/trimbox/depart.wav",
+      "octets": 58444,
+      "sha1": "6d0bae13ac00"
+    },
+    {
+      "chemin": "lua/SOUNDS/trimbox/efface.wav",
+      "octets": 60044,
+      "sha1": "777894ae6e27"
+    },
+    {
+      "chemin": "lua/SOUNDS/trimbox/egal.wav",
+      "octets": 58284,
+      "sha1": "e03ae94950b2"
+    },
+    {
+      "chemin": "lua/SOUNDS/trimbox/meilleur.wav",
+      "octets": 58284,
+      "sha1": "923002980b4d"
+    },
+    {
+      "chemin": "lua/SOUNDS/trimbox/moins.wav",
+      "octets": 58284,
+      "sha1": "e649318e2a94"
+    },
+    {
+      "chemin": "lua/SOUNDS/trimbox/pasgps.wav",
+      "octets": 62044,
+      "sha1": "a11b20233815"
+    },
+    {
+      "chemin": "lua/SOUNDS/trimbox/plus.wav",
+      "octets": 42844,
+      "sha1": "35cbad3e7a81"
+    },
+    {
+      "chemin": "lua/SOUNDS/trimbox/refus.wav",
+      "octets": 63244,
+      "sha1": "6481584b00cf"
+    },
+    {
+      "chemin": "lua/SOUNDS/trimbox/vitfaib.wav",
+      "octets": 67644,
+      "sha1": "a301c72f884c"
     },
     {
       "chemin": "lua/trmbox.lua",
@@ -395,7 +456,7 @@
     },
     {
       "chemin": "trimbox-etat-projet.json",
-      "octets": 24930,
+      "octets": 26461,
       "sha1": "(ce fichier)"
     },
     {
