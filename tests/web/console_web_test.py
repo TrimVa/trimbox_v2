@@ -35,7 +35,15 @@ try:
         b = p.chromium.launch()
         ctx = b.new_context(viewport={'width': 412, 'height': 900})
         pg = ctx.new_page()
-        pg.route('**/arcgisonline.com/**', lambda r: r.abort())   # pas d'Internet au bord de la piste
+        # Pas d'Internet au bord de la piste : toute requête hors du module
+        # (fond satellite, polices…) est refusée. Indispensable sur GitHub, où
+        # le runner a Internet : l'ancien filtre « **/arcgisonline.com/** » ne
+        # reconnaissait pas « server.arcgisonline.com », les tuiles arrivaient
+        # et le message « pas d'Internet » attendu n'apparaissait jamais.
+        offline = []
+        def no_net(route):
+            offline.append(route.request.url); route.abort()
+        pg.route(re.compile(r'^https?://(?!127\.0\.0\.1[:/])'), no_net)
         errs = []
         pg.on('pageerror', lambda e: errs.append(str(e)))
         resp = pg.goto(URL, wait_until='domcontentloaded')
@@ -106,6 +114,7 @@ try:
         pg.click('#btnSat')
         pg.wait_for_function("satOn && !document.getElementById('satNote').classList.contains('hide')", timeout=8000)
         check('Internet' in pg.inner_text('#satNote'), 'satellite sans Internet : reste actif, message affiché')
+        check(any('arcgisonline.com' in u for u in offline), f'tuiles satellite bien interceptées ({len(offline)} requêtes refusées)')
         # Internet revient (4G du téléphone) : au nouvel essai, les tuiles arrivent
         # (fournisseur remplacé par une image locale : le bac à sable n'a pas Internet).
         pg.evaluate("tileUrl = () => 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=='")
