@@ -11,7 +11,7 @@
      `.github/workflows/build-s3.yml`, coller le contenu du fichier.
    - Ou en ligne de commande :
      ```bash
-     git init && git add -A && git commit -m "TrimBox DIY S3"
+     git init && git add -A && git commit -m "TrimBox"
      git branch -M main
      git remote add origin https://github.com/<pseudo>/<dépôt>.git
      git push -u origin main

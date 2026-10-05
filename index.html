@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#000000">
-<title>TrimBox DIY</title>
+<title>TrimBox</title>
 
 <!-- ===================== Progressive Web App =====================
      Manifeste et icones entierement inline (data URI) : le fichier reste
@@ -499,7 +499,7 @@ button.tool.active{background:var(--violet);color:var(--on-violet);box-shadow:no
 <header>
   <div class="brand">
     <span class="brand-dot" id="brandDot"></span>
-    <h1>TrimBox DIY</h1>
+    <h1>TrimBox</h1>
   </div>
   <button class="theme-toggle" id="themeToggle" type="button" aria-label="Changer de thème"></button>
   <button class="theme-toggle" id="accentToggle" type="button" aria-label="Choisir la couleur d'accent"
@@ -868,15 +868,17 @@ let wsUserClosed = false;     // déconnexion voulue : pas de reconnexion auto
 // Mise à jour du firmware en cours de vérification : empreinte de compilation
 // d'avant l'envoi, comparée à celle que le module annonce en revenant.
 let fwUpd = null;
-// Modèle annoncé par FF F0 (« TrimBox DIY S3 » pour la v2) : décide si l'on
-// peut demander les emplacements v2 au téléchargement et les lignes (FF F1).
-let fwModel = '';
+// Modèle et version annoncés par FF F0 (« TrimBox|2.0-a14|… ») : décident
+// si l'on peut demander les emplacements v2 au téléchargement et les lignes
+// (FF F1). Firmware ESP32-S3 = version 2 ou plus ; les versions 2.0-a1 à
+// 2.0-a13 annonçaient le modèle « TrimBox DIY S3 », encore reconnu.
+let fwModel = '', fwVerAnn = '';
 // Lignes posées depuis la radio, lues dans le module (FF F1). Conservées
 // après une déconnexion : le point d'accès se coupe dès que la voiture
 // roule, les lignes restent valables pour analyser la session.
 let moduleLines = null;
 let linesWanted = false;      // réponse FF F1 attendue après un clic
-const isS3 = () => /\bS3\b/.test(fwModel);
+const isS3 = () => /\bS3\b/.test(fwModel) || parseInt(fwVerAnn, 10) >= 2;
 // Page servie par le module (http://192.168.4.1/…) : seule situation où le
 // WebSocket est joignable (une page https ne peut pas ouvrir un ws:// local).
 const SERVED_BY_MODULE = location.protocol === 'http:' &&
@@ -3178,7 +3180,7 @@ function onEraseProgress(p){
 function onBuild(p){
   const txt = new TextDecoder().decode(p).replace(/\0+$/,'');
   const [model, ver, stamp, gRange, nick] = txt.split('|');
-  fwModel = model || '';
+  fwModel = model || ''; fwVerAnn = ver || '';
   if(isS3()) setTimeout(() => send(CLS, ID_LINES).catch(()=>{}), 150);
   if(nick) $('dNick').textContent = nick;
   if(stamp){
@@ -3308,7 +3310,7 @@ LongAcc
 LatAcc
 
 [comments]
-Genere par la console TrimBox DIY
+Genere par la console TrimBox
 
 [column names]
 sats time lat long velocity heading height vert-vel LongAcc LatAcc
@@ -3340,7 +3342,7 @@ function exportGpx(recs, base){
     `   <trkpt lat="${r.lat.toFixed(7)}" lon="${r.lon.toFixed(7)}">`+
     `<ele>${r.alt.toFixed(2)}</ele>`+(isoOf(r)?`<time>${isoOf(r)}</time>`:'')+`</trkpt>`);
   const gpx = `<?xml version="1.0" encoding="UTF-8"?>
-<gpx version="1.1" creator="TrimBox DIY" xmlns="http://www.topografix.com/GPX/1/1">
+<gpx version="1.1" creator="TrimBox" xmlns="http://www.topografix.com/GPX/1/1">
  <trk><name>${base}</name><trkseg>
 ${pts.join('\n')}
  </trkseg></trk>
@@ -3616,14 +3618,14 @@ function selectSessionForMode(){
 
 function connectDemo(){
   $('dNick').textContent   = 'Buggy 1';
-  $('dModel').textContent  = 'TrimBox DIY S3';
+  $('dModel').textContent  = 'TrimBox';
   $('dSerial').textContent = '1234567890';
   showFwVersion('2.0 (démo)');
   $('dBuild').textContent  = 'appareil simulé · accél. ±16 g';
   $('devInfo').classList.remove('hide');
   setConnected(true);
   log('mode démonstration : aucun matériel connecté', 'ok');
-  log('appareil simulé : TrimBox DIY S3 · série 1234567890', 'ok');
+  log('appareil simulé : TrimBox · série 1234567890', 'ok');
 
   // Mémoire partiellement occupée au départ : sans cette initialisation, le
   // bloc « Mémoire » reste vide et le bouton Télécharger n'a rien à offrir.
@@ -3717,7 +3719,7 @@ function setConnected(on){
   $('btnConnect').classList.toggle('hide', on);
   $('btnDisconnect').classList.toggle('hide', !on);
   if(!on){
-    fwModel = '';
+    fwModel = ''; fwVerAnn = '';
     showFwVersion('');
     $('dBuild').textContent = '—';
     $('dNick').textContent  = '—';
@@ -4024,7 +4026,7 @@ $('btnGpxAll').onclick = () => { const r=allRecords(); r.length ? exportGpx(r,'t
    Elle est affichée sous le titre : si elle ne change pas après une mise à
    jour, c'est que le navigateur sert encore une version en cache. */
 // SEO : méta-données supplémentaires
-const META_DESC = 'TrimBox DIY — Console d\'analyse pour RC/GPS. Visualisez vos données de vitesse, distance, accélération en temps réel avec analyse de circuit et dragster.';
+const META_DESC = 'TrimBox — Console d\'analyse pour RC/GPS. Visualisez vos données de vitesse, distance, accélération en temps réel avec analyse de circuit et dragster.';
 const META_KEYWORDS = 'RC, GPS, TrimBox, analyse, vitesse, circuit, dragster, PWA';
 
 /* ==========================================================================
@@ -4069,7 +4071,7 @@ $('tabs').addEventListener('keydown', ev => {
 // Sur ordinateur, le journal a la place de s'afficher ouvert dans son onglet.
 if(matchMedia('(min-width:1100px)').matches) $('secLog').open = true;
 
-const CONSOLE_VER  = '1.7.16';
+const CONSOLE_VER  = '1.7.17';
 const CONSOLE_DATE = '20 septembre 2026';
 // En-tête : deux lignes courtes, « console v… » puis « firmware … » ; la
 // date de la console reste consultable au survol / appui long.

@@ -1,5 +1,5 @@
 // ============================================================================
-//  TrimBox DIY S3 — configuration de compilation
+//  TrimBox — configuration de compilation
 //  Cahier des charges. Les valeurs numériques ne sont PAS indicatives
 //  (v1, « Comment utiliser ce document ») : ne pas les changer sans raison.
 // ============================================================================
@@ -7,11 +7,11 @@
 
 // ---------------------------------------------------------------- identité
 #define DEVICE_NICKNAME   "Buggy 1"          // ≤ 16 caractères (§12.1)
-#define BRAND             "TrimBox DIY S3"
+#define BRAND             "TrimBox"
 #define DEVICE_NAME       "TrimBox " DEVICE_NICKNAME
-#define FIRMWARE_VER      "2.0-a13"
+#define FIRMWARE_VER      "2.0-a14"
 #define HARDWARE_VER      "ESP32-S3-DevKitC-1 N16R8"
-#define MANUFACTURER      "TrimBox DIY"
+#define MANUFACTURER      "TrimBox"
 #define BUILD_STAMP       __DATE__ " " __TIME__
 
 // ---------------------------------------------------------------- brochage

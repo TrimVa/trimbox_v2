@@ -1,4 +1,4 @@
-# Reprendre TrimBox DIY S3 avec un assistant IA
+# Reprendre TrimBox avec un assistant IA
 
 Cette archive contient **tout le projet** (firmware ESP32-S3, console web,
 script radio, tests, outils, documentation) et l'état du projet au format JSON.
@@ -18,7 +18,7 @@ limite la taille ou le nombre de fichiers, joindre au minimum, dans cet ordre :
 
 ## 2. Texte à coller en premier message
 
-> Je reprends le projet TrimBox DIY S3 (enregistreur GPS/IMU pour voiture RC
+> Je reprends le projet TrimBox (enregistreur GPS/IMU pour voiture RC
 > sur ESP32-S3, avec console web et script radio EdgeTX). Je te joins l'archive
 > de reprise : lis d'abord `trimbox-etat-projet.json` (en particulier
 > `regles_dures`, `etat` et `prochaines_etapes`), puis `CAHIER-DES-CHARGES.md`
@@ -61,7 +61,7 @@ limite la taille ou le nombre de fichiers, joindre au minimum, dans cet ordre :
 | `tools/` | Intégration de la console, schéma, boîtier, voix, sondes |
 | `docs/` | Schéma de câblage, boîtier imprimé 3D |
 | `.github/workflows/build-s3.yml` | Compilation et tests en ligne |
-| `binaires/` | Firmware 2.0-a13 compilé (mise à jour Wi-Fi et premier flash) |
+| `binaires/` | Firmware 2.0-a14 compilé (mise à jour Wi-Fi et premier flash) |
 
 ## 5. Vérifier que tout est en ordre (si l'assistant peut exécuter du code)
 

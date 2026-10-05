@@ -1,11 +1,11 @@
 {
-  "_lisezmoi": "Etat du projet TrimBox DIY S3 (ESP32-S3), a fournir a un assistant IA pour reprendre le developpement dans une conversation neuve. Lire d'abord 'regles_dures', puis 'etat', puis CAHIER-DES-CHARGES.md (§0 et §12). Le depot complet est decrit dans 'fichiers'.",
-  "projet": "TrimBox DIY S3",
+  "_lisezmoi": "Etat du projet TrimBox (ESP32-S3), a fournir a un assistant IA pour reprendre le developpement dans une conversation neuve. Lire d'abord 'regles_dures', puis 'etat', puis CAHIER-DES-CHARGES.md (§0 et §12). Le depot complet est decrit dans 'fichiers'.",
+  "projet": "TrimBox",
   "description": "Enregistreur de telemetrie GPS (25 Hz) et inertielle pour voitures RC, sur ESP32-S3-DevKitC-1 N16R8. Enregistrement autonome sur la flash interne de 16 Mo (154 333 points, 01h42min a 25 Hz), chronometrage au tour calcule dans le module avec lignes posees depuis la radio, telemetrie CRSF vers une RadioMaster MT12 (script Lua : affichage, annonces vocales, pose de ligne), console web par Bluetooth (GitHub Pages) ou par le Wi-Fi du module (console integree au firmware), mise a jour OTA par Wi-Fi avec retour arriere. Wi-Fi et Bluetooth coupes quand la voiture roule.",
   "date_export": "2026-10-05",
   "versions": {
-    "firmware": "2.0-a13",
-    "console_web": "1.7.16",
+    "firmware": "2.0-a14",
+    "console_web": "1.7.17",
     "script_lua": "trmbox.lua 2.3",
     "cahier_des_charges": "3.0 (document unique ESP32-S3, remplace les anciens v1 et v2 ; annexe A = correspondance des anciens renvois)",
     "core_esp32": "esp32:esp32@3.3.12",
@@ -27,7 +27,7 @@
     ],
     "pourquoi": "Trois corruptions par un LLM local, toutes presentees comme des 'optimisations', syntaxiquement plausibles et indetectables sans execution (CDC §12.23).",
     "validation_console": "Valider toute modification en EXECUTANT la page : tests/web/console_web_test.py (Chromium + vrai serveur du firmware) et tests/native/console_check.js. Une verification de syntaxe seule a deja laisse passer plusieurs bugs graves.",
-    "versionnage_console": "Incrementer CONSOLE_VER a CHAQUE modification (actuellement 1.7.16, prochaine 1.7.17), puis python3 tools/embed_console.py (regenere trimbox_s3/src/console_gz.h).",
+    "versionnage_console": "Incrementer CONSOLE_VER a CHAQUE modification (actuellement 1.7.17, prochaine 1.7.18), puis python3 tools/embed_console.py (regenere trimbox_s3/src/console_gz.h).",
     "lua": "INTERDIT d'utiliser table.insert / table.remove / table.concat ni ipairs dans lua/trmbox.lua : EdgeTX n'expose pas la bibliotheque 'table' aux scripts de telemetrie (plantage radio au premier tour recu). Garde-fou : les bancs Lua posent table = nil avant de charger le script.",
     "partitions": "trimbox_s3/partitions.csv ne change JAMAIS dans une mise a jour Wi-Fi (OTA) : la table n'est reecrite que par un flash cable.",
     "securite": "Le module ne pilote jamais la voiture (direction et ESC sur le recepteur). Wi-Fi et Bluetooth coupes sans condition quand la voiture roule.",
@@ -52,8 +52,8 @@
       "Mixage CH8 configure sur la MT12 (4 octobre 2026)"
     ],
     "a_valider_sur_materiel": [
-      "Console 1.7.16 : verifier la disposition en onglets et la selection de portion dans la comparaison sur l'ecran reel (Firefox et Chrome, souris et doigt)",
-      "Firmware 2.0-a13 installe (OTA) : 'b' doit afficher BLE actif a l'arret puis COUPE en roulant",
+      "Console 1.7.17 : verifier la disposition en onglets et la selection de portion dans la comparaison sur l'ecran reel (Firefox et Chrome, souris et doigt)",
+      "Firmware 2.0-a14 installe (OTA) : 'b' doit afficher BLE actif a l'arret puis COUPE en roulant",
       "IMU dans le firmware complet (touche m)",
       "Pose de ligne depuis la radio, a l'arret (ligne armee 10 s) et lancee",
       "Enregistrement automatique en roulage (une session par roulage)",
@@ -82,10 +82,11 @@
     "Voix : les 12 mots generes (WAV 16 bits mono 16 kHz, voix Azure du pack EdgeTX) ajoutes au depot dans lua/SOUNDS/trimbox/ (a copier a la racine de la carte SD).",
     "Console 1.7.14 : sur ordinateur (>= 1100 px), toute la largeur et onglets Appareil / Analyse / Sessions / Reglages (body[data-tab] + data-pane), panneaux en tuiles flex-wrap, analyse en deux zones (carte/profil a gauche, chiffres/tours a droite), message d'attente sans session, sessions en grille, journal ouvert dans Reglages. Telephone et tablette inchanges. tests/web verifie le contenu de chaque onglet et l'absence de defilement jusqu'a 2560 px. Retour utilisateur a l'origine : disposition 2 colonnes desequilibree sur ecran de 2000 px.",
     "Console 1.7.15 : onglet Sessions, le panneau 'Ouvrir des enregistrements' prend la hauteur du panneau Sessions et son bouton s'aligne sur la ligne 'Tout exporter' (demande utilisateur).",
-    "Console 1.7.16 : comparaison, profil gradue en metres depuis le depart (et non plus en fraction du parcours), survol avec vitesse de chaque session, portion selectionnee en glissant (pointer events, touch-action pan-y) avec tableau par session (duree + ecart au meilleur, V max/moy/mini, G, air, points) et portion surlignee sur les trajectoires ; appui simple ou 'Effacer' pour retirer. tests/web : selection, tableau, profil immobile, effacement (demande utilisateur)."
+    "Console 1.7.16 : comparaison, profil gradue en metres depuis le depart (et non plus en fraction du parcours), survol avec vitesse de chaque session, portion selectionnee en glissant (pointer events, touch-action pan-y) avec tableau par session (duree + ecart au meilleur, V max/moy/mini, G, air, points) et portion surlignee sur les trajectoires ; appui simple ou 'Effacer' pour retirer. tests/web : selection, tableau, profil immobile, effacement (demande utilisateur).",
+    "Renommage : le projet s'appelle TrimBox (et non plus TrimBox DIY / TrimBox DIY S3) dans la console, les documents, les outils et le firmware. Firmware 2.0-a14 : BRAND et MANUFACTURER = 'TrimBox' (FF F0, BLE 2A24/2A29). Console 1.7.17 : fonctions S3 decidees par la version annoncee (>= 2) ou un modele contenant 'S3' (anciennes 2.0-a1..a13). Nom de fichier trimbox-diy-console-demo.html conserve (redirection des anciens liens). Depot GitHub : trimbox."
   ],
   "prochaines_etapes": [
-    "1) Installer trimbox_s3-app.bin (2.0-a13, console 1.7.13) par la console Wi-Fi ; verifier la version au demarrage et la ligne BLE de 'b'.",
+    "1) Installer trimbox_s3-app.bin (2.0-a14, console 1.7.17) par la console Wi-Fi ; verifier la version au demarrage et la ligne BLE de 'b'.",
     "2) Roulage : pose de ligne depuis la radio, enregistrement automatique, tours radio / module / console, radios qui reviennent au stand.",
     "3) Bancs materiels restants (CDC §11.2) et boitier.",
     "4) Nettoyages console (pistes_non_traitees)."
@@ -195,7 +196,7 @@
       "correctif": "1.7.13 : fitCanvas (resolution interne = taille affichee x densite, plafond x2), textes et traits a l'echelle, libelle sous la ligne"
     }
   ],
-  "prompt_de_reprise": "Je reprends le projet TrimBox DIY S3 (enregistreur GPS/IMU pour voiture RC sur ESP32-S3, avec console web et script radio EdgeTX). Je te joins l'archive de reprise : lis d'abord trimbox-etat-projet.json (en particulier 'regles_dures', 'etat' et 'prochaines_etapes'), puis CAHIER-DES-CHARGES.md §0 (regles dures) et §12 (pieges connus), puis les fichiers concernes par ma demande. Respecte la convention de versionnage de la console (CONSOLE_VER + tools/embed_console.py). Valide toute modification de la console en EXECUTANT le script (tests/web, tests/native/console_check.js), toute modification du firmware par make -C tests/native (et QEMU si possible), toute modification du script Lua par tests/lua. Mets a jour trimbox-etat-projet.json et le cahier des charges a la fin. Reponds en francais, commentaires du code en francais.",
+  "prompt_de_reprise": "Je reprends le projet TrimBox (enregistreur GPS/IMU pour voiture RC sur ESP32-S3, avec console web et script radio EdgeTX). Je te joins l'archive de reprise : lis d'abord trimbox-etat-projet.json (en particulier 'regles_dures', 'etat' et 'prochaines_etapes'), puis CAHIER-DES-CHARGES.md §0 (regles dures) et §12 (pieges connus), puis les fichiers concernes par ma demande. Respecte la convention de versionnage de la console (CONSOLE_VER + tools/embed_console.py). Valide toute modification de la console en EXECUTANT le script (tests/web, tests/native/console_check.js), toute modification du firmware par make -C tests/native (et QEMU si possible), toute modification du script Lua par tests/lua. Mets a jour trimbox-etat-projet.json et le cahier des charges a la fin. Reponds en francais, commentaires du code en francais.",
   "depot": "Depot autonome de la version ESP32-S3. La version XIAO nRF52840 (v1) n'est plus suivie.",
   "fichiers": [
     {

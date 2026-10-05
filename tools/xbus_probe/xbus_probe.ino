@@ -1,5 +1,5 @@
 // ============================================================================
-//  TrimBox DIY — sonde de la prise secondaire d'un variateur (« X-Bus »)
+//  TrimBox — sonde de la prise secondaire d'un variateur (« X-Bus »)
 //
 //  Croquis AUTONOME pour ESP32-S3 : il ne fait rien d'autre qu'interroger la
 //  prise de données du variateur et afficher tout ce qui en revient.

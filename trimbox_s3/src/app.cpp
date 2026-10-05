@@ -1,5 +1,5 @@
 // ============================================================================
-//  TrimBox DIY S3 — application
+//  TrimBox — application
 //
 //  Boucle principale NON BLOQUANTE, dans cet ordre strict (§4.1) : le
 //  protocole passe avant tout le reste, pour qu'aucune commande ne reste

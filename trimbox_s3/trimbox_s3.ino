@@ -1,5 +1,5 @@
 // ============================================================================
-//  TrimBox DIY S3 — enregistreur GPS/inertiel pour voitures RC
+//  TrimBox — enregistreur GPS/inertiel pour voitures RC
 //  ESP32-S3 (N16R8), GNSS u-blox M10, IMU LSM6DS3, télémétrie CRSF.
 //
 //  Spécification : CAHIER-DES-CHARGES.md.

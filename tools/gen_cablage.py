@@ -1,4 +1,4 @@
-# Schéma de câblage TrimBox DIY S3 — génère docs/cablage-trimbox-s3.svg
+# Schéma de câblage TrimBox — génère docs/cablage-trimbox-s3.svg
 # Usage : python3 tools/gen_cablage.py   (PDF : cairosvg docs/cablage-trimbox-s3.svg -o docs/cablage-trimbox-s3.pdf)
 W, H = 1900, 1060
 out = []
@@ -22,9 +22,12 @@ C = dict(v5='#d62828', v33='#f08c00', gnd='#2b2b2b', gtx='#2a9d8f', grx='#1d6fb8
 
 a(f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}" font-family="Arial, Helvetica, sans-serif">')
 a(f'<rect width="{W}" height="{H}" fill="#fbfaf7"/>')
-text(40, 48, 'TrimBox DIY S3 — schéma de câblage', 26, weight='700')
+text(40, 48, 'TrimBox — schéma de câblage', 26, weight='700')
 text(40, 74, 'ESP32-S3-DevKitC-1 (N16R8) · GPS HGLRC M100 Mini · IMU LSM6DS3 · récepteur RadioMaster ER5C-i (ExpressLRS) · ESC XC-E8', 14, fill='#555')
-text(40, 94, 'Firmware 2.0-a12 — brochage défini dans trimbox_s3/src/config.h', 13, fill='#777')
+import os, re
+_cfg = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'trimbox_s3', 'src', 'config.h'), encoding='utf-8').read()
+FW = re.search(r'#define\s+FIRMWARE_VER\s+"([^"]+)"', _cfg).group(1)   # version lue dans config.h
+text(40, 94, f'Firmware {FW} — brochage défini dans trimbox_s3/src/config.h', 13, fill='#777')
 
 # ---------------------------------------------------------------- carte ESP32
 BX, BY, BW, BH = 940, 150, 270, 720

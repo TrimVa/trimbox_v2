@@ -1,5 +1,5 @@
 // ============================================================================
-//  TrimBox DIY — service worker
+//  TrimBox — service worker
 //  ---------------------------------------------------------------------------
 //  Optionnel : la console fonctionne intégralement sans ce fichier (elle est
 //  déjà autonome, sans dépendance externe). Ce qu'il ajoute :
@@ -15,7 +15,7 @@
 //  choix de conception ici).
 // ============================================================================
 
-const CACHE_NAME = 'trimbox-diy-v1';
+const CACHE_NAME = 'trimbox-v1';
 
 // Seule la page elle-même est mise en cache : la console n'a aucune autre
 // ressource (pas de feuille de style, pas de script, pas d'image externes).

@@ -1,5 +1,5 @@
 ﻿# ============================================================================
-#  TrimBox DIY — génère les 12 mots du script radio avec la voix Azure
+#  TrimBox — génère les 12 mots du script radio avec la voix Azure
 #  fr-FR-DeniseNeural : la MÊME voix que le pack français officiel d'EdgeTX,
 #  dans le même format (WAV 16 bits, mono, 16 kHz, réglages par défaut).
 #
@@ -52,7 +52,7 @@ foreach ($nom in $mots.Keys) {
             -Headers @{
                 "Ocp-Apim-Subscription-Key" = $cle
                 "X-Microsoft-OutputFormat"  = $format
-                "User-Agent"                = "TrimBoxDIY"
+                "User-Agent"                = "TrimBox"
             } `
             -ContentType "application/ssml+xml; charset=utf-8" `
             -Body ([System.Text.Encoding]::UTF8.GetBytes($ssml))

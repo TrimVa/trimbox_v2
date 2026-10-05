@@ -1,4 +1,4 @@
-# TrimBox DIY S3 — firmware 2.0-a13
+# TrimBox — firmware 2.0-a14
 
 Firmware ESP32-S3. Spécification : `CAHIER-DES-CHARGES.md` (à la racine du
 dépôt). État au 4 octobre 2026.

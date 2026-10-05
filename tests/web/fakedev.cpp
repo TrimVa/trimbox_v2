@@ -133,7 +133,7 @@ int main(int argc, char** argv){
         auto reply = [&](uint8_t id, const uint8_t* pl, uint16_t len){
           uint8_t fr[300]; size_t m = tb::build(fr, 0xFF, id, pl, len); c->conn.sendBinary(fr, m); };
         while(c->rx.next(f)){
-          if(f.id == tb::ID_BUILD){ std::string t = "TrimBox DIY S3|2.0-a2|" + g_stamp + "|16|Banc PC"; reply(tb::ID_BUILD, (const uint8_t*)t.data(), (uint16_t)t.size()); }
+          if(f.id == tb::ID_BUILD){ std::string t = "TrimBox|2.0-a2|" + g_stamp + "|16|Banc PC"; reply(tb::ID_BUILD, (const uint8_t*)t.data(), (uint16_t)t.size()); }
           else if(f.id == tb::ID_STATUS){ uint8_t s[12] = {recState ? (uint8_t)1 : (uint8_t)0, 1, 0, 0}; put_le32(s+4, N + 2); put_le32(s+8, 154333); reply(tb::ID_STATUS, s, 12); }
           else if(f.id == tb::ID_CONFIG && f.len == 0){ uint8_t s[12] = {recState, 0, 0x3F, 0}; put_le16(s+4, 1389); put_le16(s+6, 30); put_le16(s+8, 30); put_le16(s+10, 300); reply(tb::ID_CONFIG, s, 12); }
           else if(f.id == tb::ID_CONFIG){ recState = f.payload[0] ? 1 : 0; uint8_t s[12] = {recState}; reply(tb::ID_STATE, s, 12); uint8_t ak[2] = {0xFF, tb::ID_CONFIG}; reply(tb::ID_ACK, ak, 2); }

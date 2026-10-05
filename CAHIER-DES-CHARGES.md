@@ -1,7 +1,7 @@
-# TrimBox DIY S3 — Cahier des charges
+# TrimBox — Cahier des charges
 
 **Version du document :** 3.0 — 4 octobre 2026
-**Cible :** firmware **2.0-a13** (ESP32-S3), console web **1.7.16**, script radio
+**Cible :** firmware **2.0-a14** (ESP32-S3), console web **1.7.17**, script radio
 `trmbox.lua` **2.3**.
 **Remplace :** les anciens `CAHIER-DES-CHARGES.md` (v1, carte XIAO nRF52840) et
 `CAHIER-DES-CHARGES-V2.md` (v2). Ce document est **autonome** : il ne décrit que
@@ -49,7 +49,7 @@ matériel : le banc correspondant (§11.2) doit passer avant de bâtir dessus.
 
 ### 1.1 Objet
 
-TrimBox DIY S3 est un **enregistreur de télémétrie GPS (25 Hz) et inertielle
+TrimBox est un **enregistreur de télémétrie GPS (25 Hz) et inertielle
 pour voitures radiocommandées**, construit autour d'un **ESP32-S3**. Il :
 
 - enregistre de façon autonome sur sa flash interne de 16 Mo, sans téléphone ;
@@ -104,7 +104,7 @@ Fichiers annexes : `trimbox-sw.js` (service worker, optionnel),
 
 | Sujet | État |
 |---|---|
-| Firmware 2.0-a13 | Écrit, testé sur PC, dans un navigateur et sous émulateur ; compile (1,26 Mo, 62 % de la partition) |
+| Firmware 2.0-a14 | Écrit, testé sur PC, dans un navigateur et sous émulateur ; compile (1,26 Mo, 62 % de la partition) |
 | GPS sur la carte | ✅ fix 3D, 13 satellites, ~20 Hz |
 | IMU | ✅ capteur validé avec `tools/imu_test` (\|a\| = 0,99 g) ; à revérifier dans le firmware complet |
 | Script Lua sur la MT12 | ✅ affichage, tours, annonces vocales, accusés de pose ; ✅ mixage CH8 configuré |
@@ -231,7 +231,7 @@ RX       6E400002-B5A3-F393-E0A9-E50E24DCCA9E   écriture       (console → mod
 TX       6E400003-B5A3-F393-E0A9-E50E24DCCA9E   notification   (module → console)
 ```
 
-Service Device Information (`0x180A`) : modèle `2A24` (`TrimBox DIY S3`), série
+Service Device Information (`0x180A`) : modèle `2A24` (`TrimBox`), série
 `2A25` (dérivée de l'adresse MAC), firmware `2A26`, matériel `2A27`, fabricant
 `2A29`. **Le nom annoncé commence par `TrimBox`** : c'est le filtre de la
 console. MTU demandé : 247. Écritures acceptées jusqu'à 512 octets (§12.2).
@@ -352,12 +352,13 @@ Requête vide, réponse ASCII, champs séparés par `|` :
 
 ```
 MODÈLE|VERSION|DATE_COMPILATION|PLAGE_G|PSEUDO
-TrimBox DIY S3|2.0-a13|Oct  4 2026 23:30:12|16|Buggy 1
+TrimBox|2.0-a14|Oct  4 2026 23:30:12|16|Buggy 1
 ```
 
-- Le **modèle** décide côté console des fonctions v2 : s'il contient `S3`, le
-  téléchargement demande les emplacements `0x29` et la console lit les lignes
-  (`FF F1`).
+- La **version** décide côté console des fonctions du firmware S3 : à partir
+  de la version 2 (ou si le modèle contient `S3`, nom annoncé par les versions
+  2.0-a1 à 2.0-a13 : « TrimBox DIY S3 »), le téléchargement demande les
+  emplacements `0x29` et la console lit les lignes (`FF F1`).
 - L'**empreinte de compilation** permet à la console de vérifier, après une
   mise à jour, quelle version tourne réellement (§7).
 - Un appareil tiers répond NACK : la console traite ce cas sans erreur.
@@ -629,7 +630,7 @@ Les couleurs se superposent (rouge + bleu = violet). **Bouton BOOT, appui long
 | Réglage | Défaut | Rôle |
 |---|---|---|
 | `DEVICE_NICKNAME` | `"Buggy 1"` | ≤ 16 caractères (§12.1) : `TrimBox Buggy 1` en Bluetooth, `TrimBox-Buggy-1` en Wi-Fi |
-| `FIRMWARE_VER` | `"2.0-a13"` | Version annoncée (`FF F0`, journal) |
+| `FIRMWARE_VER` | `"2.0-a14"` | Version annoncée (`FF F0`, journal) |
 | `WIFI_PASS` | `"trimbox-rc"` | Mot de passe WPA2 du point d'accès (8 caractères min.) — **à personnaliser** |
 | `WIFI_AUTO_DEFAULT` | `1` | Wi-Fi automatique à l'arrêt |
 | `WIFI_AUTO_ON_S` | `30` | Arrêt continu avant allumage du Wi-Fi |
@@ -1035,7 +1036,7 @@ doit être réellement fonctionnel.
 
 ### 8.12 Versionnage
 
-Constante `CONSOLE_VER` (actuellement **1.7.16**), affichée dans l'en-tête,
+Constante `CONSOLE_VER` (actuellement **1.7.17**), affichée dans l'en-tête,
 incrémentée à **chaque** modification ; après `x.y.9`, passer à `x.y.10` (puis
 selon la convention en cours). Sert d'indicateur de cache. Après toute
 modification : `python3 tools/embed_console.py`.
@@ -1159,7 +1160,7 @@ Pièges de l'émulateur : §12.19 (variante `-DTRIMBOX_QEMU`, jamais flashée).
 
 Firmware :
 
-- [ ] Au démarrage, le journal affiche marque, pseudo, version (2.0-a13),
+- [ ] Au démarrage, le journal affiche marque, pseudo, version (2.0-a14),
       empreinte de compilation, `mémoire : n / 154333`.
 - [ ] `b` : GNSS 25 Hz dehors, IMU présente, CRSF « liaison OK », BLE actif.
 - [ ] Un roulage ouvre une session et la ferme 30 s après l'arrêt.

@@ -1,8 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1900" height="1060" viewBox="0 0 1900 1060" font-family="Arial, Helvetica, sans-serif">
 <rect width="1900" height="1060" fill="#fbfaf7"/>
-<text x="40" y="48" font-size="26" text-anchor="start" font-weight="700" fill="#1d1d28">TrimBox DIY S3 — schéma de câblage</text>
+<text x="40" y="48" font-size="26" text-anchor="start" font-weight="700" fill="#1d1d28">TrimBox — schéma de câblage</text>
 <text x="40" y="74" font-size="14" text-anchor="start" font-weight="400" fill="#555">ESP32-S3-DevKitC-1 (N16R8) · GPS HGLRC M100 Mini · IMU LSM6DS3 · récepteur RadioMaster ER5C-i (ExpressLRS) · ESC XC-E8</text>
-<text x="40" y="94" font-size="13" text-anchor="start" font-weight="400" fill="#777">Firmware 2.0-a12 — brochage défini dans trimbox_s3/src/config.h</text>
+<text x="40" y="94" font-size="13" text-anchor="start" font-weight="400" fill="#777">Firmware 2.0-a14 — brochage défini dans trimbox_s3/src/config.h</text>
 <rect x="940" y="150" width="270" height="720" rx="10" fill="#243447" stroke="#10202f" stroke-width="2"/>
 <rect x="1030.0" y="300" width="90" height="80" rx="4" fill="#9aa7b4" stroke="#5d6b78" stroke-width="1.6"/>
 <text x="1075.0" y="335" font-size="12" text-anchor="middle" font-weight="700" fill="#10202f">ESP32-S3</text>

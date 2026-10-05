@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Boîtier TrimBox DIY S3 — voiture 1/10 — version 2, SANS AUCUNE VIS.
+Boîtier TrimBox — voiture 1/10 — version 2, SANS AUCUNE VIS.
 Génère docs/boitier/trimbox-boitier.3mf (fond + couvercle, orientés pour
 l'impression).
 
@@ -236,8 +236,8 @@ def write_3mf(path, objects):
         items.append(f'<item objectid="{i}"/>')
     model = ('<?xml version="1.0" encoding="UTF-8"?>\n'
              '<model unit="millimeter" xml:lang="fr-FR" xmlns="http://schemas.microsoft.com/3dmanufacturing/core/2015/02">'
-             '<metadata name="Title">TrimBox DIY S3 — boîtier 1/10 sans vis</metadata>'
-             '<metadata name="Designer">TrimBox DIY</metadata>'
+             '<metadata name="Title">TrimBox — boîtier 1/10 sans vis</metadata>'
+             '<metadata name="Designer">TrimBox</metadata>'
              f'<resources>{"".join(parts)}</resources><build>{"".join(items)}</build></model>')
     ct = ('<?xml version="1.0" encoding="UTF-8"?>\n<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
           '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'

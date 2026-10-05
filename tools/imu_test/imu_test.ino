@@ -1,5 +1,5 @@
 // ============================================================================
-//  TrimBox DIY — firmware de TEST de la centrale inertielle (IMU)
+//  TrimBox — firmware de TEST de la centrale inertielle (IMU)
 //
 //  Croquis autonome pour ESP32-S3, à flasher à la place du firmware TrimBox
 //  le temps du diagnostic. Moniteur série à 115200 bauds.
@@ -100,7 +100,7 @@ static const char* nomPuce(uint8_t addr, uint8_t& who){
 
 static void diagnostic(){
   g_lsm = false; g_addr = 0;
-  Serial.println("\n=========== TEST IMU — TrimBox DIY ===========");
+  Serial.println("\n=========== TEST IMU — TrimBox ===========");
   Serial.println("1) état électrique");
   lignes();
 

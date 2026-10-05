@@ -1,4 +1,4 @@
-# TrimBox DIY S3 — table de partitions, flash 16 Mo (§2.4)
+# TrimBox — table de partitions, flash 16 Mo (§2.4)
 # Le journal commence à 0x414000 et va jusqu'à la fin de la flash.
 # Nom,     Type, Sous-type, Adresse,  Taille
 nvs,       data, nvs,       0x9000,   0x5000

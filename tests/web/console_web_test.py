@@ -74,6 +74,12 @@ try:
         # firmware S3 : lignes posées depuis la radio, lues à la connexion (FF F1)
         ml = pg.evaluate("moduleLines && [moduleLines.mode, moduleLines.channel, +moduleLines.start.head.toFixed(1)]")
         check(ml == [1, 8, 90.0], f'lignes du module lues (FF F1) : {ml}')
+        # fonctions S3 : décidées par la version (modèle « TrimBox » depuis 2.0-a14)
+        s3 = pg.evaluate("""(() => { const keep = [fwModel, fwVerAnn], out = [];
+            for(const [m, v] of [['TrimBox', '2.0-a14'], ['TrimBox DIY S3', '2.0-a13'], ['TrimBox DIY', '1.4']]){
+              fwModel = m; fwVerAnn = v; out.push(isS3()); }
+            [fwModel, fwVerAnn] = keep; return out; })()""")
+        check(s3 == [True, True, False], f'détection du firmware S3 (2.0-a14, ancien nom, v1) : {s3}')
         auto = pg.evaluate("[analMode, !!anal.lineB, !anal.lineA, (anal.laps || []).map(l => +l.time.toFixed(3))]")
         check(auto[0] == 'circuit' and auto[1] and auto[2] and len(auto[3]) == 2 and all(abs(t - 15) < 0.01 for t in auto[3]),
               f'ligne du module posée d\'office dans l\'analyse : {auto}')

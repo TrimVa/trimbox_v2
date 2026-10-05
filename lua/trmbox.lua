@@ -1,5 +1,5 @@
 -- ===========================================================================
---  TrimBox DIY — script de télémétrie EdgeTX pour RadioMaster MT12 (128×64)
+--  TrimBox — script de télémétrie EdgeTX pour RadioMaster MT12 (128×64)
 --  À copier dans  SCRIPTS/TELEMETRY/trmbox.lua  (6 caractères au plus : limite
 --  d'EdgeTX pour les scripts de télémétrie des écrans monochromes), puis
 --  Modèle → Télémétrie → Écran 1 → Script → trmbox.
