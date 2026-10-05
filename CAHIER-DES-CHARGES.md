@@ -1089,7 +1089,8 @@ caractères** au plus : limite d'EdgeTX pour les écrans monochromes).
   `egal`, `depart`, `arrivee`, `efface`, `arme`, `delai`, `vitfaib`, `pasgps`,
   `refus`) de `SOUNDS/trimbox/` (ou `trmbox/`, `fr/trimbox/`), WAV 16 bits mono
   16 kHz, fournis dans `lua/SOUNDS/trimbox/` ; sans eux, des bips. Génération :
-  `tools/sons/generer-voix.bat` (voix Azure du pack EdgeTX).
+  `tools/sons/generer-voix.bat` (voix Azure du pack EdgeTX) ; mots
+  supplémentaires à la demande : `tools/sons/generer-mot.bat`.
 - **Heure** : capteur `Date` (trame `0x03`) convertie en heure locale
   (`TZ_OFFSET` 1, heure d'été européenne `TZ_EU_DST`).
 - ⚠️ **Règle dure** : un script de télémétrie n'a **pas** la bibliothèque

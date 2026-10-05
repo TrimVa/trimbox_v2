@@ -91,7 +91,9 @@ liste au format des générateurs officiels d'EdgeTX
 d'EdgeTX est lu par la voix Azure **fr-FR-DeniseNeural**. Le script
 `tools/sons/generer-voix.bat` (Windows) produit les 12 mots avec cette même
 voix et dans le même format, à partir d'une clé Azure gratuite : mode
-d'emploi dans `tools/sons/LISEZMOI-voix.md`.
+d'emploi dans `tools/sons/LISEZMOI-voix.md`. Pour **d'autres mots**, au choix,
+`tools/sons/generer-mot.bat` demande le texte et le nom du fichier, fait
+écouter le résultat et le range dans `SOUNDS\trimbox\`.
 
 **Format exigé par EdgeTX** : WAV PCM **16 bits, mono, 32 kHz** (8 ou 16 kHz
 acceptés), sans silence au début ni à la fin. Conversion avec ffmpeg :

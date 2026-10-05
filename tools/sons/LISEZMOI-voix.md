@@ -32,6 +32,31 @@ même voix et ce même format** : ils se fondent dans les annonces de nombres.
 | `arme.wav` / `delai.wav` | ligne armée, roulez / délai dépassé |
 | `vitfaib.wav` / `pasgps.wav` / `refus.wav` | vitesse trop faible / pas de GPS / commande refusée |
 
+## 2 bis. Générer d'autres mots, à la demande
+
+Double-clic sur **`generer-mot.bat`** (même dossier). Le script :
+
+1. demande la clé et la région (il peut les **mémoriser** dans
+   `azure-cle.txt`, à côté du script, pour ne plus les redemander ; supprimer
+   ce fichier pour les oublier, ne pas le partager) ;
+2. demande le dossier de destination (Entrée = `SOUNDS\trimbox\`) ;
+3. puis, en boucle :
+   - le **texte à prononcer** (un mot ou une phrase ; Entrée seule pour
+     terminer) ;
+   - le **nom du fichier** : il en propose un, tiré du texte (« Arrivée
+     posée » → `arriveep`) ; **8 caractères au plus**, minuscules sans accent,
+     chiffres, `-` ou `_` ;
+   - il fait **écouter** le résultat, puis : *Entrée* = garder,
+     `e` = réécouter, `t` = changer le texte (une autre orthographe corrige
+     souvent une prononciation), `l` / `r` = 10 % plus lent / plus rapide,
+     `a` = abandonner. Un fichier existant n'est remplacé qu'après
+     confirmation.
+
+Un mot nouveau ne sera prononcé par la radio que si quelque chose le joue :
+le script `trmbox.lua` (qui ne connaît que les 12 mots ci-dessus) ou une
+*fonction spéciale* EdgeTX « Jouer piste ». Pour **remplacer** un des 12 mots
+(autre formulation, autre débit), lui donner exactement le même nom.
+
 ## 3. Copier sur la radio
 
 MT12 branchée en USB, mode *Stockage USB* : copier le dossier **`SOUNDS`**

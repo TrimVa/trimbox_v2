@@ -11,3 +11,6 @@ __pycache__/
 # Fichiers système
 .DS_Store
 Thumbs.db
+# Clé Azure mémorisée par tools/sons/generer-mot.ps1 (secret, jamais publié)
+tools/sons/azure-cle.txt
+azure-cle.txt

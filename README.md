@@ -240,7 +240,8 @@ Mode d'emploi complet : **[lua/LISEZMOI.md](lua/LISEZMOI.md)**.
   `lua/SOUNDS/trimbox/` (copier `lua/SOUNDS` à la racine de la carte SD). Ils
   ont été produits par `tools/sons/generer-voix.bat` avec la voix Azure du pack
   EdgeTX (liste : `tools/sons/liste-sons-mt12.csv`). Sans eux, des bips les
-  remplacent.
+  remplacent. `tools/sons/generer-mot.bat` produit à la demande d'autres mots
+  ou phrases avec la même voix (texte et nom demandés, écoute avant d'enregistrer).
 - **Date et heure GPS** : le module envoie la trame CRSF `0x03` une fois par
   seconde. Il faut **ExpressLRS 4.1 ou plus récent** sur l'émetteur **et** sur
   le récepteur pour qu'elle soit relayée, et une version d'EdgeTX qui la

@@ -84,7 +84,8 @@
     "Console 1.7.15 : onglet Sessions, le panneau 'Ouvrir des enregistrements' prend la hauteur du panneau Sessions et son bouton s'aligne sur la ligne 'Tout exporter' (demande utilisateur).",
     "Console 1.7.16 : comparaison, profil gradue en metres depuis le depart (et non plus en fraction du parcours), survol avec vitesse de chaque session, portion selectionnee en glissant (pointer events, touch-action pan-y) avec tableau par session (duree + ecart au meilleur, V max/moy/mini, G, air, points) et portion surlignee sur les trajectoires ; appui simple ou 'Effacer' pour retirer. tests/web : selection, tableau, profil immobile, effacement (demande utilisateur).",
     "Renommage : le projet s'appelle TrimBox (et non plus TrimBox DIY / TrimBox DIY S3) dans la console, les documents, les outils et le firmware. Firmware 2.0-a14 : BRAND et MANUFACTURER = 'TrimBox' (FF F0, BLE 2A24/2A29). Console 1.7.17 : fonctions S3 decidees par la version annoncee (>= 2) ou un modele contenant 'S3' (anciennes 2.0-a1..a13). Nom de fichier trimbox-diy-console-demo.html conserve (redirection des anciens liens). Depot GitHub : TrimVa/trimbox_v2.",
-    "tests/web : toute requete hors du module est refusee (regex sur l'hote) ; l'ancien filtre '**/arcgisonline.com/**' ne reconnaissait pas server.arcgisonline.com, si bien que sur GitHub (runner avec Internet) le message 'pas d'Internet' du satellite n'apparaissait jamais et le job 'Console embarquee' echouait. Le test verifie maintenant que les tuiles sont bien interceptees."
+    "tests/web : toute requete hors du module est refusee (regex sur l'hote) ; l'ancien filtre '**/arcgisonline.com/**' ne reconnaissait pas server.arcgisonline.com, si bien que sur GitHub (runner avec Internet) le message 'pas d'Internet' du satellite n'apparaissait jamais et le job 'Console embarquee' echouait. Le test verifie maintenant que les tuiles sont bien interceptees.",
+    "Voix : tools/sons/generer-mot.bat / .ps1, generation a la demande (texte et nom demandes, nom propose sans accent <= 8 caracteres, ecoute avant d'enregistrer, vitesse +/-10 %, cle Azure memorisable dans azure-cle.txt ignore par git). Teste sous PowerShell 7 contre un faux service Azure (SSML echappe, prosody, 401)."
   ],
   "prochaines_etapes": [
     "1) Installer trimbox_s3-app.bin (2.0-a14, console 1.7.17) par la console Wi-Fi ; verifier la version au demarrage et la ligne BLE de 'b'.",
@@ -202,33 +203,33 @@
   "fichiers": [
     {
       "chemin": ".github/workflows/build-s3.yml",
-      "octets": 8220,
-      "sha1": "6af393266e82"
+      "octets": 8213,
+      "sha1": "b03b9da0b998"
     },
     {
       "chemin": ".gitignore",
-      "octets": 264,
-      "sha1": "9463f9863546"
+      "octets": 384,
+      "sha1": "f5595a58a38a"
     },
     {
       "chemin": "CAHIER-DES-CHARGES.md",
-      "octets": 73227,
-      "sha1": "2b3445fa816d"
+      "octets": 74306,
+      "sha1": "27ad613aca26"
     },
     {
       "chemin": "DEMARRAGE.md",
-      "octets": 3930,
-      "sha1": "0c96bc107387"
+      "octets": 3923,
+      "sha1": "9f1b4788bb97"
     },
     {
       "chemin": "README.md",
-      "octets": 27206,
-      "sha1": "3696c6846aa5"
+      "octets": 27421,
+      "sha1": "3fa5dc48fcc9"
     },
     {
       "chemin": "REPRISE-IA.md",
-      "octets": 4074,
-      "sha1": "4197129ef07f"
+      "octets": 4060,
+      "sha1": "be677dc5ace5"
     },
     {
       "chemin": "docs/boitier/LISEZMOI.md",
@@ -242,28 +243,28 @@
     },
     {
       "chemin": "docs/boitier/trimbox-boitier.3mf",
-      "octets": 10317,
-      "sha1": "d92fa1f1b624"
+      "octets": 10306,
+      "sha1": "ad25b7152717"
     },
     {
       "chemin": "docs/cablage-trimbox-s3.pdf",
-      "octets": 168072,
-      "sha1": "b8e9a00d1073"
+      "octets": 167853,
+      "sha1": "46f2694675f5"
     },
     {
       "chemin": "docs/cablage-trimbox-s3.svg",
-      "octets": 26895,
-      "sha1": "207f8e9c2008"
+      "octets": 26888,
+      "sha1": "2fbcf8655626"
     },
     {
       "chemin": "index.html",
-      "octets": 181281,
-      "sha1": "890f7513483f"
+      "octets": 192907,
+      "sha1": "92f6335f7794"
     },
     {
       "chemin": "lua/LISEZMOI.md",
-      "octets": 10865,
-      "sha1": "89d47f8b73b8"
+      "octets": 11030,
+      "sha1": "4247671a74d5"
     },
     {
       "chemin": "lua/SOUNDS/trimbox/arme.wav",
@@ -327,8 +328,8 @@
     },
     {
       "chemin": "lua/trmbox.lua",
-      "octets": 18975,
-      "sha1": "518302c84cfb"
+      "octets": 18971,
+      "sha1": "7e0cb21cb623"
     },
     {
       "chemin": "tests/lua/radio_bridge.lua",
@@ -392,13 +393,13 @@
     },
     {
       "chemin": "tests/web/console_web_test.py",
-      "octets": 12552,
-      "sha1": "2ce21a4d27ef"
+      "octets": 15355,
+      "sha1": "4ffb484f729c"
     },
     {
       "chemin": "tests/web/fakedev.cpp",
-      "octets": 10078,
-      "sha1": "f68fa05a8127"
+      "octets": 10071,
+      "sha1": "efef1269cc2d"
     },
     {
       "chemin": "tools/embed_console.py",
@@ -407,28 +408,38 @@
     },
     {
       "chemin": "tools/gen_boitier.py",
-      "octets": 15024,
-      "sha1": "d9192230c8c7"
+      "octets": 15006,
+      "sha1": "4a294b361d87"
     },
     {
       "chemin": "tools/gen_cablage.py",
-      "octets": 10980,
-      "sha1": "24cc32926c6a"
+      "octets": 11211,
+      "sha1": "ed4365ab0ae3"
     },
     {
       "chemin": "tools/imu_test/imu_test.ino",
-      "octets": 7665,
-      "sha1": "6c1cabf39a2a"
+      "octets": 7657,
+      "sha1": "b84c05c2f2c4"
     },
     {
       "chemin": "tools/sons/LISEZMOI-voix.md",
-      "octets": 2312,
-      "sha1": "184c45472210"
+      "octets": 3612,
+      "sha1": "ac341ed1a8d0"
     },
     {
       "chemin": "tools/sons/fr-FR-trimbox-edgetx.csv",
       "octets": 27146,
       "sha1": "761e255d59ee"
+    },
+    {
+      "chemin": "tools/sons/generer-mot.bat",
+      "octets": 156,
+      "sha1": "b82bb8e90526"
+    },
+    {
+      "chemin": "tools/sons/generer-mot.ps1",
+      "octets": 8618,
+      "sha1": "e13f27e65ffa"
     },
     {
       "chemin": "tools/sons/generer-voix.bat",
@@ -437,8 +448,8 @@
     },
     {
       "chemin": "tools/sons/generer-voix.ps1",
-      "octets": 3615,
-      "sha1": "bd948bdbce1c"
+      "octets": 3608,
+      "sha1": "2736e78f71f0"
     },
     {
       "chemin": "tools/sons/liste-sons-mt12.csv",
@@ -452,23 +463,23 @@
     },
     {
       "chemin": "tools/xbus_probe/xbus_probe.ino",
-      "octets": 12990,
-      "sha1": "1b147425ff87"
+      "octets": 12986,
+      "sha1": "5f79096b3eb0"
     },
     {
       "chemin": "trimbox-diy-console-demo.html",
-      "octets": 873,
-      "sha1": "63dcdfc655e9"
+      "octets": 869,
+      "sha1": "e9347aa2e829"
     },
     {
       "chemin": "trimbox-etat-projet.json",
-      "octets": 27303,
+      "octets": null,
       "sha1": "(ce fichier)"
     },
     {
       "chemin": "trimbox-sw.js",
-      "octets": 2415,
-      "sha1": "dc051ebf3731"
+      "octets": 2407,
+      "sha1": "96698181bbba"
     },
     {
       "chemin": "trimbox_s3/.gitignore",
@@ -477,33 +488,33 @@
     },
     {
       "chemin": "trimbox_s3/LISEZMOI.md",
-      "octets": 10089,
-      "sha1": "bb284e9ac06e"
+      "octets": 10082,
+      "sha1": "c79e0a844c18"
     },
     {
       "chemin": "trimbox_s3/partitions.csv",
-      "octets": 452,
-      "sha1": "fb9f642b3434"
+      "octets": 445,
+      "sha1": "94bfce53ffbe"
     },
     {
       "chemin": "trimbox_s3/src/app.cpp",
-      "octets": 36721,
-      "sha1": "a1e684d10f99"
+      "octets": 36714,
+      "sha1": "272a4d5e38a9"
     },
     {
       "chemin": "trimbox_s3/src/app.h",
-      "octets": 133,
-      "sha1": "aae6278e8831"
+      "octets": 126,
+      "sha1": "79222008e9f5"
     },
     {
       "chemin": "trimbox_s3/src/config.h",
-      "octets": 6354,
-      "sha1": "d992a969d0c6"
+      "octets": 6336,
+      "sha1": "178b40369b9f"
     },
     {
       "chemin": "trimbox_s3/src/console_gz.h",
-      "octets": 302365,
-      "sha1": "9e11fe9de563"
+      "octets": 319719,
+      "sha1": "abd7ae834f39"
     },
     {
       "chemin": "trimbox_s3/src/core/airgate.cpp",
@@ -727,8 +738,8 @@
     },
     {
       "chemin": "trimbox_s3/trimbox_s3.ino",
-      "octets": 568,
-      "sha1": "5d604272b342"
+      "octets": 561,
+      "sha1": "f7713b658ebb"
     }
   ]
 }
