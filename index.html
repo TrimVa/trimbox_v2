@@ -314,6 +314,10 @@ details[open] summary::before{content:"▾ "}
   padding:2px 8px;white-space:nowrap}
 .sp b{font-weight:400;color:var(--mute);margin-right:5px}
 .cmpwrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+#secCompare{overflow-anchor:none}
+#cmpChart{touch-action:pan-y;cursor:crosshair;user-select:none;-webkit-user-select:none}
+.cmpSecHead{display:flex;align-items:center;justify-content:space-between;gap:var(--sp2);flex-wrap:wrap;margin-bottom:8px}
+.cmpSecHead>button{padding:6px 16px;min-height:36px}
 table.cmp{border-collapse:collapse;width:100%;min-width:430px;font-family:var(--mono);font-size:13px}
 table.cmp th,table.cmp td{padding:8px 10px;border-bottom:1px solid var(--line);
   text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;color:var(--ink)}
@@ -796,9 +800,21 @@ button.tool.active{background:var(--violet);color:var(--on-violet);box-shadow:no
     <table class="cmp" id="cmpTable"></table>
   </div>
 
-  <p class="hint" style="margin-top:12px">Vitesse en fonction de la distance parcourue : les tracés se superposent même si les sessions n'ont pas la même durée.</p>
+  <p class="hint" style="margin-top:12px">Vitesse en fonction de la distance parcourue depuis le départ de chaque session : une même abscisse correspond au même endroit du parcours.</p>
   <canvas id="cmpChart" width="900" height="260" style="width:100%;height:150px"></canvas>
   <div class="legend" id="cmpLegend"></div>
+  <p class="hint" id="cmpCursor">Glissez sur le profil pour sélectionner une portion du parcours.</p>
+
+  <div id="cmpSecBox" class="hide" style="margin-top:14px">
+    <div class="cmpSecHead">
+      <h2 style="margin:0">Portion sélectionnée — <span id="cmpSecRange" style="text-transform:none;letter-spacing:0;color:var(--ink)"></span></h2>
+      <button class="ghost" id="btnCmpClear" type="button">Effacer</button>
+    </div>
+    <div class="cmpwrap">
+      <table class="cmp" id="cmpSecTable"></table>
+    </div>
+    <p class="hint" id="cmpSecNote"></p>
+  </div>
 
   <p class="hint" style="margin-top:12px">Trajectoires superposées, recalées sur une origine commune.</p>
   <div class="mapwrap">
@@ -1387,35 +1403,111 @@ function paintCompare(){
     `<span class="lg-lab"><span class="swatch" style="background:${cmpColor(r.k)}"></span>${r.name}</span>`
   ).join('');
 
-  drawCompareChart(rows);
-  drawCompareMap(rows);
+  /* --- profil et portion sélectionnée --- */
+  // La portion est conservée tant que les sessions comparées ne changent pas.
+  const key = sel.map(i => i+':'+sessions[i].length).join(',');
+  if(!cmpView || cmpView.key !== key) cmpView = {key, sel:null, hover:null, geo:null};
+  cmpView.series = rows.map(r => {
+    const d = speedByDistance(sessions[r.i], CMP_N);
+    return d ? {...r, d, clean: r.st.clean, cum: cumDist(r.st.clean)} : null;
+  }).filter(Boolean);
+  cmpView.dmax = Math.max(0, ...cmpView.series.map(s => s.d.total));
+  drawCompareChart();
+  paintCmpCursor();
+  paintCmpSection();
+  drawCompareMap();
 }
 
-function drawCompareChart(rows){
+/* ---------- profil comparé : axe en mètres, sélection d'une portion ----------
+   L'axe horizontal est la distance parcourue depuis le départ de chaque
+   session, en mètres : une même abscisse désigne le même endroit du parcours
+   pour toutes les sessions (à leur point de départ près). Glisser sur le
+   profil choisit une portion [d0, d1] ; ses statistiques sont recalculées pour
+   chaque session et la portion est surlignée sur les trajectoires. */
+let cmpView = null;   // {key, series, dmax, sel:[d0,d1]|null, hover:mètres|null, geo}
+const CMP_N = 400;
+
+/* Distance cumulée point par point, avec la même règle que speedByDistance et
+   pathLength : un saut de plus de MAX_STEP_M n'est pas un déplacement. */
+function cumDist(pts){
+  const cum = [0];
+  for(let i=1;i<pts.length;i++){
+    const step = distM(pts[i-1], pts[i]);
+    cum.push(cum[i-1] + (step > MAX_STEP_M ? 0 : step));
+  }
+  return cum;
+}
+function fmtDist(d){
+  return d >= 1000 ? (d/1000).toFixed(2).replace('.', ',')+' km' : Math.round(d)+' m';
+}
+/* Indices [a, b] des points dont la distance cumulée tombe dans [d0, d1]. */
+function segRange(cum, d0, d1){
+  let a = 0;
+  while(a < cum.length && cum[a] < d0) a++;
+  let b = a;
+  while(b+1 < cum.length && cum[b+1] <= d1) b++;
+  return (a < cum.length && b > a) ? [a, b] : null;
+}
+/* Vitesse d'une série à la distance d (null au-delà de son parcours). */
+function speedAtDist(s, d){
+  if(d > s.d.total) return null;
+  const x = d / s.d.total * (CMP_N-1), n = Math.min(CMP_N-2, Math.floor(x)), f = x - n;
+  return s.d.profile[n] + (s.d.profile[n+1] - s.d.profile[n]) * f;
+}
+
+function drawCompareChart(){
   const cv = $('cmpChart'), ctx = cv.getContext('2d');
   fitCanvas(cv);
   const k = cv.width / (cv.clientWidth || cv.width);   // pixels internes par pixel CSS
-  const W = cv.width, H = cv.height, pad = 8;
+  const W = cv.width, H = cv.height;
   ctx.clearRect(0,0,W,H);
-  const N = 400;
-  const series = rows.map(r => ({...r, d: speedByDistance(sessions[r.i], N)}))
-                     .filter(r => r.d);
-  if(!series.length) return;
+  if(!cmpView || !cmpView.series.length || !cmpView.dmax) return;
+  const series = cmpView.series, dmax = cmpView.dmax;
+  const L = 8*k, R = 8*k, T = 8*k, B = 20*k;        // marges (B : graduations)
+  cmpView.geo = {L, R, W};
+  const xOf = d => L + (W-L-R)*d/dmax;
   const vmax = Math.max(...series.map(s => Math.max(...s.d.profile))) || 1;
+  const yOf = v => H - B - (v/vmax)*(H-T-B);
+
+  // portion sélectionnée (dessous des tracés)
+  if(cmpView.sel){
+    const x0 = xOf(cmpView.sel[0]), x1 = xOf(cmpView.sel[1]);
+    ctx.fillStyle = 'rgba(124,77,255,.14)';
+    ctx.fillRect(x0, T, x1-x0, H-T-B);
+    ctx.strokeStyle = 'rgba(124,77,255,.85)'; ctx.lineWidth = 1.5*k;
+    ctx.beginPath(); ctx.moveTo(x0,T); ctx.lineTo(x0,H-B); ctx.moveTo(x1,T); ctx.lineTo(x1,H-B); ctx.stroke();
+  }
 
   // repères horizontaux
   ctx.strokeStyle = 'rgba(198,202,191,.9)'; ctx.lineWidth = 1*k;
-  for(let q=1;q<4;q++){
-    const y = pad + (H-2*pad)*q/4;
-    ctx.beginPath(); ctx.moveTo(pad,y); ctx.lineTo(W-pad,y); ctx.stroke();
+  for(let q=0;q<=4;q++){
+    const y = T + (H-T-B)*q/4;
+    ctx.beginPath(); ctx.moveTo(L,y); ctx.lineTo(W-R,y); ctx.stroke();
   }
+
+  // graduations de distance : pas « rond » donnant au plus ~8 repères
+  const pxPer = (W-L-R)/k;                            // largeur utile, en pixels CSS
+  const raw = dmax / Math.max(2, Math.floor(pxPer/90));
+  const p10 = Math.pow(10, Math.floor(Math.log10(raw)));
+  const step = [1,2,5,10].map(v=>v*p10).find(v=>v>=raw) || p10*10;
+  ctx.fillStyle = THEME.mute;
+  ctx.font = `600 ${Math.round(10*k)}px ui-monospace, monospace`;
+  ctx.textBaseline = 'top';
+  for(let j=0; j*step<=dmax+1e-6; j++){
+    const d = j*step, x = xOf(d);
+    ctx.strokeStyle = 'rgba(198,202,191,.55)';
+    ctx.beginPath(); ctx.moveTo(x,T); ctx.lineTo(x,H-B+3*k); ctx.stroke();
+    ctx.textAlign = d === 0 ? 'left' : (xOf(d+step) > W-R+1 && W-R-x < 40*k ? 'right' : 'center');
+    ctx.fillText(d === 0 ? '0' : d >= 1000
+      ? (d/1000).toLocaleString('fr-FR', {maximumFractionDigits:2})+' km' : Math.round(d)+' m', x, H-B+5*k);
+  }
+  ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
 
   series.forEach(s => {
     ctx.strokeStyle = get_cmp_color(s.k); ctx.lineWidth = 2*k;
     ctx.beginPath();
     s.d.profile.forEach((v,n) => {
-      const x = pad + (W-2*pad)*n/(N-1);
-      const y = H - pad - (v/vmax)*(H-2*pad);
+      const x = xOf(s.d.total*n/(CMP_N-1)), y = yOf(v);
       n ? ctx.lineTo(x,y) : ctx.moveTo(x,y);
     });
     ctx.stroke();
@@ -1423,28 +1515,186 @@ function drawCompareChart(rows){
 
   ctx.fillStyle = THEME.mute;
   ctx.font = `600 ${Math.round(11*k)}px ui-monospace, monospace`;
-  ctx.fillText(vmax.toFixed(0)+' km/h', pad+4, pad+14*k);
-  ctx.fillText('0', pad+4, H-pad-4);
-  ctx.textAlign = 'right';
-  ctx.fillText('distance parcourue →', W-pad-4, H-pad-4);
-  ctx.textAlign = 'left';
+  ctx.fillText(vmax.toFixed(0)+' km/h', L+4*k, T+13*k);
+
+  // curseur de survol : une pastille par session
+  if(cmpView.hover != null){
+    const x = xOf(cmpView.hover);
+    ctx.strokeStyle = THEME.ink; ctx.lineWidth = 1*k;
+    ctx.beginPath(); ctx.moveTo(x,T); ctx.lineTo(x,H-B); ctx.stroke();
+    series.forEach(s => {
+      const v = speedAtDist(s, cmpView.hover);
+      if(v == null) return;
+      ctx.fillStyle = get_cmp_color(s.k);
+      ctx.beginPath(); ctx.arc(x, yOf(v), 4*k, 0, Math.PI*2); ctx.fill();
+    });
+  }
 }
 
-function drawCompareMap(rows){
+/* Ligne sous le profil : consigne, ou vitesses au point survolé. */
+function paintCmpCursor(){
+  const el = $('cmpCursor');
+  if(!cmpView) return;
+  const h = cmpView.hover;
+  if(h == null){
+    el.textContent = cmpView.sel
+      ? 'Glissez à nouveau pour changer de portion, touchez sans glisser pour l\'effacer.'
+      : 'Glissez sur le profil pour sélectionner une portion du parcours.';
+    return;
+  }
+  el.innerHTML = `à ${fmtDist(h)} — ` + cmpView.series.map(s => {
+    const v = speedAtDist(s, h);
+    return `<span style="color:${get_cmp_color(s.k)}">${v == null ? '—' : v.toFixed(1)+' km/h'}</span>`;
+  }).join(' · ');
+}
+
+/* Tableau de la portion sélectionnée, une colonne par session. */
+/* Le tableau apparaît ou disparaît SOUS le profil : le profil, que l'on est
+   en train de manipuler, doit rester à sa place à l'écran. Sans cette
+   correction, l'ancrage de défilement du navigateur pouvait faire sauter la
+   page de toute la hauteur du tableau. */
+function keepCmpChartInPlace(fn){
+  const cv = $('cmpChart'), y0 = cv.getBoundingClientRect().top;
+  fn();
+  const dy = cv.getBoundingClientRect().top - y0;
+  if(Math.abs(dy) > 0.5) window.scrollBy(0, dy);
+}
+function paintCmpSection(){ keepCmpChartInPlace(paintCmpSectionNow); }
+function paintCmpSectionNow(){
+  const box = $('cmpSecBox');
+  if(!cmpView || !cmpView.sel){ box.classList.add('hide'); return; }
+  const [d0, d1] = cmpView.sel;
+  $('cmpSecRange').textContent = `${fmtDist(d0)} → ${fmtDist(d1)}`;
+  const cols = cmpView.series.map(s => {
+    const ab = segRange(s.cum, d0, d1);
+    if(!ab) return {s, st:null};
+    const seg = s.clean.slice(ab[0], ab[1]+1);
+    const st = gStats(seg);
+    st.dist = pathLength(seg).dist;
+    const dt = (seg[seg.length-1].itow - seg[0].itow) / 1000;
+    st.dur = (dt > 0 && dt < 86400) ? dt : seg.length / 25;
+    st.pts = seg.length;
+    return {s, st};
+  });
+  const defs = [
+    ['Durée',        st => st.dur,   v => v.toFixed(2)+' s', 'low'],
+    ['Distance',     st => st.dist,  v => fmtDist(v), null],
+    ['V max',        st => st.vmax,  v => v.toFixed(1)+' km/h', 'high'],
+    ['V moyenne',    st => st.vavg,  v => v.toFixed(1)+' km/h', 'high'],
+    ['V mini',       st => st.vmin,  v => v.toFixed(1)+' km/h', 'high'],
+    ['Accél. max',   st => st.accel, v => v.toFixed(2)+' g', 'high'],
+    ['Freinage max', st => st.brake, v => v.toFixed(2)+' g', 'high'],
+    ['Latéral max',  st => st.lat,   v => v.toFixed(2)+' g', 'high'],
+    ['Vertical max', st => st.vup,   v => v.toFixed(2)+' g', 'high'],
+    ['En l\'air',    st => st.air,   v => v.toFixed(2)+' s', null],
+    ['Points',       st => st.pts,   v => v.toLocaleString('fr-FR'), null],
+  ];
+  let html = '<thead><tr><th>Critère</th>';
+  cols.forEach(c => {
+    html += `<th><span class="swatch" style="background:${cmpColor(c.s.k)}"></span>${c.s.name}</th>`;
+  });
+  html += '</tr></thead><tbody>';
+  for(const [label, get, fmt, best] of defs){
+    const vals = cols.map(c => c.st ? get(c.st) : null);
+    const ok = vals.filter(v => v != null && isFinite(v));
+    let bv = null;
+    if(best === 'high' && ok.length > 1) bv = Math.max(...ok);
+    if(best === 'low'  && ok.length > 1) bv = Math.min(...ok);
+    html += `<tr><td>${label}</td>`;
+    vals.forEach(v => {
+      if(v == null || !isFinite(v)){ html += '<td>—</td>'; return; }
+      // Durée : écart au meilleur temps de la portion
+      const gap = (best === 'low' && bv != null && v !== bv)
+        ? ` <small style="color:var(--mute)">+${(v-bv).toFixed(2)}</small>` : '';
+      html += `<td class="${v===bv?'best':''}">${fmt(v)}${gap}</td>`;
+    });
+    html += '</tr>';
+  }
+  html += '</tbody>';
+  $('cmpSecTable').innerHTML = html;
+  $('cmpSecNote').textContent = cols.some(c => !c.st)
+    ? 'Un tiret : la session s\'arrête avant cette portion.' : '';
+  box.classList.remove('hide');
+}
+
+/* Redessin groupé (une fois par image) pendant le glisser. */
+let cmpRaf = 0, cmpFull = false;
+function cmpRedraw(full){
+  cmpFull = cmpFull || full;             // une demande complète n'est jamais perdue
+  if(cmpRaf) return;
+  cmpRaf = requestAnimationFrame(() => {
+    cmpRaf = 0;
+    const full = cmpFull; cmpFull = false;
+    keepCmpChartInPlace(() => {
+      drawCompareChart(); paintCmpCursor();
+      if(full){ paintCmpSectionNow(); drawCompareMap(); }
+    });
+  });
+}
+
+function bindCompareChart(){
+  const cv = $('cmpChart');
+  let from = null, fromX = 0;
+  const distAt = ev => {
+    const r = cv.getBoundingClientRect(), g = cmpView.geo;
+    const x = (ev.clientX - r.left) * cv.width / r.width;
+    const f = (x - g.L) / (g.W - g.L - g.R);
+    return Math.max(0, Math.min(1, f)) * cmpView.dmax;
+  };
+  const ready = () => cmpView && cmpView.dmax > 0 && cmpView.geo;
+  cv.addEventListener('pointerdown', ev => {
+    if(!ready() || ev.button > 0) return;
+    from = distAt(ev); fromX = ev.clientX;
+    cmpView.hover = from;
+    try{ cv.setPointerCapture(ev.pointerId); }catch(e){}
+    cmpRedraw(false);
+  });
+  cv.addEventListener('pointermove', ev => {
+    if(!ready()) return;
+    const d = distAt(ev);
+    cmpView.hover = d;
+    // Moins de 6 px parcourus : simple appui, pas encore une sélection.
+    if(from !== null && Math.abs(ev.clientX - fromX) >= 6)
+      cmpView.sel = [Math.min(from, d), Math.max(from, d)];
+    cmpRedraw(from !== null);
+  });
+  const end = ev => {
+    if(from === null) return;
+    // Appui sans glisser : efface la portion.
+    if(Math.abs(ev.clientX - fromX) < 6) cmpView.sel = null;
+    from = null;
+    if(ev.pointerType !== 'mouse') cmpView.hover = null;
+    cmpRedraw(true);
+  };
+  cv.addEventListener('pointerup', end);
+  cv.addEventListener('pointercancel', ev => {
+    if(from === null) return;
+    from = null; cmpView.hover = null; cmpRedraw(true);
+  });
+  cv.addEventListener('pointerleave', () => {
+    if(!ready() || from !== null) return;
+    cmpView.hover = null; cmpRedraw(false);
+  });
+  $('btnCmpClear').onclick = () => {
+    if(!cmpView) return;
+    cmpView.sel = null; cmpRedraw(true);
+  };
+}
+
+function drawCompareMap(){
   const cv = $('cmpMap'), ctx = cv.getContext('2d');
   const W = cv.width, H = cv.height, pad = 30;
   ctx.clearRect(0,0,W,H);
+  if(!cmpView){ $('cmpScale').textContent = '—'; return; }
 
   // Chaque session est ramenée à une origine commune : les enregistrements
   // peuvent venir de jours différents, seule la forme du parcours compte.
-  const sets = rows.map(r => {
-    const st = computeStats(sessions[r.i]);
-    if(!st.clean.length) return null;
-    const lat0 = st.clean[0].lat, lon0 = st.clean[0].lon;
+  const sets = cmpView.series.map(s => {
+    const lat0 = s.clean[0].lat, lon0 = s.clean[0].lon;
     const kx = Math.cos(lat0*Math.PI/180)*111320, ky = 110540;
-    return {k: r.k,
-            xy: st.clean.map(p => ({x:(p.lon-lon0)*kx, y:(p.lat-lat0)*ky}))};
-  }).filter(Boolean);
+    return {k: s.k, cum: s.cum,
+            xy: s.clean.map(p => ({x:(p.lon-lon0)*kx, y:(p.lat-lat0)*ky}))};
+  });
   if(!sets.length){ $('cmpScale').textContent = '—'; return; }
 
   const all = sets.flatMap(s => s.xy);
@@ -1454,15 +1704,29 @@ function drawCompareMap(rows){
   const ox = (W - (maxX-minX)*k)/2, oy = (H - (maxY-minY)*k)/2;
   const px = p => ox + (p.x-minX)*k;
   const py = p => H - (oy + (p.y-minY)*k);
+  const path = (xy, a, b) => {
+    ctx.beginPath();
+    for(let i=a;i<=b;i++) i>a ? ctx.lineTo(px(xy[i]),py(xy[i])) : ctx.moveTo(px(xy[i]),py(xy[i]));
+    ctx.stroke();
+  };
 
+  const sel = cmpView.sel;
   ctx.lineJoin = ctx.lineCap = 'round';
   sets.forEach(s => {
     ctx.strokeStyle = cmpColor(s.k);
-    ctx.globalAlpha = 0.75;
+    ctx.globalAlpha = sel ? 0.25 : 0.75;
     ctx.lineWidth = 2.5;
-    ctx.beginPath();
-    s.xy.forEach((p,i) => i ? ctx.lineTo(px(p),py(p)) : ctx.moveTo(px(p),py(p)));
-    ctx.stroke();
+    path(s.xy, 0, s.xy.length-1);
+  });
+  // portion sélectionnée : tracé plein et épais, point de départ marqué
+  if(sel) sets.forEach(s => {
+    const ab = segRange(s.cum, sel[0], sel[1]);
+    if(!ab) return;
+    ctx.globalAlpha = 1;
+    ctx.strokeStyle = cmpColor(s.k); ctx.lineWidth = 5;
+    path(s.xy, ab[0], ab[1]);
+    ctx.fillStyle = cmpColor(s.k);
+    ctx.beginPath(); ctx.arc(px(s.xy[ab[0]]), py(s.xy[ab[0]]), 6, 0, Math.PI*2); ctx.fill();
   });
   ctx.globalAlpha = 1;
 
@@ -2859,6 +3123,7 @@ function showAnalysis(idx){
 }
 
 bindCanvas();
+bindCompareChart();
 
 function paintSessions(){
   paintTabs();
@@ -3804,7 +4069,7 @@ $('tabs').addEventListener('keydown', ev => {
 // Sur ordinateur, le journal a la place de s'afficher ouvert dans son onglet.
 if(matchMedia('(min-width:1100px)').matches) $('secLog').open = true;
 
-const CONSOLE_VER  = '1.7.15';
+const CONSOLE_VER  = '1.7.16';
 const CONSOLE_DATE = '20 septembre 2026';
 // En-tête : deux lignes courtes, « console v… » puis « firmware … » ; la
 // date de la console reste consultable au survol / appui long.

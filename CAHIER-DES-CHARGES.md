@@ -1,7 +1,7 @@
 # TrimBox DIY S3 — Cahier des charges
 
 **Version du document :** 3.0 — 4 octobre 2026
-**Cible :** firmware **2.0-a13** (ESP32-S3), console web **1.7.15**, script radio
+**Cible :** firmware **2.0-a13** (ESP32-S3), console web **1.7.16**, script radio
 `trmbox.lua` **2.3**.
 **Remplace :** les anciens `CAHIER-DES-CHARGES.md` (v1, carte XIAO nRF52840) et
 `CAHIER-DES-CHARGES-V2.md` (v2). Ce document est **autonome** : il ne décrit que
@@ -919,7 +919,18 @@ passe à ±32 g, et sur demande explicite (§12.17).
   statistiques.
 - Session vide ou sans fix : explication affichée (nombre de points, de fix).
 - **Comparaison** de sessions : tableau, vitesse en fonction de la distance,
-  trajectoires superposées.
+  trajectoires superposées. Le profil est gradué en **mètres depuis le départ
+  de chaque session** (une même abscisse = le même endroit du parcours ; la
+  session la plus courte s'arrête avant). Le survol affiche la vitesse de
+  chaque session au point visé. **Glisser** sur le profil sélectionne une
+  portion [d0, d1] : tableau par session (durée avec écart au meilleur temps,
+  distance, V max / moyenne / mini, accélération, freinage, latéral, vertical,
+  temps en l'air, points ; « — » si la session s'arrête avant) et portion
+  surlignée sur les trajectoires. Un appui sans glisser ou « Effacer » retire
+  la sélection ; elle est conservée au redimensionnement et tant que les
+  sessions comparées ne changent pas. Distances cumulées avec la règle de
+  `pathLength` (saut > `MAX_STEP_M` ignoré). Le profil reste à sa place à
+  l'écran quand le tableau apparaît (`overflow-anchor:none` + correction).
 
 ### 8.6 Chronométrage de la console
 
@@ -1024,7 +1035,7 @@ doit être réellement fonctionnel.
 
 ### 8.12 Versionnage
 
-Constante `CONSOLE_VER` (actuellement **1.7.15**), affichée dans l'en-tête,
+Constante `CONSOLE_VER` (actuellement **1.7.16**), affichée dans l'en-tête,
 incrémentée à **chaque** modification ; après `x.y.9`, passer à `x.y.10` (puis
 selon la convention en cours). Sert d'indicateur de cache. Après toute
 modification : `python3 tools/embed_console.py`.

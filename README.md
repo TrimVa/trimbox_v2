@@ -4,7 +4,7 @@ Enregistreur de télémétrie **GPS + inertiel** pour voitures radiocommandées,
 avec **chronométrage au tour** affiché et annoncé sur la radio, **console web**
 d'analyse et **mise à jour par Wi-Fi**. Construit autour d'un **ESP32-S3**.
 
-> **État :** firmware **2.0-a13**, console **1.7.15**. Tout est écrit et testé
+> **État :** firmware **2.0-a13**, console **1.7.16**. Tout est écrit et testé
 > sur PC, dans un navigateur et dans un émulateur ESP32-S3. **Essais sur le
 > vrai matériel en cours** : GPS, IMU et script Lua sur la MT12 validés ; reste
 > le roulage. Voir [les bancs d'essai](#bancs-dessai-à-la-réception-du-matériel).
@@ -45,7 +45,7 @@ d'analyse et **mise à jour par Wi-Fi**. Construit autour d'un **ESP32-S3**.
 | **Télémétrie radio** | position GPS, vitesse, état, et un message par tour (temps + écart au meilleur) vers la MT12, qui **annonce les temps à voix haute**. |
 | **Console Bluetooth** | depuis la page GitHub du projet, sur Chrome Android. Comme le Wi-Fi, le Bluetooth se coupe quand la voiture roule et revient 30 s après l'arrêt. |
 | **Console Wi-Fi** | le module ouvre son propre réseau quand la voiture est arrêtée depuis 30 s, et le coupe dès qu'elle roule. Fonctionne aussi sur **iPhone**, sans Internet. |
-| **Analyse** | tracé coloré par vitesse, zoom, tours et parcours, forces G, temps en l'air, statistiques au survol du tracé, comparaison de sessions. Les **lignes posées depuis la radio** sont reprises d'office, et les **tours calculés en course** par le module s'affichent à côté de ceux de la console. |
+| **Analyse** | tracé coloré par vitesse, zoom, tours et parcours, forces G, temps en l'air, statistiques au survol du tracé, comparaison de sessions (portion choisie en glissant sur le profil, statistiques par session). Les **lignes posées depuis la radio** sont reprises d'office, et les **tours calculés en course** par le module s'affichent à côté de ceux de la console. |
 | **Exports** | VBO (RaceChrono, Circuit Tools), CSV, GPX ; import de ces mêmes formats. |
 | **Mise à jour Wi-Fi** | depuis le téléphone, avec retour automatique à la version précédente si la nouvelle ne démarre pas correctement. |
 

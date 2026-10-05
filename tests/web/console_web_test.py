@@ -9,6 +9,7 @@ Vérifie, sur la VRAIE page intégrée au firmware :
   4. téléchargement → session → analyse avec des tours de 15,00 s ;
      lignes du module (FF F1) reprises d'office, chronos du module (0x29)
      affichés et comparés au calcul de la console ;
+     comparaison : portion choisie en glissant sur le profil vitesse/distance ;
   5. coupure du point d'accès → reconnexion automatique ;
   6. choix de la couleur d'accent conservé (localStorage, origine du module) ;
   7. mise à jour du firmware : fichier quelconque refusé avec un message clair,
@@ -119,6 +120,25 @@ try:
         check(air == 0, f'temps en l\'air sans IMU : {air} s')
         air2 = pg.evaluate("gStats(Array.from({length:500}, (_, i) => ({lat:45.9, lon:-1.3, speed:0.2, alt:10, ax:0.01, ay:0, az:0, fix:3, sats:12, t:i*0.04}))).air")
         check(air2 > 19, f'… mais chute libre réelle toujours comptée : {air2:.2f} s')
+
+        # comparaison : glisser sur le profil vitesse/distance → portion sélectionnée
+        pg.evaluate("""(() => { sessions.push(sessions[0].slice()); sessionNames.push('copie');
+            cmpSel.clear(); cmpSel.add(0); cmpSel.add(1); paintSessions(); paintCompare(); })()""")
+        pg.locator('#cmpChart').scroll_into_view_if_needed()
+        bb = pg.locator('#cmpChart').bounding_box(); y = bb['y'] + bb['height'] / 2
+        pg.mouse.move(bb['x'] + bb['width'] * 0.2, y); pg.mouse.down()
+        pg.mouse.move(bb['x'] + bb['width'] * 0.6, y, steps=8); pg.mouse.up()
+        pg.wait_for_timeout(150)
+        sel = pg.evaluate("cmpView.sel && cmpView.sel.map(Math.round)")
+        rows = pg.evaluate("[...document.querySelectorAll('#cmpSecTable tbody tr')].map(tr => [...tr.cells].map(c => c.textContent))")
+        dur = [r for r in rows if r[0] == 'Durée']
+        check(sel and sel[1] > sel[0] and pg.is_visible('#cmpSecBox') and dur and dur[0][1] == dur[0][2]
+              and '+' not in dur[0][2], f'comparaison : portion {sel} m, durées {dur}')
+        check('→' in pg.inner_text('#cmpSecRange'), 'portion affichée : ' + pg.inner_text('#cmpSecRange'))
+        bb2 = pg.locator('#cmpChart').bounding_box()
+        check(abs(bb2['y'] - bb['y']) < 2, f'profil resté en place pendant la sélection ({bb["y"]:.0f} → {bb2["y"]:.0f} px)')
+        pg.mouse.click(bb2['x'] + bb2['width'] * 0.5, bb2['y'] + bb2['height'] / 2); pg.wait_for_timeout(150)
+        check(pg.evaluate("cmpView.sel === null") and not pg.is_visible('#cmpSecBox'), 'appui sans glisser : portion effacée')
 
         # coupure du point d'accès puis retour
         open(f'/tmp/fakedev_drop_{PORT}', 'w').close()
