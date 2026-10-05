@@ -1,7 +1,7 @@
 # TrimBox DIY S3 — Cahier des charges
 
 **Version du document :** 3.0 — 4 octobre 2026
-**Cible :** firmware **2.0-a13** (ESP32-S3), console web **1.7.14**, script radio
+**Cible :** firmware **2.0-a13** (ESP32-S3), console web **1.7.15**, script radio
 `trmbox.lua` **2.3**.
 **Remplace :** les anciens `CAHIER-DES-CHARGES.md` (v1, carte XIAO nRF52840) et
 `CAHIER-DES-CHARGES-V2.md` (v2). Ce document est **autonome** : il ne décrit que
@@ -993,7 +993,8 @@ partir des positions. Aller-retour vérifié < 5 cm.
     une **barre d'onglets** — *Appareil* (connexion, direct, mémoire),
     *Analyse* (carte et profil à gauche, chiffres et tours à droite ; message
     d'attente sans session), *Sessions* (ouverture de fichiers, liste en
-    grille, comparaison), *Réglages* (enregistrement autonome, mise à jour,
+    grille ; le bouton « Choisir des fichiers… » est aligné sur la ligne « Tout
+    exporter », comparaison), *Réglages* (enregistrement autonome, mise à jour,
     journal ouvert) — à côté du choix de la source. Dans un onglet, les
     panneaux sont des tuiles qui se partagent la ligne (`flex-wrap`) : la ligne
     est toujours remplie. Chaque panneau porte `data-pane`, `body[data-tab]`
@@ -1023,7 +1024,7 @@ doit être réellement fonctionnel.
 
 ### 8.12 Versionnage
 
-Constante `CONSOLE_VER` (actuellement **1.7.14**), affichée dans l'en-tête,
+Constante `CONSOLE_VER` (actuellement **1.7.15**), affichée dans l'en-tête,
 incrémentée à **chaque** modification ; après `x.y.9`, passer à `x.y.10` (puis
 selon la convention en cours). Sert d'indicateur de cache. Après toute
 modification : `python3 tools/embed_console.py`.

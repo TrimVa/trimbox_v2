@@ -461,7 +461,13 @@ button.tool.active{background:var(--violet);color:var(--on-violet);box-shadow:no
   #devInfo{grid-template-columns:repeat(4,minmax(0,1fr))}
   /* Onglet Sessions : l'ouverture de fichiers reste compacte, la liste des
      sessions s'étale en grille */
-  #secImport{flex:0 1 420px;align-self:flex-start}
+  /* « Ouvrir des enregistrements » prend la hauteur du panneau Sessions et
+     son bouton s'aligne sur la ligne « Tout exporter » (même hauteur de
+     bouton, même ligne d'aide en dessous) */
+  #secImport{flex:0 1 420px;display:flex;flex-direction:column}
+  #secImport>#btnImport{margin-top:auto}
+  #secImport>#importMsg{min-height:calc(1.5em + 1px)}
+  #secSessions>.hint{min-height:calc(1.5em + 1px)}
   #sessionList{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:8px}
   #sessionList .sessionRow{margin-bottom:0}
   #sessionList .row>button{min-width:0}
@@ -3798,7 +3804,7 @@ $('tabs').addEventListener('keydown', ev => {
 // Sur ordinateur, le journal a la place de s'afficher ouvert dans son onglet.
 if(matchMedia('(min-width:1100px)').matches) $('secLog').open = true;
 
-const CONSOLE_VER  = '1.7.14';
+const CONSOLE_VER  = '1.7.15';
 const CONSOLE_DATE = '20 septembre 2026';
 // En-tête : deux lignes courtes, « console v… » puis « firmware … » ; la
 // date de la console reste consultable au survol / appui long.
