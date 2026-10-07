@@ -11,6 +11,8 @@
 #     Wi-Fi automatique à l'arrêt, pose de ligne par la voie 8, tours
 #     chronométrés, coupure d'alimentation, RETOUR ARRIÈRE après une mise à
 #     jour qui plante (vrai chargeur de démarrage)
+#  5. publication : si tout est vert sur main et que FIRMWARE_VER est nouvelle,
+#     release GitHub « firmware-<version> » (fichiers + notes complètes)
 #
 #  La console (index.html) est intégrée au firmware à chaque compilation :
 #  tools/embed_console.py régénère trimbox_s3/src/console_gz.h.
@@ -19,7 +21,7 @@ name: Firmware S3
 
 on:
   push:
-    paths: ['trimbox_s3/**', 'tests/**', 'lua/**', 'tools/embed_console.py', 'index.html', '.github/workflows/build-s3.yml']
+    paths: ['trimbox_s3/**', 'tests/**', 'lua/**', 'tools/embed_console.py', 'tools/release_notes.py', 'index.html', '.github/workflows/build-s3.yml']
   pull_request:
   workflow_dispatch:
 
@@ -171,3 +173,64 @@ jobs:
         run: python3 tests/qemu/sim.py flash.bin --reboot
       - name: Mise à jour qui plante → retour à la version précédente
         run: python3 tests/qemu/ota_rollback.py buildq/trimbox_s3.ino.merged.bin buildq/trimbox_s3.ino.bin buildc/trimbox_s3.ino.bin
+
+  # --------------------------------------------------------------------------
+  #  5. Publication : quand TOUT est vert sur la branche main, crée la release
+  #     « firmware-<FIRMWARE_VER> » avec les .bin, le pack radio, la console,
+  #     les empreintes et des notes complètes (tools/release_notes.py).
+  #     Une version déjà publiée n'est jamais écrasée : pour publier, il faut
+  #     incrémenter FIRMWARE_VER (trimbox_s3/src/config.h).
+  # --------------------------------------------------------------------------
+  release:
+    name: Publication (release GitHub)
+    needs: [build, console, qemu]
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0            # historique et tags : nouveautés depuis la release précédente
+      - uses: actions/download-artifact@v5
+        with:
+          name: firmware-s3-complet
+          path: fw
+      - name: Version
+        id: v
+        run: |
+          fw=$(sed -n 's/^#define[[:space:]]*FIRMWARE_VER[[:space:]]*"\([^"]*\)".*/\1/p' trimbox_s3/src/config.h)
+          cons=$(sed -n "s/^const CONSOLE_VER *= *'\([^']*\)'.*/\1/p" index.html)
+          [ -n "$fw" ] && [ -n "$cons" ] || { echo "::error::versions introuvables"; exit 1; }
+          tag="firmware-$fw"
+          echo "fw=$fw" >> "$GITHUB_OUTPUT"; echo "cons=$cons" >> "$GITHUB_OUTPUT"; echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          if gh release view "$tag" >/dev/null 2>&1 || git rev-parse -q --verify "refs/tags/$tag" >/dev/null; then
+            echo "deja=1" >> "$GITHUB_OUTPUT"
+            echo "::notice::La version $fw est déjà publiée ($tag) : rien à faire. Incrémenter FIRMWARE_VER pour une nouvelle release."
+          fi
+          prec=$(git tag --list 'firmware-*' --sort=-creatordate | grep -vx "$tag" | head -n1 || true)
+          echo "prec=$prec" >> "$GITHUB_OUTPUT"
+      - name: Fichiers à publier
+        if: steps.v.outputs.deja != '1'
+        run: |
+          mkdir -p pub
+          cp fw/trimbox_s3-app.bin fw/trimbox_s3-complet.bin pub/
+          cp fw/trimbox_s3.ino.bootloader.bin fw/trimbox_s3.ino.partitions.bin pub/
+          cp index.html pub/
+          (cd lua && zip -qr ../pub/trimbox-radio.zip trmbox.lua LISEZMOI.md SOUNDS)
+          (cd pub && sha256sum * > SHA256SUMS.txt)
+          ls -la pub
+      - name: Notes de version
+        if: steps.v.outputs.deja != '1'
+        run: python3 tools/release_notes.py pub "${{ steps.v.outputs.prec }}" > notes.md && cat notes.md
+      - name: Création de la release
+        if: steps.v.outputs.deja != '1'
+        run: |
+          gh release create "${{ steps.v.outputs.tag }}" pub/* \
+            --target "$GITHUB_SHA" \
+            --title "TrimBox ${{ steps.v.outputs.fw }} (console ${{ steps.v.outputs.cons }})" \
+            --notes-file notes.md \
+            --latest
+          echo "::notice::Release publiée : $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/tag/${{ steps.v.outputs.tag }}"

@@ -121,7 +121,7 @@ Détail pas à pas : **[DEMARRAGE.md](DEMARRAGE.md)**. En résumé :
 2. **Activer GitHub Pages** (*Settings → Pages → branche `main`, dossier
    `/ (root)`*) pour la console Bluetooth en ligne.
 3. **Premier flash, une seule fois, par câble depuis un ordinateur** :
-   artefact `firmware-s3-complet` → `trimbox_s3-complet.bin`, avec
+   page **Releases** du dépôt → dernière version → `trimbox_s3-complet.bin`, avec
    https://espressif.github.io/esptool-js/ (Chrome ou Edge), adresse **0x0**,
    prise **USB** de la carte.
 4. **Vérifier** : 30 s après la mise sous tension, le Wi-Fi
@@ -270,8 +270,10 @@ Messages envoyés à la radio (capteur `FM`) :
 
 1. Modifier le code dans GitHub (bouton crayon) et valider : la compilation
    repart seule.
-2. *Actions* → compilation verte → artefact **firmware-s3-app** →
-   `trimbox_s3-app.bin`.
+2. Page **Releases** du dépôt → dernière version → `trimbox_s3-app.bin`
+   (publiée automatiquement quand tout est vert et que `FIRMWARE_VER` a
+   changé ; sinon *Actions* → compilation verte → artefact
+   **firmware-s3-app**).
 3. Voiture **et** enregistrement arrêtés : console Wi-Fi → **Mise à jour du
    firmware** → choisir le fichier → **Envoyer au module** (environ 10 s).
 4. La console se reconnecte et affiche « ✓ Nouvelle version active ».
@@ -453,6 +455,15 @@ Artefacts produits :
 | `capture-console-wifi` | capture d'écran | contrôle visuel de la console |
 
 Il faut être **connecté à GitHub** pour télécharger un artefact.
+
+**Release automatique** : sur la branche `main`, quand tous les jobs sont
+verts et que `FIRMWARE_VER` (`trimbox_s3/src/config.h`) n'a pas encore été
+publiée, le job *Publication* crée la release `firmware-<version>` : les deux
+`.bin`, bootloader et partitions séparés, la console `index.html`, le pack
+radio `trimbox-radio.zip`, `SHA256SUMS.txt`, et des notes complètes (usage de
+chaque fichier, procédures, nouveautés depuis la release précédente,
+empreintes). Téléchargeable **sans compte GitHub**. Une version déjà publiée
+n'est jamais écrasée : incrémenter `FIRMWARE_VER` pour publier.
 
 ---
 

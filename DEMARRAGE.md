@@ -38,8 +38,8 @@ rien : elle est dans le firmware.
 
 ## 3. Premier flash (une seule fois, par câble, depuis un ordinateur)
 
-1. *Actions* → dernière compilation verte → artefact **firmware-s3-complet**
-   → dézipper → `trimbox_s3-complet.bin`.
+1. Page **Releases** du dépôt → dernière version → `trimbox_s3-complet.bin`
+   (ou *Actions* → compilation verte → artefact **firmware-s3-complet**).
 2. Chrome ou Edge sur ordinateur : https://espressif.github.io/esptool-js/
 3. Carte branchée sur sa prise **USB** (pas « UART »), câble de données.
    *Connect* (si rien : maintenir **BOOT**, appuyer sur **RST**, relâcher
@@ -56,7 +56,9 @@ Détails, câblage et bancs d'essai : `trimbox_s3/LISEZMOI.md`.
 ## 4. Mises à jour suivantes (sans PC)
 
 1. Modifier le code dans GitHub (crayon), valider : la compilation repart.
-2. Artefact **firmware-s3-app** → `trimbox_s3-app.bin`.
+   Si `FIRMWARE_VER` a changé et que tout est vert, une release est publiée.
+2. Page **Releases** → dernière version → `trimbox_s3-app.bin` (ou artefact
+   **firmware-s3-app** de la compilation).
 3. Voiture et enregistrement arrêtés, console Wi-Fi → *Mise à jour du
    firmware* → envoyer le fichier.
 

@@ -102,7 +102,7 @@
     "Mesures moteur en reserve (CDC §13) : regime par fil Hall, temperature par thermistance, tension par pont diviseur sur l'ADC1."
   ],
   "chaine_de_compilation": {
-    "ci": ".github/workflows/build-s3.yml : tests natifs + console_check + Lua, compilation (artefacts firmware-s3-complet, firmware-s3-app), console dans Chromium avec le .bin compile, QEMU (sim, --lua, --arret, --reboot, ota_rollback).",
+    "ci": ".github/workflows/build-s3.yml : tests natifs + console_check + Lua, compilation (artefacts firmware-s3-complet, firmware-s3-app), console dans Chromium avec le .bin compile, QEMU (sim, --lua, --arret, --reboot, ota_rollback), puis job release sur main si tout est vert et FIRMWARE_VER pas encore publiee : release GitHub firmware-<version> (bin, index.html, trimbox-radio.zip, SHA256SUMS.txt, notes par tools/release_notes.py).",
     "fqbn": "esp32:esp32:esp32s3:FlashSize=16M,PSRAM=opi,FlashMode=qio,USBMode=hwcdc,CDCOnBoot=cdc,PartitionScheme=no_fs",
     "fqbn_qemu": "esp32:esp32:esp32s3:FlashSize=16M,PSRAM=disabled,FlashMode=dio,USBMode=hwcdc,CDCOnBoot=default,PartitionScheme=no_fs + -DTRIMBOX_QEMU (jamais flashee)",
     "hors_ci": "Si downloads.arduino.cc est inaccessible : index ESP32 recupere dans les assets de la release GitHub espressif/arduino-esp32 3.3.12, paquets pre-telecharges dans ~/.arduino15/staging/packages, NimBLE clone depuis GitHub (tag 2.5.1), ctags remplace par un script vide (--build-property runtime.tools.ctags.path=...). QEMU sans libslirp : bibliotheque factice (lance avec -nic none). Lua 5.2 compile depuis github.com/lua/lua si absent."
@@ -204,8 +204,8 @@
   "fichiers": [
     {
       "chemin": ".github/workflows/build-s3.yml",
-      "octets": 8213,
-      "sha1": "b03b9da0b998"
+      "octets": 11569,
+      "sha1": "1d4cf95f2d77"
     },
     {
       "chemin": ".gitignore",
@@ -214,18 +214,18 @@
     },
     {
       "chemin": "CAHIER-DES-CHARGES.md",
-      "octets": 76373,
-      "sha1": "d16df167902c"
+      "octets": 77186,
+      "sha1": "d9dc4c3fab61"
     },
     {
       "chemin": "DEMARRAGE.md",
-      "octets": 4077,
-      "sha1": "3cb7b87be440"
+      "octets": 4254,
+      "sha1": "28ef7fde9475"
     },
     {
       "chemin": "README.md",
-      "octets": 27740,
-      "sha1": "489687f3efb6"
+      "octets": 28514,
+      "sha1": "3476b2d317a7"
     },
     {
       "chemin": "REPRISE-IA.md",
@@ -423,6 +423,11 @@
       "sha1": "b84c05c2f2c4"
     },
     {
+      "chemin": "tools/release_notes.py",
+      "octets": 7271,
+      "sha1": "b58a2dad44dd"
+    },
+    {
       "chemin": "tools/sons/LISEZMOI-voix.md",
       "octets": 3612,
       "sha1": "ac341ed1a8d0"
@@ -474,8 +479,8 @@
     },
     {
       "chemin": "trimbox-etat-projet.json",
-      "octets": null,
-      "sha1": "(ce fichier)"
+      "octets": 30986,
+      "sha1": "3cadc2ab8176"
     },
     {
       "chemin": "trimbox-sw.js",
@@ -489,8 +494,8 @@
     },
     {
       "chemin": "trimbox_s3/LISEZMOI.md",
-      "octets": 10193,
-      "sha1": "4a24d7cade8d"
+      "octets": 10303,
+      "sha1": "5c2f0a498df9"
     },
     {
       "chemin": "trimbox_s3/partitions.csv",

@@ -1147,6 +1147,17 @@ voiture, enregistrement automatique en roulage.
   fichiers séparés), `firmware-s3-app` (`trimbox_s3-app.bin`, OTA, non
   compressé), `capture-console-wifi`.
 - La compilation échoue si un test échoue.
+- **Publication** (job `release`) : seulement sur `main` (envoi ou lancement
+  manuel), après succès de **tous** les jobs (tests, compilation, console,
+  émulateur). Crée la release GitHub `firmware-<FIRMWARE_VER>` (marquée
+  « Latest ») avec `trimbox_s3-app.bin`, `trimbox_s3-complet.bin`, bootloader
+  et partitions séparés, `index.html`, `trimbox-radio.zip` (`trmbox.lua`,
+  `LISEZMOI.md`, `SOUNDS`) et `SHA256SUMS.txt`. Notes rédigées par
+  `tools/release_notes.py` : versions firmware et console, commit, usage de
+  chaque fichier, procédures de mise à jour et de premier flash, nouveautés
+  (messages de commit depuis la release précédente), vérifications passées,
+  empreintes SHA-256. Une version déjà publiée n'est **jamais écrasée** : pour
+  publier, incrémenter `FIRMWARE_VER`.
 
 Compilation hors CI : mêmes versions. Sans accès à `downloads.arduino.cc`,
 l'outil `ctags` peut être remplacé par un script vide (le `.ino` ne déclare que

@@ -52,7 +52,8 @@ firmware passe par là.
 
 Il se fait **une fois, depuis un ordinateur** :
 
-1. Télécharger l'artefact `firmware-s3-complet` de la compilation GitHub.
+1. Télécharger `trimbox_s3-complet.bin` depuis la page **Releases** du dépôt
+   (ou l'artefact `firmware-s3-complet` de la compilation GitHub).
 2. Ouvrir <https://espressif.github.io/esptool-js/> dans Chrome ou Edge sur
    ordinateur, brancher la carte (port **USB**), *Connect*.
 3. Adresse **0x0**, fichier `trimbox_s3-complet.bin`, *Program*.
@@ -65,8 +66,9 @@ les mises à jour se font **par Wi-Fi, depuis le téléphone** (ci-dessous).
 
 ## Mettre à jour le firmware par Wi-Fi (sans PC)
 
-1. Sur le téléphone : onglet **Actions** du dépôt GitHub → dernière
-   compilation réussie → artefact **firmware-s3-app** → `trimbox_s3-app.bin`.
+1. Sur le téléphone : page **Releases** du dépôt GitHub → dernière version
+   → `trimbox_s3-app.bin` (ou onglet **Actions** → compilation réussie →
+   artefact **firmware-s3-app**).
 2. Voiture **arrêtée**, enregistrement **arrêté**. Attendre le Wi-Fi du
    module (30 s) et ouvrir la console (http://192.168.4.1/).
 3. Section **Mise à jour du firmware** → choisir le fichier → **Envoyer au
