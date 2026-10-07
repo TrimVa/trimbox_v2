@@ -37,6 +37,7 @@ jobs:
   tests:
     name: Tests natifs
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
       - name: Logique du firmware (g++)
@@ -45,8 +46,8 @@ jobs:
         run: node tests/native/console_check.js index.html tests/native/lap_cases.json
       - name: Script Lua de la MT12 (syntaxe + banc avec API EdgeTX simulée)
         run: |
-          sudo apt-get update -q
-          sudo apt-get install -y -q lua5.2
+          sudo apt-get -o Acquire::Retries=3 -o Acquire::http::Timeout=60 update -q
+          sudo apt-get -o Acquire::Retries=3 -o Acquire::http::Timeout=60 install -y -q lua5.2
           luac5.2 -p lua/trmbox.lua
           lua5.2 tests/lua/test_trmbox.lua lua/trmbox.lua
         # lap_cases.json est produit par test_lap à l'étape précédente
@@ -55,6 +56,7 @@ jobs:
     name: Console embarquée (navigateur)
     needs: build
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v5
       - uses: actions/download-artifact@v5
@@ -82,6 +84,7 @@ jobs:
     name: Compilation ESP32-S3
     needs: tests
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v5
       - name: Un seul croquis dans trimbox_s3/
@@ -97,7 +100,7 @@ jobs:
       - name: arduino-cli (script officiel)
         run: |
           mkdir -p "$HOME/.local/bin"
-          curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | BINDIR="$HOME/.local/bin" sh
+          curl -fsSL --retry 4 --retry-delay 10 --retry-all-errors --connect-timeout 30 --max-time 900 https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | BINDIR="$HOME/.local/bin" sh
           export PATH="$HOME/.local/bin:$PATH"; echo "$HOME/.local/bin" >> "$GITHUB_PATH"
           arduino-cli config init --overwrite
           arduino-cli config set board_manager.additional_urls "$CORE_INDEX"
@@ -129,6 +132,7 @@ jobs:
     name: Intégration (émulateur)
     needs: build
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v5
       - uses: actions/cache@v5
@@ -139,18 +143,18 @@ jobs:
           key: arduino-s3-${{ env.CORE }}-${{ env.NIMBLE }}-v1
       - name: Outils
         run: |
-          sudo apt-get update -q
+          sudo apt-get -o Acquire::Retries=3 -o Acquire::http::Timeout=60 update -q
           # dépendances de l'émulateur QEMU d'Espressif (documentation ESP-IDF)
-          sudo apt-get install -y -q libgcrypt20 libglib2.0-0 libpixman-1-0 libsdl2-2.0-0 libslirp0 lua5.2
+          sudo apt-get -o Acquire::Retries=3 -o Acquire::http::Timeout=60 install -y -q libgcrypt20 libglib2.0-0 libpixman-1-0 libsdl2-2.0-0 libslirp0 lua5.2
           mkdir -p "$HOME/.local/bin"
-          curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | BINDIR="$HOME/.local/bin" sh
+          curl -fsSL --retry 4 --retry-delay 10 --retry-all-errors --connect-timeout 30 --max-time 900 https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | BINDIR="$HOME/.local/bin" sh
           export PATH="$HOME/.local/bin:$PATH"; echo "$HOME/.local/bin" >> "$GITHUB_PATH"
           arduino-cli config init --overwrite
           arduino-cli config set board_manager.additional_urls "$CORE_INDEX"
           arduino-cli core update-index
           arduino-cli core install "$CORE"
           arduino-cli lib install "$NIMBLE"
-          mkdir -p "$HOME/qemu" && curl -fsSL "$QEMU_URL" | tar xJ -C "$HOME/qemu"
+          mkdir -p "$HOME/qemu" && curl -fsSL --retry 4 --retry-delay 10 --retry-all-errors --connect-timeout 30 --max-time 900 "$QEMU_URL" | tar xJ -C "$HOME/qemu"
           echo "QEMU=$HOME/qemu/qemu/bin/qemu-system-xtensa" >> "$GITHUB_ENV"
       - name: Variantes émulateur (normale, et « plante au démarrage »)
         run: |
@@ -186,6 +190,7 @@ jobs:
     needs: [build, console, qemu]
     if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: write
     env:
