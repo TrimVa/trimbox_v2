@@ -1,4 +1,4 @@
-# TrimBox — firmware 2.0-a15
+# TrimBox — firmware 2.0-a16
 
 Firmware ESP32-S3. Spécification : `CAHIER-DES-CHARGES.md` (à la racine du
 dépôt). État au 4 octobre 2026.
@@ -9,6 +9,7 @@ dépôt). État au 4 octobre 2026.
 |---|---|
 | GNSS M10 : détection de vitesse, configuration, NAV-PVT 25 Hz | ✅ testé sous émulateur ; ✅ **sur la carte** (fix 3D, 13 satellites, ~20 Hz) |
 | Enregistrement en flash (01h42min à 25 Hz), filtres arrêt / sans fix / extinction | ✅ testé (natif + émulateur) |
+| Voiture posée : vitesse 0 et position figée, jugées par l'agitation de l'IMU (GPS seul si IMU absente) ; plus de faux départ avec peu de satellites (2.0-a16) | ✅ testé sur PC (scénario de l'essai du 07/10) ; ⚠️ à vérifier sur la voiture (touche `m` : « calme ») |
 | Coupure d'alimentation : config A/B, pas de reprise, journal intact | ✅ testé sous émulateur |
 | Bluetooth, protocole console v1 (état, config, téléchargement, effacement, FF F0) | ⚠️ compilé, **non testé** (pas de Bluetooth dans l'émulateur) |
 | IMU LSM6DS3 / LSM6DS3TR-C, ±16 g, moyenne par période GNSS | ✅ capteur validé sur matériel avec `tools/imu_test` (\|a\| = 0,99 g) ; ⚠️ à revérifier dans le firmware complet (touche `m`) |

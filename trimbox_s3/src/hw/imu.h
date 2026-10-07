@@ -16,4 +16,16 @@ void poll();                  // lit les échantillons disponibles (à appeler s
 // IMU_AVERAGE), puis remise à zéro de l'accumulateur.
 rec::Imu take();
 uint32_t samples();           // échantillons lus depuis le démarrage
+
+// Agitation pendant l'époque rendue par le dernier take() : écart-type des
+// échantillons (vibrations, chocs, rotations). Une voiture posée reste à
+// quelques mg ; une voiture qui roule ou qu'on porte, bien au-delà. Les
+// biais du capteur n'interviennent pas (écart à la moyenne de l'époque).
+struct Activity {
+  bool     ok = false;        // mesure exploitable (IMU présente, ≥ 3 échantillons, capteur non figé)
+  uint16_t n = 0;             // échantillons de l'époque
+  int32_t  accStdMg = 0;      // accéléromètre, mg (3 axes combinés)
+  int32_t  gyroStdCdps = 0;   // gyroscope, centi-°/s (3 axes combinés)
+};
+Activity activity();
 }

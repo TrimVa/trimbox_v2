@@ -2,9 +2,9 @@
   "_lisezmoi": "Etat du projet TrimBox (ESP32-S3), a fournir a un assistant IA pour reprendre le developpement dans une conversation neuve. Lire d'abord 'regles_dures', puis 'etat', puis CAHIER-DES-CHARGES.md (§0 et §12). Le depot complet est decrit dans 'fichiers'.",
   "projet": "TrimBox",
   "description": "Enregistreur de telemetrie GPS (25 Hz) et inertielle pour voitures RC, sur ESP32-S3-DevKitC-1 N16R8. Enregistrement autonome sur la flash interne de 16 Mo (154 333 points, 01h42min a 25 Hz), chronometrage au tour calcule dans le module avec lignes posees depuis la radio, telemetrie CRSF vers une RadioMaster MT12 (script Lua : affichage, annonces vocales, pose de ligne), console web par Bluetooth (GitHub Pages) ou par le Wi-Fi du module (console integree au firmware), mise a jour OTA par Wi-Fi avec retour arriere. Wi-Fi et Bluetooth coupes quand la voiture roule.",
-  "date_export": "2026-10-05",
+  "date_export": "2026-10-07",
   "versions": {
-    "firmware": "2.0-a15",
+    "firmware": "2.0-a16",
     "console_web": "1.7.18",
     "script_lua": "trmbox.lua 2.3",
     "cahier_des_charges": "3.0 (document unique ESP32-S3, remplace les anciens v1 et v2 ; annexe A = correspondance des anciens renvois)",
@@ -49,11 +49,12 @@
       "IMU : tools/imu_test, |a| = 0,99 g au repos",
       "Liaison CRSF : messages du chrono et accuses de pose recus sur la MT12",
       "Script Lua sur MT12 : getValue('FM'), touches, lisibilite, annonces vocales, accuses",
-      "Mixage CH8 configure sur la MT12 (4 octobre 2026)"
+      "Mixage CH8 configure sur la MT12 (4 octobre 2026)",
+      "Renommage du vehicule (FF F3) : vehicule YT7, Wi-Fi TrimBox-YT7, mot de passe personnalise (video du 07/10/2026)"
     ],
     "a_valider_sur_materiel": [
-      "Console 1.7.18 : renommer le vehicule et changer le mot de passe Wi-Fi depuis Reglages (en Wi-Fi puis en Bluetooth), verifier le nouveau SSID et le nom Bluetooth apres redemarrage, et la touche x du port serie ; verifier la disposition en onglets et la selection de portion dans la comparaison sur l'ecran reel (Firefox et Chrome, souris et doigt)",
-      "Firmware 2.0-a15 installe (OTA) : 'b' doit afficher BLE actif a l'arret puis COUPE en roulant",
+      "Firmware 2.0-a16 : voiture posee (meme avec peu de satellites), vitesse affichee 0,0 km/h et aucun enregistrement automatique ; touche m : agitation 'calme' voiture posee, 'agitee' en la touchant ; depart reel detecte sans retard visible. Ajuster quietAccMg / quietGyroCdps (core/stillhold.h) si besoin.",
+      "Firmware 2.0-a16 installe (OTA) : 'b' doit afficher BLE actif a l'arret puis COUPE en roulant",
       "IMU dans le firmware complet (touche m)",
       "Pose de ligne depuis la radio, a l'arret (ligne armee 10 s) et lancee",
       "Enregistrement automatique en roulage (une session par roulage)",
@@ -61,16 +62,17 @@
       "Wi-Fi et Bluetooth qui reviennent seuls 30 s apres l'arret",
       "Bancs CDC §11.2 n°1 (30 min d'ecriture sans perte GNSS), 2, 5, 8 (Wi-Fi pres d'ELRS)",
       "Boitier imprime 3D",
-      "Plage accelerometre suffisante (plateaux a 15,99 g ?), IMU_AVERAGE 1 ou 0, repli GPS seul si Galileo"
+      "Plage accelerometre suffisante (plateaux a 15,99 g ?), IMU_AVERAGE 1 ou 0, repli GPS seul si Galileo",
+      "Console 1.7.18 : selection de portion dans la comparaison sur l'ecran reel (Firefox et Chrome, souris et doigt) ; renommage en Bluetooth"
     ],
     "teste_hors_materiel_dernier_passage": {
-      "date": "2026-10-05",
-      "natifs": "protocoles 61, chrono 30, logique 2419 : OK",
+      "date": "2026-10-07",
+      "natifs": "protocoles 61, chrono 30, logique 2474 : OK",
       "console_check": "56 verifications : OK",
       "lua": "4036 verifications : OK",
-      "tests_web": "OK (dont lignes FF F1, chronos du module, mise en page 320 a 1440 px, envoi du vrai trimbox_s3-app.bin)",
-      "qemu": "sim.py, --lua, --arret, --reboot, ota_rollback.py : OK",
-      "compilation": "1 263 303 octets (62 % de app0), 149 772 octets de RAM, aucun avertissement"
+      "tests_web": "OK (dont envoi du vrai trimbox_s3-app.bin 2.0-a16)",
+      "qemu": "sur GitHub (job Integration emulateur)",
+      "compilation": "1 275 283 octets (62 % de app0), aucun avertissement"
     }
   },
   "travail_recent": [
@@ -86,10 +88,12 @@
     "Renommage : le projet s'appelle TrimBox (et non plus TrimBox DIY / TrimBox DIY S3) dans la console, les documents, les outils et le firmware. Firmware 2.0-a14 : BRAND et MANUFACTURER = 'TrimBox' (FF F0, BLE 2A24/2A29). Console 1.7.17 : fonctions S3 decidees par la version annoncee (>= 2) ou un modele contenant 'S3' (anciennes 2.0-a1..a13). Nom de fichier trimbox-diy-console-demo.html conserve (redirection des anciens liens). Depot GitHub : TrimVa/trimbox_v2.",
     "tests/web : toute requete hors du module est refusee (regex sur l'hote) ; l'ancien filtre '**/arcgisonline.com/**' ne reconnaissait pas server.arcgisonline.com, si bien que sur GitHub (runner avec Internet) le message 'pas d'Internet' du satellite n'apparaissait jamais et le job 'Console embarquee' echouait. Le test verifie maintenant que les tuiles sont bien interceptees.",
     "Voix : tools/sons/generer-mot.bat / .ps1, generation a la demande (texte et nom demandes, nom propose sans accent <= 8 caracteres, ecoute avant d'enregistrer, vitesse +/-10 %, cle Azure memorisable dans azure-cle.txt ignore par git). Teste sous PowerShell 7 contre un faux service Azure (SSML echappe, prosody, 401).",
-    "Firmware 2.0-a15 / console 1.7.18 : nom du vehicule et mot de passe du point d'acces modifiables depuis la console (Reglages > Vehicule et point d'acces). Message FF F3 (requete vide -> 17 o : nom + drapeau mot de passe personnalise ; ecriture 80 o : masque + nom 16 + mot de passe 63), core/ident (regles, testees), hw/identity (NVS, espace 'trimbox' ; partition cfg pleine, table de partitions inchangee), ACK puis redemarrage 1,5 s ; NACK si enregistrement, roulage, telechargement, effacement ou validation OTA en cours. SSID TrimBox-<nom>, Bluetooth 'TrimBox <nom>'. Touche serie 'x' : retour aux valeurs de config.h. Console : 'Pseudo' devient 'Vehicule' ; controle des saisies identique au firmware, apercu des noms, confirmation, consignes de reconnexion. tests/web : lecture, refus, envoi, redemarrage simule par fakedev, relecture."
+    "Firmware 2.0-a15 / console 1.7.18 : nom du vehicule et mot de passe du point d'acces modifiables depuis la console (Reglages > Vehicule et point d'acces). Message FF F3 (requete vide -> 17 o : nom + drapeau mot de passe personnalise ; ecriture 80 o : masque + nom 16 + mot de passe 63), core/ident (regles, testees), hw/identity (NVS, espace 'trimbox' ; partition cfg pleine, table de partitions inchangee), ACK puis redemarrage 1,5 s ; NACK si enregistrement, roulage, telechargement, effacement ou validation OTA en cours. SSID TrimBox-<nom>, Bluetooth 'TrimBox <nom>'. Touche serie 'x' : retour aux valeurs de config.h. Console : 'Pseudo' devient 'Vehicule' ; controle des saisies identique au firmware, apercu des noms, confirmation, consignes de reconnexion. tests/web : lecture, refus, envoi, redemarrage simule par fakedev, relecture.",
+    "Firmware 2.0-a16 : maintien a l'arret refait (core/stillhold). Essai reel du 07/10/2026 (video) : voiture posee, 4-5 satellites, vitesse GNSS parasite 0 a 5,8 km/h affichee et faux depart de l'enregistrement automatique (seuil 5 km/h). Desormais hw/imu mesure l'agitation par epoque (ecart-type des echantillons, imu::activity) et l'IMU tranche seule : figee apres 0,4 s de calme (<= 25 mg, <= 3 deg/s) meme si le GNSS annonce plusieurs km/h, liberee apres 2 epoques agitees (> 50 mg ou > 6 deg/s) ou 1 si le GNSS confirme ; garde-fou GNSS > 10 km/h et > 3 x sAcc pendant 0,5 s. Sans IMU (ou capteur fige) : GNSS seul avec seuils releves par sAcc (entree max(1,1 km/h ; 2 sAcc) plafonne 3,6 km/h, sortie max(2,2 ; 3 sAcc) plafonne 9 km/h). Derive max(4 m ; 3 hAcc). Touche serie m : colonne agitation (calme / agitee). Test natif testStillHoldImu (scenario de l'essai, choc isole, depart, garde-fou, capteur fige).",
+    "CI : timeout-minutes par job et nouvelles tentatives curl / apt-get (le job emulateur etait reste bloque > 20 min sur un telechargement). Premiere release publiee automatiquement : firmware-2.0-a15."
   ],
   "prochaines_etapes": [
-    "1) Installer trimbox_s3-app.bin (2.0-a15, console 1.7.18) par la console Wi-Fi ; verifier la version au demarrage et la ligne BLE de 'b'.",
+    "1) Installer trimbox_s3-app.bin 2.0-a16 (release GitHub firmware-2.0-a16) par la console Wi-Fi ; verifier vitesse 0 a l'arret et la touche m.",
     "2) Roulage : pose de ligne depuis la radio, enregistrement automatique, tours radio / module / console, radios qui reviennent au stand.",
     "3) Bancs materiels restants (CDC §11.2) et boitier.",
     "4) Nettoyages console (pistes_non_traitees)."
@@ -204,8 +208,8 @@
   "fichiers": [
     {
       "chemin": ".github/workflows/build-s3.yml",
-      "octets": 11569,
-      "sha1": "1d4cf95f2d77"
+      "octets": 12139,
+      "sha1": "a73a3694ffd2"
     },
     {
       "chemin": ".gitignore",
@@ -214,8 +218,8 @@
     },
     {
       "chemin": "CAHIER-DES-CHARGES.md",
-      "octets": 77186,
-      "sha1": "d9dc4c3fab61"
+      "octets": 78823,
+      "sha1": "14ebb9648010"
     },
     {
       "chemin": "DEMARRAGE.md",
@@ -225,12 +229,12 @@
     {
       "chemin": "README.md",
       "octets": 28514,
-      "sha1": "3476b2d317a7"
+      "sha1": "75e0581c04c9"
     },
     {
       "chemin": "REPRISE-IA.md",
       "octets": 4060,
-      "sha1": "03ecb11f350c"
+      "sha1": "4f9a3f9ceb7e"
     },
     {
       "chemin": "docs/boitier/LISEZMOI.md",
@@ -369,8 +373,8 @@
     },
     {
       "chemin": "tests/native/test_logic.cpp",
-      "octets": 20303,
-      "sha1": "48409c42b9a7"
+      "octets": 25274,
+      "sha1": "59ef74b30d7c"
     },
     {
       "chemin": "tests/native/test_proto.cpp",
@@ -479,8 +483,8 @@
     },
     {
       "chemin": "trimbox-etat-projet.json",
-      "octets": 30986,
-      "sha1": "3cadc2ab8176"
+      "octets": 32344,
+      "sha1": "(ce fichier)"
     },
     {
       "chemin": "trimbox-sw.js",
@@ -494,8 +498,8 @@
     },
     {
       "chemin": "trimbox_s3/LISEZMOI.md",
-      "octets": 10303,
-      "sha1": "5c2f0a498df9"
+      "octets": 10585,
+      "sha1": "0bb396cb4dc2"
     },
     {
       "chemin": "trimbox_s3/partitions.csv",
@@ -504,8 +508,8 @@
     },
     {
       "chemin": "trimbox_s3/src/app.cpp",
-      "octets": 38841,
-      "sha1": "cef0546c574d"
+      "octets": 39921,
+      "sha1": "132e78ba5d31"
     },
     {
       "chemin": "trimbox_s3/src/app.h",
@@ -515,7 +519,7 @@
     {
       "chemin": "trimbox_s3/src/config.h",
       "octets": 6541,
-      "sha1": "1f3adccda9ee"
+      "sha1": "2a9170917284"
     },
     {
       "chemin": "trimbox_s3/src/console_gz.h",
@@ -649,13 +653,13 @@
     },
     {
       "chemin": "trimbox_s3/src/core/stillhold.cpp",
-      "octets": 1713,
-      "sha1": "f76e6e958e69"
+      "octets": 3480,
+      "sha1": "235b816dc594"
     },
     {
       "chemin": "trimbox_s3/src/core/stillhold.h",
-      "octets": 2587,
-      "sha1": "51f3a550fda8"
+      "octets": 5861,
+      "sha1": "5719753a7aca"
     },
     {
       "chemin": "trimbox_s3/src/core/tbproto.cpp",
@@ -714,13 +718,13 @@
     },
     {
       "chemin": "trimbox_s3/src/hw/imu.cpp",
-      "octets": 5239,
-      "sha1": "1a5ff72b953d"
+      "octets": 6083,
+      "sha1": "7ac72e101756"
     },
     {
       "chemin": "trimbox_s3/src/hw/imu.h",
-      "octets": 920,
-      "sha1": "0e1ca9e65247"
+      "octets": 1584,
+      "sha1": "f8f36cb15ec9"
     },
     {
       "chemin": "trimbox_s3/src/hw/ota.cpp",

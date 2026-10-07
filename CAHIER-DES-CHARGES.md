@@ -1,7 +1,7 @@
 # TrimBox — Cahier des charges
 
 **Version du document :** 3.0 — 4 octobre 2026
-**Cible :** firmware **2.0-a15** (ESP32-S3), console web **1.7.18**, script radio
+**Cible :** firmware **2.0-a16** (ESP32-S3), console web **1.7.18**, script radio
 `trmbox.lua` **2.3**.
 **Remplace :** les anciens `CAHIER-DES-CHARGES.md` (v1, carte XIAO nRF52840) et
 `CAHIER-DES-CHARGES-V2.md` (v2). Ce document est **autonome** : il ne décrit que
@@ -104,7 +104,7 @@ Fichiers annexes : `trimbox-sw.js` (service worker, optionnel),
 
 | Sujet | État |
 |---|---|
-| Firmware 2.0-a15 | Écrit, testé sur PC, dans un navigateur et sous émulateur ; compile (1,26 Mo, 62 % de la partition) |
+| Firmware 2.0-a16 | Écrit, testé sur PC, dans un navigateur et sous émulateur ; compile (1,26 Mo, 62 % de la partition) |
 | GPS sur la carte | ✅ fix 3D, 13 satellites, ~20 Hz |
 | IMU | ✅ capteur validé avec `tools/imu_test` (\|a\| = 0,99 g) ; à revérifier dans le firmware complet |
 | Script Lua sur la MT12 | ✅ affichage, tours, annonces vocales, accusés de pose ; ✅ mixage CH8 configuré |
@@ -629,12 +629,34 @@ fonctionner sans enregistrement, §12.20).
 ### 4.10 Maintien à l'arrêt
 
 `core/stillhold` (`STILL_HOLD 1`) : position figée (moyenne de 2 s) et vitesse
-à 0 quand la voiture est immobile, pour supprimer la dérive du GPS à l'arrêt.
+à **0** quand la voiture est immobile. Sans lui, le GPS « promène » une voiture
+posée de 1 à 3 m et annonce une vitesse parasite : quelques dixièmes de km/h
+sous un ciel dégagé, **jusqu'à 5 ou 6 km/h avec 4 ou 5 satellites** (essai du
+07/10/2026 : affichage incohérent et faux départ de l'enregistrement
+automatique). Toute la suite utilise la vitesse filtrée : affichage en direct,
+enregistrement, démarrage automatique, Wi-Fi / Bluetooth, pose de ligne,
+chronomètre.
 
-- Entrée : vitesse sous ~1,1 km/h pendant 0,2 s, IMU calme
-  (`|‖a‖ − 1 g| < 80 mg`, `‖ω‖ < 15 °/s`).
-- Sortie : vitesse au-dessus de ~2,2 km/h, mouvement vu par l'IMU, ou
-  éloignement de plus de 4 m.
+- **IMU présente (cas normal) : elle tranche seule.** `hw/imu` mesure à chaque
+  époque l'**agitation** (écart-type des échantillons, 3 axes combinés) ;
+  les biais du capteur n'interviennent pas. Posée, une voiture reste à
+  quelques mg et sous 1 °/s ; qui roule, qu'on pousse ou qu'on soulève, bien
+  au-delà.
+  - Entrée : calme (≤ 25 mg et ≤ 3 °/s) pendant **0,4 s**, quelle que soit la
+    vitesse annoncée par le GPS.
+  - Sortie : agitation franche (> 50 mg ou > 6 °/s) **2 époques de suite** (un
+    choc isolé sur la table ne suffit pas), ou dès la première si le GPS
+    confirme une vitesse significative.
+  - Garde-fou (IMU décrochée ou mal fixée) : GPS au-dessus de 10 km/h et de
+    3 × sAcc pendant 0,5 s → libéré.
+- **IMU absente ou capteur figé : GPS seul**, avec des seuils qui tiennent
+  compte de la précision de vitesse annoncée (sAcc) : entrée sous
+  max(1,1 km/h ; 2 × sAcc), plafonné à 3,6 km/h, pendant 0,2 s ; sortie
+  au-dessus de max(2,2 km/h ; 3 × sAcc), plafonné à 9 km/h.
+- Dans les deux cas : éloignement de l'ancrage au-delà de max(4 m ; 3 × hAcc)
+  → libéré (voiture déplacée).
+- Réglage sur la voiture : touche série `m`, colonne « agitation » (doit
+  rester « calme » voiture posée, moteur arrêté).
 - `STILL_HOLD 0` pour enregistrer le GNSS brut.
 
 ### 4.11 DEL et bouton
@@ -656,7 +678,7 @@ Les couleurs se superposent (rouge + bleu = violet). **Bouton BOOT, appui long
 | Réglage | Défaut | Rôle |
 |---|---|---|
 | `DEVICE_NICKNAME` | `"Buggy 1"` | Nom du véhicule **par défaut**, ≤ 16 caractères (§12.1) : `TrimBox Buggy 1` en Bluetooth, `TrimBox-Buggy-1` en Wi-Fi. Modifiable depuis la console (§3.13) |
-| `FIRMWARE_VER` | `"2.0-a15"` | Version annoncée (`FF F0`, journal) |
+| `FIRMWARE_VER` | `"2.0-a16"` | Version annoncée (`FF F0`, journal) |
 | `WIFI_PASS` | `"trimbox-rc"` | Mot de passe WPA2 **par défaut** du point d'accès (8 à 63 caractères) ; à changer depuis la console (Réglages, §3.13) |
 | `WIFI_AUTO_DEFAULT` | `1` | Wi-Fi automatique à l'arrêt |
 | `WIFI_AUTO_ON_S` | `30` | Arrêt continu avant allumage du Wi-Fi |
@@ -1199,10 +1221,12 @@ Pièges de l'émulateur : §12.19 (variante `-DTRIMBOX_QEMU`, jamais flashée).
 
 Firmware :
 
-- [ ] Au démarrage, le journal affiche marque, pseudo, version (2.0-a15),
+- [ ] Au démarrage, le journal affiche marque, pseudo, version (2.0-a16),
       empreinte de compilation, `mémoire : n / 154333`.
 - [ ] `b` : GNSS 25 Hz dehors, IMU présente, CRSF « liaison OK », BLE actif.
 - [ ] Un roulage ouvre une session et la ferme 30 s après l'arrêt.
+- [ ] Voiture posée (même avec peu de satellites) : vitesse affichée 0,0 km/h,
+      position figée, aucun enregistrement automatique ; `m` : « calme ».
 - [ ] **Arrachement** : couper l'alimentation en pleine session. Au
       redémarrage, le module est joignable, à l'arrêt, données intactes.
 - [ ] Le téléchargement signale les emplacements corrompus écartés.

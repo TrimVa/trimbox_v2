@@ -9,7 +9,7 @@
 #define DEVICE_NICKNAME   "Buggy 1"          // nom du véhicule PAR DÉFAUT, ≤ 16 caractères (§12.1) ;
                                              // modifiable depuis la console (Réglages), gardé en NVS
 #define BRAND             "TrimBox"
-#define FIRMWARE_VER      "2.0-a15"
+#define FIRMWARE_VER      "2.0-a16"
 #define HARDWARE_VER      "ESP32-S3-DevKitC-1 N16R8"
 #define MANUFACTURER      "TrimBox"
 #define BUILD_STAMP       __DATE__ " " __TIME__

@@ -155,6 +155,82 @@ static void testStillHold(){
   CHECK(!any, "sans fix : pas de maintien");
 }
 
+// Maintien à l'arrêt jugé par l'IMU : essai réel du 07/10/2026 (voiture
+// posée, 4 à 5 satellites, vitesse GNSS parasite de 0 à 5,8 km/h qui faisait
+// démarrer l'enregistrement automatique).
+static void testStillHoldImu(){
+  const int32_t LAT0 = 459192780, LON0 = -13359680;
+  const double mPerLat = 0.01112, mPerLon = 0.01112 * cos(45.919 * M_PI / 180);
+  uint32_t seed = 777;
+  auto rnd = [&](){ seed = seed * 1103515245u + 12345u; return ((seed >> 8) & 0xFFFF) / 65535.0; };   // [0, 1]
+  double wn = 0, we = 0, v = 0;
+  uint32_t t = 0;
+  // une époque à 20 Hz ; agitation « posée » par défaut
+  auto sample = [&](int32_t speed, int32_t accStd, int32_t gyroStd){
+    still::Sample x = {};
+    t += 50; x.tMs = t;
+    wn += (rnd() - 0.5) * 0.2; we += (rnd() - 0.5) * 0.2;
+    wn = fmax(-2.0, fmin(2.0, wn)); we = fmax(-2.0, fmin(2.0, we));
+    x.fix = true; x.lat = LAT0 + (int32_t)(wn / mPerLat); x.lon = LON0 + (int32_t)(we / mPerLon);
+    x.hMSL = -2500; x.gSpeed = speed; x.sAcc = 450; x.hAcc = 2000;
+    x.imuOk = true; x.az = 1000; x.gx = 300;                  // biais du gyroscope : sans effet
+    x.act.ok = true; x.act.accStdMg = accStd; x.act.gyroStdCdps = gyroStd;
+    return x;
+  };
+  // vitesse parasite corrélée (le GNSS lisse) : 0 à ~6 km/h, pointes à 5,8 km/h
+  auto noisySpeed = [&](){ v += (rnd() - 0.5) * 500; v = fmax(0, fmin(1650, v)); return (int32_t)v; };
+
+  still::Hold h;
+  recd::Recorder r; recd::Settings rs; r.configure(rs);       // F_AUTO, seuil 5 km/h
+  int held = 0, maxShown = 0, peaks = 0; bool started = false;
+  for(int i = 0; i < 1200; i++){                               // 60 s posée
+    still::Sample x = sample(noisySpeed(), 3 + (int32_t)(rnd() * 4), 20 + (int32_t)(rnd() * 40));
+    if(x.gSpeed >= 1389) peaks++;
+    const bool hd = h.apply(x);
+    if(i >= 8){ held += hd; if(x.gSpeed > maxShown) maxShown = x.gSpeed; }
+    if(r.epoch(t, true, x.gSpeed).changed) started = true;
+  }
+  CHECK(peaks > 20, "bruit réaliste : %d époques au-dessus de 5 km/h", peaks);
+  CHECK(held == 1200 - 8, "posée : figée en 0,4 s puis tout le temps (%d/%d)", held, 1200 - 8);
+  CHECK(maxShown == 0, "posée : vitesse affichée 0 (max %d mm/s)", maxShown);
+  CHECK(!started && r.state() == recd::STOPPED, "posée : pas de faux départ de l'enregistrement");
+
+  // Choc isolé sur la table : reste figée
+  { still::Sample x = sample(noisySpeed(), 400, 5000); CHECK(h.apply(x), "choc isolé : reste figée"); }
+  { still::Sample x = sample(noisySpeed(), 4, 30); CHECK(h.apply(x), "après le choc : figée"); }
+  // Départ réel : vibrations franches → libérée à la 2e époque (ou à la 1re si le GNSS confirme)
+  { still::Sample x = sample(300, 180, 2500); CHECK(h.apply(x), "départ : 1re époque agitée, GNSS lent : encore figée"); }
+  { still::Sample x = sample(900, 220, 3000); CHECK(!h.apply(x) && x.gSpeed == 900, "départ : libérée à la 2e époque, vitesse réelle"); }
+  for(int i = 0; i < 20; i++){ still::Sample x = sample(5000, 300, 4000); CHECK(!h.apply(x), "roule : jamais figée"); }
+  // Retour au calme : figée après 0,4 s
+  int k = 0; for(; k < 40; k++){ still::Sample x = sample(noisySpeed(), 4, 30); if(h.apply(x)) break; }
+  CHECK(k >= 7 && k <= 9, "arrêt : figée après ~0,4 s (époque %d)", k);
+  // Départ franc confirmé par le GNSS : libérée dès la 1re époque
+  { still::Sample x = sample(3000, 200, 2500); CHECK(!h.apply(x), "départ franc : libérée immédiatement"); }
+
+  // Garde-fou : IMU calme mais GNSS à 15 km/h pendant 0,5 s (IMU décrochée)
+  still::Hold g; for(int i = 0; i < 20; i++){ still::Sample x = sample(100, 3, 20); g.apply(x); }
+  CHECK(g.held(), "garde-fou : figée au départ");
+  int rel = -1;
+  for(int i = 0; i < 30; i++){ still::Sample x = sample(4200, 3, 20); if(!g.apply(x) && rel < 0) rel = i; }
+  CHECK(rel >= 9 && rel <= 11, "garde-fou : libérée après 0,5 s de vraie vitesse GNSS (époque %d)", rel);
+
+  // Capteur figé (agitation non mesurable) : retour au jugement GNSS, seuils relevés par sAcc
+  still::Hold f; int fh = 0; maxShown = 0; v = 0;
+  for(int i = 0; i < 1200; i++){
+    still::Sample x = sample(0, 0, 0); x.act.ok = false; x.sAcc = 800;
+    v += (rnd() - 0.5) * 300; v = fmax(0, fmin(1600, v)); x.gSpeed = (int32_t)v;
+    if(f.apply(x)) fh++;
+    else if(i > 200 && x.gSpeed > maxShown) maxShown = x.gSpeed;
+  }
+  CHECK(fh > 1000, "GNSS seul, sAcc 0,8 m/s : figée la plupart du temps (%d/1200)", fh);
+  CHECK(still::Hold::enterThr(sample(0,0,0), still::Settings()) == 900, "seuil d'entrée = 2 × sAcc");
+  { still::Sample x = sample(0,0,0); x.sAcc = 5000;
+    CHECK(still::Hold::enterThr(x, still::Settings()) == 1000 && still::Hold::exitThr(x, still::Settings()) == 2500, "seuils plafonnés"); }
+  { still::Sample x = sample(0,0,0); x.sAcc = 0;
+    CHECK(still::Hold::enterThr(x, still::Settings()) == 300 && still::Hold::exitThr(x, still::Settings()) == 600, "sAcc inconnu : seuils de base"); }
+}
+
 // Pose à l'arrêt : armement, départ, cap, délai.
 static void testLineArm(){
   using namespace linearm;
@@ -363,4 +439,4 @@ static void testIdent(){
   k = tb::build(fr, tb::CLS, tb::ID_IDENT, p, 20); pr.push(fr, k); CHECK(!pr.next(f), "FF F3 de 20 octets refusé");
 }
 
-int main(){ testIdent(); testAirGate(); testRecorder(); testAutoRecord(); testLineCmd(); testPersist(); testStillHold(); testLineArm(); DONE("logique"); }
+int main(){ testIdent(); testAirGate(); testRecorder(); testAutoRecord(); testLineCmd(); testPersist(); testStillHold(); testStillHoldImu(); testLineArm(); DONE("logique"); }

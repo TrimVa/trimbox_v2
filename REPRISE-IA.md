@@ -61,7 +61,7 @@ limite la taille ou le nombre de fichiers, joindre au minimum, dans cet ordre :
 | `tools/` | Intégration de la console, schéma, boîtier, voix, sondes |
 | `docs/` | Schéma de câblage, boîtier imprimé 3D |
 | `.github/workflows/build-s3.yml` | Compilation et tests en ligne |
-| `binaires/` | Firmware 2.0-a15 compilé (mise à jour Wi-Fi et premier flash) |
+| `binaires/` | Firmware 2.0-a16 compilé (mise à jour Wi-Fi et premier flash) |
 
 ## 5. Vérifier que tout est en ordre (si l'assistant peut exécuter du code)
 

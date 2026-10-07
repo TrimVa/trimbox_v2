@@ -524,12 +524,17 @@ static void onPvt(const rec::Pvt& raw){
   {
     bool fix0 = raw.fixType >= 3 && raw.gnssFixOK();
     if(fix0 && g_cfg.gnssMinAcc && raw.hAcc > (uint32_t)g_cfg.gnssMinAcc * 1000u) fix0 = false;
-    still::Sample x;
+    still::Sample x = {};
+    x.tMs = now;
     x.fix = fix0; x.lat = raw.lat; x.lon = raw.lon; x.hMSL = raw.hMSL; x.height = raw.height;
-    x.gSpeed = raw.gSpeed;
+    x.gSpeed = raw.gSpeed; x.sAcc = raw.sAcc; x.hAcc = raw.hAcc;
     x.ax = m.ax; x.ay = m.ay; x.az = m.az; x.gx = m.gx; x.gy = m.gy; x.gz = m.gz;
     // IMU absente ou muette (lecture nulle) : décision sur le seul GNSS
     x.imuOk = imu::ok() && (m.ax || m.ay || m.az);
+    // Agitation de l'époque : c'est elle qui dit si la voiture est posée,
+    // même quand le GNSS annonce plusieurs km/h (peu de satellites).
+    const imu::Activity act = imu::activity();
+    x.act.ok = act.ok; x.act.accStdMg = act.accStdMg; x.act.gyroStdCdps = act.gyroStdCdps;
     if(STILL_HOLD && g_still.apply(x)){
       p.lat = x.lat; p.lon = x.lon; p.hMSL = x.hMSL; p.height = x.height;
       p.gSpeed = 0; p.velN = p.velE = p.velD = 0;
@@ -664,12 +669,23 @@ static void serviceSerialCommands(){
       case 'b': printBench(); break;
       case 'm': {                                        // mesures IMU en direct
         if(!imu::ok()){ Serial.printf("[imu] absente (identifiant 0x%02X)\n", imu::whoAmI()); break; }
-        Serial.println("   ax     ay     az (mg)  |   gx     gy     gz (c°/s)");
+        // agitation (écart-type sur 40 ms, comme une époque à 25 Hz) : posée,
+        // elle doit rester sous les seuils du maintien à l'arrêt (core/stillhold)
+        const still::Settings& ss = g_still.settings();
+        Serial.printf("   ax     ay     az (mg)  |   gx     gy     gz (c°/s) | agitation mg  c°/s (posée : <= %ld et <= %ld)\n",
+                      (long)ss.quietAccMg, (long)ss.quietGyroCdps);
         for(int k = 0; k < 10; k++){
-          const uint32_t t0 = millis();
-          while(millis() - t0 < 200) imu::poll();
+          uint32_t t0 = millis();
+          while(millis() - t0 < 160) imu::poll();
+          imu::take();
+          t0 = millis();
+          while(millis() - t0 < 40) imu::poll();
           const rec::Imu m = imu::take();
-          Serial.printf("  %+6d %+6d %+6d     | %+6d %+6d %+6d\n", m.ax, m.ay, m.az, m.gx, m.gy, m.gz);
+          const imu::Activity a = imu::activity();
+          Serial.printf("  %+6d %+6d %+6d     | %+6d %+6d %+6d     |  %5ld %5ld  %s\n", m.ax, m.ay, m.az, m.gx, m.gy, m.gz,
+                        (long)a.accStdMg, (long)a.gyroStdCdps,
+                        !a.ok ? "(non mesurable)" :
+                        (a.accStdMg <= ss.quietAccMg && a.gyroStdCdps <= ss.quietGyroCdps) ? "calme" : "agitée");
         }
         break;
       }
