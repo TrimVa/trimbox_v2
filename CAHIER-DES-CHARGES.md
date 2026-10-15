@@ -1,7 +1,7 @@
 # TrimBox — Cahier des charges
 
 **Version du document :** 3.0 — 4 octobre 2026
-**Cible :** firmware **2.0-a16** (ESP32-S3), console web **1.7.18**, script radio
+**Cible :** firmware **2.0-a17** (ESP32-S3), console web **1.7.18**, script radio
 `trmbox.lua` **2.3**.
 **Remplace :** les anciens `CAHIER-DES-CHARGES.md` (v1, carte XIAO nRF52840) et
 `CAHIER-DES-CHARGES-V2.md` (v2). Ce document est **autonome** : il ne décrit que
@@ -104,7 +104,7 @@ Fichiers annexes : `trimbox-sw.js` (service worker, optionnel),
 
 | Sujet | État |
 |---|---|
-| Firmware 2.0-a16 | Écrit, testé sur PC, dans un navigateur et sous émulateur ; compile (1,26 Mo, 62 % de la partition) |
+| Firmware 2.0-a17 | Écrit, testé sur PC, dans un navigateur et sous émulateur ; compile (1,26 Mo, 62 % de la partition) |
 | GPS sur la carte | ✅ fix 3D, 13 satellites, ~20 Hz |
 | IMU | ✅ capteur validé avec `tools/imu_test` (\|a\| = 0,99 g) ; à revérifier dans le firmware complet |
 | Script Lua sur la MT12 | ✅ affichage, tours, annonces vocales, accusés de pose ; ✅ mixage CH8 configuré |
@@ -119,7 +119,7 @@ Fichiers annexes : `trimbox-sw.js` (service worker, optionnel),
 
 | Élément | Référence | Remarque |
 |---|---|---|
-| Carte | **ESP32-S3-DevKitC-1, module WROOM-1-N16R8** | 16 Mo de flash, 8 Mo de PSRAM octale. Deux prises USB-C : **« USB »** (natif, à utiliser) et « UART » (pont série) |
+| Carte | **NiceMCU « ESP32-S3_MINI_Nano » N16R8** (puce ESP32-S3R8) | 16 Mo de flash, 8 Mo de PSRAM octale (intégrée à la puce). **Une seule prise USB-C** (USB natif : journal et flash). Antenne céramique ou prise IPEX (choix par résistance R2/R3 près de la prise). Broches repérées « IOxx » au dos ; alimentation par **VIN** (pas de broche « 5V ») |
 | Centrale inertielle | **LSM6DS3 / LSM6DS3TR-C**, module générique I2C | Adresse **0x6A ou 0x6B** (broche SDO/SA0), détection automatique. Identifiants acceptés : 0x69, 0x6A, 0x6B, 0x6C. **±16 g** obligatoire (§2.5). Alternative ±32 g : LSM6DSO32 (§12.17) |
 | GNSS | **HGLRC M100 Mini** (u-blox M10) | Alimenté en 5 V, signaux 3,3 V. Ne garde pas ses réglages : configuration **renvoyée à chaque démarrage** (§4.8) |
 | Récepteur | **RadioMaster ER5C-i** (ExpressLRS 2,4 GHz) | Sorties 2 et 3 en CRSF série (§5.1) |
@@ -130,11 +130,15 @@ Fichiers annexes : `trimbox-sw.js` (service worker, optionnel),
 ### 2.2 Alimentation
 
 - Le module est alimenté par le **BEC de l'ESC** (6,0 à 8,4 V) via un
-  **régulateur abaisseur 5 V**, qui alimente la carte (broche 5V) et le GNSS.
+  **régulateur abaisseur 5 V**, qui alimente la carte (broche **VIN**) et le
+  GNSS.
   Le régulateur 3,3 V de la carte alimente l'IMU.
-- Le BEC ne va **jamais** directement sur la broche 5V de la carte (§12.18).
+- Le BEC ne va **jamais** directement sur la broche VIN de la carte (§12.18).
 - Au banc, l'USB de la carte alimente tout ; ne pas cumuler USB et régulateur
   sans vérifier le schéma de la carte (retour de courant vers l'USB).
+  **[À VALIDER]** sur la carte NiceMCU : VIN doit recevoir le 5 V de l'USB
+  (mesurer VIN–GND, USB seul branché) ; sinon le GPS n'est pas alimenté au
+  banc.
 - Conséquence acceptée : le module ne fonctionne que batterie de la voiture
   branchée. L'octet batterie du message de données (offset 67) vaut **toujours
   0** ; la tension de la batterie de propulsion s'affiche **sur la radio**,
@@ -154,13 +158,17 @@ CRSF TX         15     UART2  420000 b    → RX du récepteur (télémétrie)
 IMU SDA          8     I2C0
 IMU SCL          9     I2C0
 IMU INT1         7     entrée             (réservée)
-LED          48 / 38   sortie             DEL RGB : GPIO 48 sur DevKitC-1 v1.0, 38 sur v1.1
+LED             48     sortie             DEL RGB de la carte [À VALIDER] ; IO48 aussi sur un picot
 BOUTON           0     entrée             Bouton BOOT (appui long : Wi-Fi, §6.2)
 (libres)       5, 6    —                  ex-X-Bus, objectif abandonné (§13)
-Journal série   USB    CDC natif          115 200 bauds, prise « USB »
+Journal série   USB    CDC natif          115 200 bauds, prise USB-C de la carte
 ```
 
-**Broches interdites** (§12.11) : 35, 36, 37 (PSRAM octale), 19 et 20 (USB),
+Sur la carte, chaque GPIO est repéré **« IOxx »** au dos (IO18 = GPIO 18) ;
+alimentation : **VIN**, **3V3**, **GND** ; TX / RX = UART0 (43 / 44), inutilisés.
+
+**Broches interdites** (§12.11) : **33 à 37** (PSRAM octale de l'ESP32-S3R8 ;
+la carte les sort quand même sur des picots), 19 et 20 (USB, non sorties),
 0, 3, 45, 46 en sortie (lues au démarrage). Entrées analogiques :
 **exclusivement l'ADC1** (GPIO 1 à 10), l'ADC2 étant inutilisable Wi-Fi actif.
 
@@ -678,14 +686,14 @@ Les couleurs se superposent (rouge + bleu = violet). **Bouton BOOT, appui long
 | Réglage | Défaut | Rôle |
 |---|---|---|
 | `DEVICE_NICKNAME` | `"Buggy 1"` | Nom du véhicule **par défaut**, ≤ 16 caractères (§12.1) : `TrimBox Buggy 1` en Bluetooth, `TrimBox-Buggy-1` en Wi-Fi. Modifiable depuis la console (§3.13) |
-| `FIRMWARE_VER` | `"2.0-a16"` | Version annoncée (`FF F0`, journal) |
+| `FIRMWARE_VER` | `"2.0-a17"` | Version annoncée (`FF F0`, journal) |
 | `WIFI_PASS` | `"trimbox-rc"` | Mot de passe WPA2 **par défaut** du point d'accès (8 à 63 caractères) ; à changer depuis la console (Réglages, §3.13) |
 | `WIFI_AUTO_DEFAULT` | `1` | Wi-Fi automatique à l'arrêt |
 | `WIFI_AUTO_ON_S` | `30` | Arrêt continu avant allumage du Wi-Fi |
 | `BLE_AUTO_OFF` / `BLE_AUTO_ON_S` | `1` / `30` | Bluetooth coupé au roulage / rallumé après 30 s (§6.3) |
 | `CRSF_LINE_CHANNEL_DEFAULT` | `8` | Voie de pose de ligne |
 | `LINE_MIN_SPEED_MMS` / `LINE_ARM_WINDOW_MS` | `2000` / `10000` | Pose lancée au-dessus de 2 m/s ; sinon ligne armée 10 s (§5.5) |
-| `PIN_LED_RGB` | `48` | **38** sur une DevKitC-1 v1.1 |
+| `PIN_LED_RGB` | `48` | DEL RGB de la carte, à confirmer (§2.3) |
 | `AXIS_*` | à plat, x vers l'avant | Orientation de l'IMU |
 | `IMU_AVERAGE`, `STILL_HOLD` | `1`, `1` | §4.9, §4.10 |
 
@@ -1221,7 +1229,7 @@ Pièges de l'émulateur : §12.19 (variante `-DTRIMBOX_QEMU`, jamais flashée).
 
 Firmware :
 
-- [ ] Au démarrage, le journal affiche marque, pseudo, version (2.0-a16),
+- [ ] Au démarrage, le journal affiche marque, pseudo, version (2.0-a17),
       empreinte de compilation, `mémoire : n / 154333`.
 - [ ] `b` : GNSS 25 Hz dehors, IMU présente, CRSF « liaison OK », BLE actif.
 - [ ] Un roulage ouvre une session et la ferme 30 s après l'arrêt.
@@ -1340,7 +1348,7 @@ roulage (§6.1). Un seul comportement, quel que soit le système radio.
 
 ### 12.11 Broches de l'ESP32-S3 N16R8
 
-GPIO 35-37 (PSRAM octale) : les toucher fige ou redémarre la carte. GPIO 19-20 :
+GPIO 33-37 (PSRAM octale de l’ESP32-S3R8, sortis sur la carte NiceMCU) : les toucher fige ou redémarre la carte. GPIO 19-20 :
 USB (plus de port de programmation). GPIO 0, 3, 45, 46 : lues au démarrage, un
 niveau imposé peut empêcher le démarrage. ADC2 inutilisable Wi-Fi actif.
 
@@ -1379,9 +1387,9 @@ impose de le relever **en même temps** (35 g) : c'est la **seule** modification
 admise dans `plausible()`, sur demande explicite. La plage réelle est transmise
 par `FF F0` (champ `PLAGE_G`).
 
-### 12.18 Alimentation de la DevKitC-1
+### 12.18 Alimentation de la carte
 
-Jamais le BEC (6 à 8,4 V) sur la broche 5V de la carte : régulateur 5 V en
+Jamais le BEC (6 à 8,4 V) sur la broche VIN de la carte : régulateur 5 V en
 amont obligatoire. Ne pas cumuler USB et régulateur sans vérifier le schéma
 (retour de courant vers l'USB).
 
@@ -1512,7 +1520,9 @@ Seeeduino / PlatformIO.
 
 | Point | Bloquant pour | Résolution |
 |---|---|---|
-| Révision de la DevKitC-1 (DEL sur GPIO 48 ou 38) | §4.11 | Sérigraphie de la carte |
+| GPIO de la DEL RGB de la carte NiceMCU (48 supposé) | §4.11 | DEL allumée au démarrage ? Sinon essayer 38, 21 |
+| VIN alimenté par l'USB au banc (GPS) | §2.2 | Mesure VIN–GND, USB seul |
+| Cotes de la carte NiceMCU pour le boîtier | `docs/boitier` | Mesure au pied à coulisse |
 | Plage accéléromètre suffisante à ±16 g | §2.5, §12.17 | Premiers roulages : plateaux à 15,99 g ? |
 | `IMU_AVERAGE` 1 ou 0 | §4.9 | Même roulage analysé dans les deux modes |
 | Repli GPS seul si Galileo empêche les 25 Hz | §4.8 | Mesure dehors (`b`) |

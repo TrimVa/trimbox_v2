@@ -1,4 +1,4 @@
-# TrimBox — firmware 2.0-a16
+# TrimBox — firmware 2.0-a17
 
 Firmware ESP32-S3. Spécification : `CAHIER-DES-CHARGES.md` (à la racine du
 dépôt). État au 4 octobre 2026.
@@ -26,21 +26,26 @@ dépôt). État au 4 octobre 2026.
 
 ## Câblage de banc (alimentation par l'USB de la carte)
 
-| Module | Broche module | ESP32-S3-DevKitC-1 |
+Carte NiceMCU « ESP32-S3_MINI_Nano » N16R8 : broches repérées « IOxx » au dos.
+
+| Module | Broche module | Carte (sérigraphie) |
 |---|---|---|
-| GPS M100 Mini | VCC | **5V** |
-| | GND | GND |
-| | TX | **GPIO 18** |
-| | RX | **GPIO 17** |
+| GPS M100 Mini | V | **VIN** (5 V) |
+| | G | GND |
+| | T (TX) | **IO18** |
+| | R (RX) | **IO17** |
 | IMU LSM6DS3 | VCC | **3V3** |
 | | GND | GND |
-| | SDA | **GPIO 8** |
-| | SCL | **GPIO 9** |
-| Récepteur ER5C-i | sortie 2 (Serial TX) | **GPIO 16** |
-| | sortie 3 (Serial RX) | **GPIO 15** |
+| | SDA | **IO8** |
+| | SCL | **IO9** |
+| Récepteur ER5C-i | sortie 2 (Serial TX) | **IO16** |
+| | sortie 3 (Serial RX) | **IO15** |
 | | − | GND |
 
-Le fil + du récepteur reste sur le BEC de l'ESC (ou sur le 5V de la carte au
+Au banc, vérifier que **VIN** reçoit le 5 V de l'USB (VIN–GND ≈ 5 V, USB seul) :
+sinon le GPS n'est pas alimenté. Ne rien brancher sur IO33 à IO37 (PSRAM).
+
+Le fil + du récepteur reste sur le BEC de l'ESC (ou sur le VIN de la carte au
 banc). **Rien au-dessus de 3,3 V sur une broche GPIO.**
 
 `GPIO 10` (GPS_EN) ne sert que si un transistor coupe l'alimentation du GPS.

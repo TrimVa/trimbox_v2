@@ -9,14 +9,16 @@
 #define DEVICE_NICKNAME   "Buggy 1"          // nom du véhicule PAR DÉFAUT, ≤ 16 caractères (§12.1) ;
                                              // modifiable depuis la console (Réglages), gardé en NVS
 #define BRAND             "TrimBox"
-#define FIRMWARE_VER      "2.0-a16"
-#define HARDWARE_VER      "ESP32-S3-DevKitC-1 N16R8"
+#define FIRMWARE_VER      "2.0-a17"
+#define HARDWARE_VER      "ESP32-S3 Mini Nano N16R8"   // carte NiceMCU (ESP32-S3R8, flash 16 Mo)
 #define MANUFACTURER      "TrimBox"
 #define BUILD_STAMP       __DATE__ " " __TIME__
 
 // ---------------------------------------------------------------- brochage
-// §2.3. INTERDITES : 35-37 (PSRAM octale), 19-20 (USB), 0/3/45/46 en
-// sortie (configuration au démarrage). ADC : uniquement l'ADC1 (GPIO 1-10).
+// §2.3. Carte NiceMCU « ESP32-S3_MINI_Nano » N16R8 (broches repérées « IOxx »
+// au dos). INTERDITES : 33-37 (PSRAM octale de l'ESP32-S3R8, pourtant sorties
+// sur la carte), 19-20 (USB, non sorties), 0/3/45/46 en sortie (configuration
+// au démarrage). ADC : uniquement l'ADC1 (GPIO 1-10).
 #define PIN_GNSS_RX       18    // ← TX du module GNSS
 #define PIN_GNSS_TX       17    // → RX du module GNSS
 #define PIN_GPS_EN        10    // commande d'alimentation du GNSS
@@ -29,7 +31,8 @@
 #define PIN_IMU_SCL        9
 #define PIN_IMU_INT1       7
 #define PIN_BUTTON         0    // bouton BOOT (actif à l'état bas)
-#define PIN_LED_RGB       48    // 48 sur DevKitC-1 v1.0, 38 sur v1.1
+#define PIN_LED_RGB       48    // DEL RGB de la carte [À VALIDER] (48 : cas le plus courant ;
+                                //  38 sur une DevKitC-1 v1.1). IO48 est aussi sortie sur un picot : n'y rien brancher
 
 // ---------------------------------------------------------------- UART
 #ifndef TRIMBOX_QEMU

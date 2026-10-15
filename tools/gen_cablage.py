@@ -23,58 +23,58 @@ C = dict(v5='#d62828', v33='#f08c00', gnd='#2b2b2b', gtx='#2a9d8f', grx='#1d6fb8
 a(f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}" font-family="Arial, Helvetica, sans-serif">')
 a(f'<rect width="{W}" height="{H}" fill="#fbfaf7"/>')
 text(40, 48, 'TrimBox — schéma de câblage', 26, weight='700')
-text(40, 74, 'ESP32-S3-DevKitC-1 (N16R8) · GPS HGLRC M100 Mini · IMU LSM6DS3 · récepteur RadioMaster ER5C-i (ExpressLRS) · ESC XC-E8', 14, fill='#555')
+text(40, 74, 'Carte NiceMCU ESP32-S3 Mini Nano (N16R8) · GPS HGLRC M100 Mini · IMU LSM6DS3 · récepteur RadioMaster ER5C-i (ExpressLRS) · ESC XC-E8', 14, fill='#555')
 import os, re
 _cfg = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'trimbox_s3', 'src', 'config.h'), encoding='utf-8').read()
 FW = re.search(r'#define\s+FIRMWARE_VER\s+"([^"]+)"', _cfg).group(1)   # version lue dans config.h
 text(40, 94, f'Firmware {FW} — brochage défini dans trimbox_s3/src/config.h', 13, fill='#777')
 
 # ---------------------------------------------------------------- carte ESP32
+# Carte NiceMCU « ESP32-S3_MINI_Nano » N16R8. Seules les broches utilisées
+# sont dessinées, sous leur nom sérigraphié au dos (« IOxx ») : repérer
+# chaque picot par la sérigraphie, pas par sa position sur ce schéma.
 BX, BY, BW, BH = 940, 150, 270, 720
-rect(BX, BY, BW, BH, fill='#243447', stroke='#10202f', rx=10, sw=2)
+rect(BX, BY, BW, BH, fill='#151a21', stroke='#05080c', rx=10, sw=2)
 CX = BX + BW / 2
-rect(CX - 45, BY + 150, 90, 80, fill='#9aa7b4', stroke='#5d6b78', rx=4)
-text(CX, BY + 185, 'ESP32-S3', 12, 'middle', '700', '#10202f')
-text(CX, BY + 202, 'WROOM-1', 10, 'middle', '400', '#10202f')
-text(CX, BY + 255, 'DevKitC-1', 15, 'middle', '700', '#fff')
-text(CX, BY + 273, 'N16R8', 12, 'middle', '400', '#c9d3dd')
-text(CX, BY + 300, 'antenne ↑', 10, 'middle', '400', '#8fa1b3')
-J1 = ['3V3','3V3','RST','4','5','6','7','15','16','17','18','8','3','46','9','10','11','12','13','14','5V','GND']
-J3 = ['GND','TX','RX','1','2','42','41','40','39','38','37','36','35','0','45','48','47','21','20','19','GND','GND']
-PY0, PSTEP = BY + 45, 30.5
+rect(CX - 45, BY + 470, 90, 80, fill='#2b323b', stroke='#5d6b78', rx=4)
+text(CX + 10, BY + 505, 'ESP32-S3', 12, 'middle', '700', '#c9d3dd')
+text(CX + 10, BY + 522, 'R8', 10, 'middle', '400', '#c9d3dd')
+text(CX + 10, BY + 575, 'NiceMCU', 15, 'middle', '700', '#fff')
+text(CX + 10, BY + 593, 'ESP32-S3 Mini Nano', 12, 'middle', '400', '#c9d3dd')
+text(CX + 10, BY + 609, 'N16R8', 12, 'middle', '400', '#c9d3dd')
+text(CX + 10, BY + 455, 'antenne ↑ (céramique / IPEX)', 10, 'middle', '400', '#8fa1b3')
+# alias : les câbles visent '5V' (alimentation 5 V de la carte = VIN)
+J1 = ['VIN','3V3','GND','18','17','8','9','16','15','10','7']
+J1_LABEL = {'VIN':'VIN (5 V)','3V3':'3V3','GND':'GND','10':'IO10 (GPS_EN, facultatif)','7':'IO7 (IMU INT1, réservé)'}
+PY0, PSTEP = BY + 45, 38
 def j1y(name, occ=0):
+    name = {'5V':'VIN'}.get(name, name)
     idx = [i for i, n in enumerate(J1) if n == name][occ]
     return PY0 + idx * PSTEP
 for i, n in enumerate(J1):
     y = PY0 + i * PSTEP
     a(f'<rect x="{BX-8}" y="{y-8}" width="16" height="16" rx="2" fill="#d4af37" stroke="#8a6d1d"/>')
-    lbl = n if not n.isdigit() else 'GPIO ' + n
-    text(BX + 14, y + 4, lbl, 11, 'start', '400', '#e6edf3')
-for i, n in enumerate(J3):
-    y = PY0 + i * PSTEP
-    a(f'<rect x="{BX+BW-8}" y="{y-8}" width="16" height="16" rx="2" fill="#d4af37" stroke="#8a6d1d"/>')
-    lbl = {'TX':'TX0 (43)','RX':'RX0 (44)'}.get(n, n if not n.isdigit() else 'GPIO ' + n)
-    text(BX + BW - 14, y + 4, lbl, 11, 'end', '400', '#e6edf3')
-text(BX + 20, BY - 10, 'J1', 13, 'start', '700', '#243447')
-text(BX + BW - 20, BY - 10, 'J3', 13, 'end', '700', '#243447')
-# annotations côté J3
-y0 = PY0 + J3.index('0') * PSTEP
-wire([(BX+BW+10, y0), (BX+BW+40, y0)], '#555', 1.5)
-text(BX+BW+46, y0 + 4, 'bouton BOOT (3 s : Wi-Fi)', 12, fill='#333')
-y48 = PY0 + J3.index('48') * PSTEP
-wire([(BX+BW+10, y48), (BX+BW+40, y48)], '#555', 1.5)
-text(BX+BW+46, y48 + 4, 'DEL RGB (38 si carte v1.1)', 12, fill='#333')
-yu = PY0 + J3.index('19') * PSTEP
-text(BX+BW+46, yu - 11, '19 / 20 : USB, ne pas utiliser', 12, fill='#a33')
-text(BX+BW+46, PY0 + J3.index('36') * PSTEP + 4, '35 / 36 / 37 : PSRAM,', 12, fill='#a33')
-text(BX+BW+46, PY0 + J3.index('35') * PSTEP + 4, 'ne pas utiliser', 12, fill='#a33')
-# prises USB
-for k, (lab, sub) in enumerate([('USB', 'journal série + flash'), ('UART', 'pont série')]):
-    ux = BX + 50 + k * 120
-    rect(ux, BY + BH - 6, 50, 26, fill='#b0b8c0', stroke='#555', rx=6)
-    text(ux + 25, BY + BH + 42, lab, 13, 'middle', '700')
-    text(ux + 25, BY + BH + 58, sub, 10, 'middle', '400', '#555')
-text(BX + BW/2, BY + BH + 80, '→ brancher le câble sur « USB »', 12, 'middle', '700', '#243447')
+    lbl = J1_LABEL.get(n, 'IO' + n)
+    text(BX + 14, y + 4, lbl, 12, 'start', '700' if n.isdigit() and n not in ('10','7') else '400', '#e6edf3')
+text(BX + 14, BY - 10, 'Broches utilisées (sérigraphie au dos)', 13, 'start', '700', '#151a21')
+# annotations à droite de la carte
+NX = BX + BW + 20
+notes = [('Sur la carte :', '#333', '700'),
+         ('bouton BOOT = IO0 (3 s : Wi-Fi)', '#333', '400'),
+         ('DEL RGB = IO48 (à confirmer)', '#333', '400'),
+         ('', '#333', '400'),
+         ('Ne rien brancher sur :', '#a33', '700'),
+         ('IO33 à IO37 (PSRAM),', '#a33', '400'),
+         ('   pourtant sorties sur la carte', '#a33', '400'),
+         ('IO48 (DEL de la carte)', '#a33', '400'),
+         ('IO0, IO3, IO45, IO46 (démarrage)', '#a33', '400'),
+         ('TX / RX (UART0) : inutilisés', '#555', '400')]
+for k, (t, col, w) in enumerate(notes):
+    if t: text(NX, BY + 470 + k * 19, t, 12, 'start', w, col)
+# prise USB-C unique (USB natif)
+rect(CX - 25, BY + BH - 6, 50, 26, fill='#b0b8c0', stroke='#555', rx=6)
+text(CX, BY + BH + 42, 'USB-C', 13, 'middle', '700')
+text(CX, BY + BH + 58, 'journal série + flash', 10, 'middle', '400', '#555')
 
 # ---------------------------------------------------------------- composants
 def comp(x, y, w, h, title, sub, pins, side='right', fill='#ffffff'):
@@ -93,16 +93,16 @@ def comp(x, y, w, h, title, sub, pins, side='right', fill='#ffffff'):
     return pos
 
 gps = comp(470, 140, 220, 170, 'GPS HGLRC M100 Mini', 'u-blox M10 · 25 Hz · UART', [
-    ('VCC', 190, 'VCC → 5V'), ('GND', 220, 'GND → GND'), ('TX', 250, 'TX → GPIO 18'), ('RX', 280, 'RX ← GPIO 17')])
+    ('VCC', 190, 'V → VIN'), ('GND', 220, 'G → GND'), ('TX', 250, 'T (TX) → IO18'), ('RX', 280, 'R (RX) ← IO17')])
 imu = comp(470, 350, 220, 170, 'IMU LSM6DS3', 'accéléromètre ±16 g · I2C 0x6A/0x6B', [
-    ('VCC', 400, 'VCC → 3V3'), ('GND', 430, 'GND → GND'), ('SDA', 460, 'SDA → GPIO 8'), ('SCL', 490, 'SCL → GPIO 9')])
+    ('VCC', 400, 'VCC → 3V3'), ('GND', 430, 'GND → GND'), ('SDA', 460, 'SDA → IO8'), ('SCL', 490, 'SCL → IO9')])
 rx  = comp(470, 560, 220, 230, 'Récepteur ER5C-i', 'ExpressLRS · sorties 2/3 en CRSF', [
-    ('Sortie 2  S = TX', 610, 'Sortie 2 S (TX) → GPIO 16'), ('Sortie 3  S = RX', 645, 'Sortie 3 S (RX) ← GPIO 15'), ('− (GND)', 680, '− (masse) → GND')])
+    ('Sortie 2  S = TX', 610, 'Sortie 2 S (TX) → IO16'), ('Sortie 3  S = RX', 645, 'Sortie 3 S (RX) ← IO15'), ('− (GND)', 680, '− (masse) → GND')])
 rxl = {}
 for label, py in [('Sortie 1', 700), ('Sortie 4', 725), ('Sortie 5  +', 750), ('Sortie 5  −', 772)]:
     pin(470, py); text(482, py + 4, label, 12); rxl[label] = (470, py)
 reg = comp(470, 840, 220, 110, 'Régulateur 5 V', 'abaisseur ≥ 1 A (ex. Pololu D24V10F5)', [
-    ('OUT 5 V', 890, 'OUT 5 V → 5V'), ('GND', 920)])
+    ('OUT 5 V', 890, 'OUT 5 V → VIN'), ('GND', 920)])
 pin(470, 890); text(482, 894, 'IN (6-8,4 V)', 12); pin(470, 920); text(482, 924, 'GND', 12)
 
 servo = comp(60, 560, 230, 90, 'Servo de direction', 'voie CH1', [('câble servo', 615)])
@@ -129,8 +129,9 @@ to_board(imu['VCC'], 740, j1y('3V3'), C['v33'], '→ 3V3')
 GL = 760
 for src in (gps['GND'], imu['GND'], rx['− (GND)'], reg['GND']):
     wire([src, (GL, src[1])], C['gnd'], 3); dot(GL, src[1], C['gnd'])
-wire([(GL, 220), (GL, j1y('GND')), (X1, j1y('GND'))], C['gnd'], 3)
-dot(X1, j1y('GND'), C['gnd']); text(GL + 8, j1y('GND') - 6, 'masse commune → GND', 10, 'start', '700', C['gnd'])
+wire([(GL, 220), (GL, 920)], C['gnd'], 3)                    # rail de masse
+wire([(GL, j1y('GND')), (X1, j1y('GND'))], C['gnd'], 3); dot(GL, j1y('GND'), C['gnd'])
+dot(X1, j1y('GND'), C['gnd']); text(GL + 50, j1y('GND') - 6, 'masse commune', 10, 'start', '700', C['gnd'])
 # GPS (TX et RX croisés)
 to_board(gps['TX'], 800, j1y('18'), C['gtx'], '→ GPIO 18')
 to_board(gps['RX'], 820, j1y('17'), C['grx'], '← GPIO 17')
@@ -165,14 +166,15 @@ for i, (lab, col, dash) in enumerate(items):
 text(LX + 14, LY + 210, '● = connexion · croisement sans point = pas de contact', 10.5, fill='#555')
 
 RX0, RY0 = 1510, 420
-rect(RX0, RY0, 360, 300, fill='#fff8e6', stroke='#c98a00', rx=8)
+rect(RX0, RY0, 360, 325, fill='#fff8e6', stroke='#c98a00', rx=8)
 text(RX0 + 14, RY0 + 24, 'À respecter', 15, weight='700', fill='#8a5a00')
 rules = ['Jamais plus de 3,3 V sur une broche GPIO.',
          'TX et RX CROISÉS : TX du module → RX de la carte.',
-         'BEC (6 à 8,4 V) : jamais directement sur « 5V »,',
+         'BEC (6 à 8,4 V) : jamais directement sur « VIN »,',
          '   toujours via le régulateur 5 V.',
          'Au banc : l\'USB alimente tout — régulateur',
-         '   débranché (ne pas cumuler USB + régulateur).',
+         '   débranché (ne pas cumuler USB + régulateur) ;',
+         '   vérifier VIN ≈ 5 V sur USB seul (GPS alimenté).',
          'Masse commune entre tous les éléments.',
          'ER5C-i (page web, onglet Model) : sorties 2 et 3',
          '   en Serial TX / RX, protocole CRSF ; direction',

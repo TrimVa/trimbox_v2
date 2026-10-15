@@ -1,10 +1,10 @@
 {
   "_lisezmoi": "Etat du projet TrimBox (ESP32-S3), a fournir a un assistant IA pour reprendre le developpement dans une conversation neuve. Lire d'abord 'regles_dures', puis 'etat', puis CAHIER-DES-CHARGES.md (§0 et §12). Le depot complet est decrit dans 'fichiers'.",
   "projet": "TrimBox",
-  "description": "Enregistreur de telemetrie GPS (25 Hz) et inertielle pour voitures RC, sur ESP32-S3-DevKitC-1 N16R8. Enregistrement autonome sur la flash interne de 16 Mo (154 333 points, 01h42min a 25 Hz), chronometrage au tour calcule dans le module avec lignes posees depuis la radio, telemetrie CRSF vers une RadioMaster MT12 (script Lua : affichage, annonces vocales, pose de ligne), console web par Bluetooth (GitHub Pages) ou par le Wi-Fi du module (console integree au firmware), mise a jour OTA par Wi-Fi avec retour arriere. Wi-Fi et Bluetooth coupes quand la voiture roule.",
-  "date_export": "2026-10-07",
+  "description": "Enregistreur de telemetrie GPS (25 Hz) et inertielle pour voitures RC, sur carte NiceMCU ESP32-S3 Mini Nano N16R8 (ex-DevKitC-1 N16R8). Enregistrement autonome sur la flash interne de 16 Mo (154 333 points, 01h42min a 25 Hz), chronometrage au tour calcule dans le module avec lignes posees depuis la radio, telemetrie CRSF vers une RadioMaster MT12 (script Lua : affichage, annonces vocales, pose de ligne), console web par Bluetooth (GitHub Pages) ou par le Wi-Fi du module (console integree au firmware), mise a jour OTA par Wi-Fi avec retour arriere. Wi-Fi et Bluetooth coupes quand la voiture roule.",
+  "date_export": "2026-10-15",
   "versions": {
-    "firmware": "2.0-a16",
+    "firmware": "2.0-a17",
     "console_web": "1.7.18",
     "script_lua": "trmbox.lua 2.3",
     "cahier_des_charges": "3.0 (document unique ESP32-S3, remplace les anciens v1 et v2 ; annexe A = correspondance des anciens renvois)",
@@ -35,7 +35,7 @@
     "langue": "Francais partout, commentaires du code compris."
   },
   "materiel": {
-    "carte": "ESP32-S3-DevKitC-1 WROOM-1-N16R8 (16 Mo flash, 8 Mo PSRAM). Prise USB native pour le journal et le flash. DEL GPIO 48 (v1.0) ou 38 (v1.1) a verifier.",
+    "carte": "NiceMCU 'ESP32-S3_MINI_Nano' N16R8 (puce ESP32-S3R8 : 8 Mo PSRAM octale integree, flash 16 Mo). Une seule prise USB-C (USB natif : journal et flash). Broches 'IOxx' serigraphiees au dos ; alimentation VIN (pas de broche 5V), 3V3, GND. GPIO 33-37 sortis mais reserves a la PSRAM. DEL RGB supposee sur GPIO 48 (a confirmer). Antenne ceramique ou IPEX (resistance R2/R3). Remplace l'ESP32-S3-DevKitC-1 N16R8 le 15/10/2026 : meme puce et meme memoire, aucun changement de compilation ni de brochage.",
     "gnss": "HGLRC M100 Mini (u-blox M10), UART1 GPIO 18 (RX) / 17 (TX), 115200 bauds, 25 Hz, alimente en 5 V",
     "imu": "LSM6DS3 / LSM6DS3TR-C, I2C GPIO 8 / 9, adresse 0x6A ou 0x6B, +/-16 g, +/-2000 dps",
     "recepteur": "RadioMaster ER5C-i (ExpressLRS 2,4 GHz), sorties 2/3 en CRSF sur UART2 GPIO 16 (RX) / 15 (TX), 420000 bauds",
@@ -53,6 +53,7 @@
       "Renommage du vehicule (FF F3) : vehicule YT7, Wi-Fi TrimBox-YT7, mot de passe personnalise (video du 07/10/2026)"
     ],
     "a_valider_sur_materiel": [
+      "Carte NiceMCU ESP32-S3 Mini Nano N16R8 : esptool-js Connect -> 16 Mo de flash et PSRAM 8 Mo ; DEL RGB allumee au demarrage (sinon PIN_LED_RGB 38 ou 21) ; VIN ~ 5 V sur USB seul (GPS alimente au banc) ; Wi-Fi correct avec l'antenne choisie (ceramique ou IPEX).",
       "Firmware 2.0-a16 : voiture posee (meme avec peu de satellites), vitesse affichee 0,0 km/h et aucun enregistrement automatique ; touche m : agitation 'calme' voiture posee, 'agitee' en la touchant ; depart reel detecte sans retard visible. Ajuster quietAccMg / quietGyroCdps (core/stillhold.h) si besoin.",
       "Firmware 2.0-a16 installe (OTA) : 'b' doit afficher BLE actif a l'arret puis COUPE en roulant",
       "IMU dans le firmware complet (touche m)",
@@ -90,10 +91,12 @@
     "Voix : tools/sons/generer-mot.bat / .ps1, generation a la demande (texte et nom demandes, nom propose sans accent <= 8 caracteres, ecoute avant d'enregistrer, vitesse +/-10 %, cle Azure memorisable dans azure-cle.txt ignore par git). Teste sous PowerShell 7 contre un faux service Azure (SSML echappe, prosody, 401).",
     "Firmware 2.0-a15 / console 1.7.18 : nom du vehicule et mot de passe du point d'acces modifiables depuis la console (Reglages > Vehicule et point d'acces). Message FF F3 (requete vide -> 17 o : nom + drapeau mot de passe personnalise ; ecriture 80 o : masque + nom 16 + mot de passe 63), core/ident (regles, testees), hw/identity (NVS, espace 'trimbox' ; partition cfg pleine, table de partitions inchangee), ACK puis redemarrage 1,5 s ; NACK si enregistrement, roulage, telechargement, effacement ou validation OTA en cours. SSID TrimBox-<nom>, Bluetooth 'TrimBox <nom>'. Touche serie 'x' : retour aux valeurs de config.h. Console : 'Pseudo' devient 'Vehicule' ; controle des saisies identique au firmware, apercu des noms, confirmation, consignes de reconnexion. tests/web : lecture, refus, envoi, redemarrage simule par fakedev, relecture.",
     "Firmware 2.0-a16 : maintien a l'arret refait (core/stillhold). Essai reel du 07/10/2026 (video) : voiture posee, 4-5 satellites, vitesse GNSS parasite 0 a 5,8 km/h affichee et faux depart de l'enregistrement automatique (seuil 5 km/h). Desormais hw/imu mesure l'agitation par epoque (ecart-type des echantillons, imu::activity) et l'IMU tranche seule : figee apres 0,4 s de calme (<= 25 mg, <= 3 deg/s) meme si le GNSS annonce plusieurs km/h, liberee apres 2 epoques agitees (> 50 mg ou > 6 deg/s) ou 1 si le GNSS confirme ; garde-fou GNSS > 10 km/h et > 3 x sAcc pendant 0,5 s. Sans IMU (ou capteur fige) : GNSS seul avec seuils releves par sAcc (entree max(1,1 km/h ; 2 sAcc) plafonne 3,6 km/h, sortie max(2,2 ; 3 sAcc) plafonne 9 km/h). Derive max(4 m ; 3 hAcc). Touche serie m : colonne agitation (calme / agitee). Test natif testStillHoldImu (scenario de l'essai, choc isole, depart, garde-fou, capteur fige).",
-    "CI : timeout-minutes par job et nouvelles tentatives curl / apt-get (le job emulateur etait reste bloque > 20 min sur un telechargement). Premiere release publiee automatiquement : firmware-2.0-a15."
+    "CI : timeout-minutes par job et nouvelles tentatives curl / apt-get (le job emulateur etait reste bloque > 20 min sur un telechargement). Premiere release publiee automatiquement : firmware-2.0-a15.",
+    "Firmware 2.0-a17 : nouvelle carte NiceMCU ESP32-S3 Mini Nano N16R8 (meme ESP32-S3 + 16 Mo flash + 8 Mo PSRAM octale que la DevKitC N16R8, donc FQBN, partitions et brochage inchanges ; toutes les broches utilisees sont sorties). HARDWARE_VER (caracteristique BLE 2A27) = 'ESP32-S3 Mini Nano N16R8'. Docs : CDC §2.1/2.2/2.3/12.11/12.18/annexe B, README, LISEZMOI, DEMARRAGE (une seule prise USB-C), notes de release ; alimentation par VIN ; GPIO 33-37 interdits ; schema de cablage redessine (broches par serigraphie IOxx). Boitier 3D encore aux cotes de la DevKitC (avertissement dans docs/boitier/LISEZMOI.md) : cotes de la nouvelle carte a mesurer."
   ],
   "prochaines_etapes": [
-    "1) Installer trimbox_s3-app.bin 2.0-a16 (release GitHub firmware-2.0-a16) par la console Wi-Fi ; verifier vitesse 0 a l'arret et la touche m.",
+    "0) Mesurer la carte NiceMCU (longueur, largeur, epaisseur, DEL, prise USB-C, antenne) et regenerer le boitier (tools/gen_boitier.py).",
+    "1) Installer trimbox_s3-app.bin 2.0-a17 (release GitHub firmware-2.0-a17) par la console Wi-Fi ; verifier vitesse 0 a l'arret et la touche m.",
     "2) Roulage : pose de ligne depuis la radio, enregistrement automatique, tours radio / module / console, radios qui reviennent au stand.",
     "3) Bancs materiels restants (CDC §11.2) et boitier.",
     "4) Nettoyages console (pistes_non_traitees)."
@@ -218,28 +221,28 @@
     },
     {
       "chemin": "CAHIER-DES-CHARGES.md",
-      "octets": 78823,
-      "sha1": "14ebb9648010"
+      "octets": 79695,
+      "sha1": "c186214ec5fa"
     },
     {
       "chemin": "DEMARRAGE.md",
-      "octets": 4254,
-      "sha1": "28ef7fde9475"
+      "octets": 4247,
+      "sha1": "10b038a470da"
     },
     {
       "chemin": "README.md",
-      "octets": 28514,
-      "sha1": "75e0581c04c9"
+      "octets": 28685,
+      "sha1": "76ed62bbfa39"
     },
     {
       "chemin": "REPRISE-IA.md",
       "octets": 4060,
-      "sha1": "4f9a3f9ceb7e"
+      "sha1": "e31ffb431278"
     },
     {
       "chemin": "docs/boitier/LISEZMOI.md",
-      "octets": 4428,
-      "sha1": "385681ee013c"
+      "octets": 4843,
+      "sha1": "5a1262955131"
     },
     {
       "chemin": "docs/boitier/boitier-coupes.png",
@@ -253,13 +256,13 @@
     },
     {
       "chemin": "docs/cablage-trimbox-s3.pdf",
-      "octets": 167853,
-      "sha1": "46f2694675f5"
+      "octets": 160998,
+      "sha1": "a81a4b41b9ba"
     },
     {
       "chemin": "docs/cablage-trimbox-s3.svg",
-      "octets": 26888,
-      "sha1": "2fbcf8655626"
+      "octets": 20602,
+      "sha1": "3da56d2e82af"
     },
     {
       "chemin": "index.html",
@@ -418,8 +421,8 @@
     },
     {
       "chemin": "tools/gen_cablage.py",
-      "octets": 11211,
-      "sha1": "ed4365ab0ae3"
+      "octets": 11351,
+      "sha1": "484e755ed0ab"
     },
     {
       "chemin": "tools/imu_test/imu_test.ino",
@@ -428,8 +431,8 @@
     },
     {
       "chemin": "tools/release_notes.py",
-      "octets": 7271,
-      "sha1": "b58a2dad44dd"
+      "octets": 7303,
+      "sha1": "213083f31be6"
     },
     {
       "chemin": "tools/sons/LISEZMOI-voix.md",
@@ -483,7 +486,7 @@
     },
     {
       "chemin": "trimbox-etat-projet.json",
-      "octets": 32344,
+      "octets": 33805,
       "sha1": "(ce fichier)"
     },
     {
@@ -498,8 +501,8 @@
     },
     {
       "chemin": "trimbox_s3/LISEZMOI.md",
-      "octets": 10585,
-      "sha1": "0bb396cb4dc2"
+      "octets": 10832,
+      "sha1": "6558f7c5a09a"
     },
     {
       "chemin": "trimbox_s3/partitions.csv",
@@ -518,8 +521,8 @@
     },
     {
       "chemin": "trimbox_s3/src/config.h",
-      "octets": 6541,
-      "sha1": "2a9170917284"
+      "octets": 6882,
+      "sha1": "dd328c983226"
     },
     {
       "chemin": "trimbox_s3/src/console_gz.h",

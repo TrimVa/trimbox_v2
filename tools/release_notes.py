@@ -115,7 +115,7 @@ def main():
 
     print(f"""## TrimBox — firmware {fw} · console {cons}
 
-Compilé le {date} depuis le commit `{commit}` (ESP32-S3-DevKitC-1 N16R8, core Arduino `esp32:esp32@3.3.12`, NimBLE 2.5.1).
+Compilé le {date} depuis le commit `{commit}` (carte ESP32-S3 N16R8, core Arduino `esp32:esp32@3.3.12`, NimBLE 2.5.1).
 
 ### Quel fichier prendre ?
 
@@ -131,7 +131,7 @@ Compilé le {date} depuis le commit `{commit}` (ESP32-S3-DevKitC-1 N16R8, core A
 ### Premier flash (par câble, une seule fois)
 
 1. Chrome ou Edge sur ordinateur : https://espressif.github.io/esptool-js/
-2. Carte branchée sur sa prise **USB** (pas « UART »), câble de données → *Connect*
+2. Carte branchée par sa prise USB-C (sur une DevKitC : la prise « USB », pas « UART »), câble de données → *Connect*
    (si rien : maintenir **BOOT**, appuyer sur **RST**, relâcher **BOOT**).
 3. Adresse **`0x0`**, fichier `trimbox_s3-complet.bin` → *Program* (2 à 4 min), puis **RST**.
 4. 30 s plus tard, le Wi-Fi `TrimBox-Buggy-1` apparaît (mot de passe `trimbox-rc`) : http://192.168.4.1/

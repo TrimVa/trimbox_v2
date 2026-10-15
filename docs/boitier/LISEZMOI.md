@@ -1,5 +1,12 @@
 # Boîtier imprimé 3D — voiture 1/10 (v2, sans vis)
 
+> ⚠️ **Boîtier dessiné pour l'ancienne carte (ESP32-S3-DevKitC-1, 57 × 28 mm,
+> deux prises USB).** La carte du projet est désormais la NiceMCU
+> « ESP32-S3_MINI_Nano » N16R8, plus petite, à une seule prise USB-C. Il faut
+> mesurer la nouvelle carte (longueur, largeur, épaisseur, position de la DEL,
+> largeur et position de la prise USB-C, antenne) et régénérer le boîtier
+> avant de l'imprimer.
+
 Fichier : **`trimbox-boitier.3mf`**. Le fond et le couvercle sont sur le même
 plateau et déjà orientés pour l'impression. Le fichier est généré par
 `tools/gen_boitier.py`, qui regroupe toutes les cotes en tête de fichier.

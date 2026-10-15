@@ -41,7 +41,7 @@ rien : elle est dans le firmware.
 1. Page **Releases** du dépôt → dernière version → `trimbox_s3-complet.bin`
    (ou *Actions* → compilation verte → artefact **firmware-s3-complet**).
 2. Chrome ou Edge sur ordinateur : https://espressif.github.io/esptool-js/
-3. Carte branchée sur sa prise **USB** (pas « UART »), câble de données.
+3. Carte branchée par sa prise USB-C, avec un câble de **données**.
    *Connect* (si rien : maintenir **BOOT**, appuyer sur **RST**, relâcher
    **BOOT**).
 4. Adresse **`0x0`**, fichier `trimbox_s3-complet.bin`, **Program**

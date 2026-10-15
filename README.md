@@ -4,7 +4,7 @@ Enregistreur de télémétrie **GPS + inertiel** pour voitures radiocommandées,
 avec **chronométrage au tour** affiché et annoncé sur la radio, **console web**
 d'analyse et **mise à jour par Wi-Fi**. Construit autour d'un **ESP32-S3**.
 
-> **État :** firmware **2.0-a16**, console **1.7.18**. Tout est écrit et testé
+> **État :** firmware **2.0-a17**, console **1.7.18**. Tout est écrit et testé
 > sur PC, dans un navigateur et dans un émulateur ESP32-S3. **Essais sur le
 > vrai matériel en cours** : GPS, IMU et script Lua sur la MT12 validés ; reste
 > le roulage. Voir [les bancs d'essai](#bancs-dessai-à-la-réception-du-matériel).
@@ -55,7 +55,7 @@ d'analyse et **mise à jour par Wi-Fi**. Construit autour d'un **ESP32-S3**.
 
 | Élément | Référence utilisée | Rôle |
 |---|---|---|
-| Carte | **ESP32-S3-DevKitC-1, module WROOM-1-N16R8** | 16 Mo de flash, 8 Mo de PSRAM, Bluetooth, Wi-Fi |
+| Carte | **NiceMCU « ESP32-S3_MINI_Nano » N16R8** | 16 Mo de flash, 8 Mo de PSRAM, Bluetooth, Wi-Fi, une prise USB-C |
 | GPS | **HGLRC M100 Mini** (u-blox M10) | position et vitesse à 25 Hz |
 | Centrale inertielle | module **LSM6DS3 / LSM6DS3TR-C** (I2C) | accélérations ±16 g, rotations ±2000 °/s |
 | Récepteur | **RadioMaster ER5C-i** (ExpressLRS 2,4 GHz) | commande de la voiture + liaison CRSF avec le module |
@@ -63,7 +63,8 @@ d'analyse et **mise à jour par Wi-Fi**. Construit autour d'un **ESP32-S3**.
 | ESC | **XC-E8** | aucune liaison : son port X-Bus est une entrée (voir ci-dessous) |
 | Alimentation | régulateur abaisseur **5 V, ≥ 1 A** | depuis le BEC de l'ESC (6 à 8,4 V) |
 
-Au banc, l'USB de la carte suffit à tout alimenter.
+Au banc, l'USB de la carte suffit à tout alimenter (à vérifier : la broche VIN
+doit recevoir le 5 V de l'USB, sinon le GPS reste éteint).
 
 ⚠️ **Le module ne pilote jamais la voiture.** Direction et ESC restent sur
 les sorties du récepteur : si le module plante, la voiture reste pilotable.
@@ -76,20 +77,20 @@ les sorties du récepteur : si le module plante, la voiture reste pilotable.
 
 Schéma vectoriel : [SVG](docs/cablage-trimbox-s3.svg) · [PDF à imprimer](docs/cablage-trimbox-s3.pdf) (régénéré par `tools/gen_cablage.py`).
 
-| Module | Broche du module | ESP32-S3-DevKitC-1 |
+| Module | Broche du module | Carte (sérigraphie au dos) |
 |---|---|---|
-| **GPS M100 Mini** | VCC | **5V** |
-| | GND | GND |
-| | TX | **GPIO 18** |
-| | RX | **GPIO 17** |
+| **GPS M100 Mini** | V | **VIN** (5 V) |
+| | G | GND |
+| | T (TX) | **IO18** |
+| | R (RX) | **IO17** |
 | **IMU LSM6DS3** | VCC | **3V3** |
 | | GND | GND |
-| | SDA | **GPIO 8** |
-| | SCL | **GPIO 9** |
-| **Récepteur ER5C-i** | sortie 2 (Serial TX) | **GPIO 16** |
-| | sortie 3 (Serial RX) | **GPIO 15** |
+| | SDA | **IO8** |
+| | SCL | **IO9** |
+| **Récepteur ER5C-i** | sortie 2 (Serial TX) | **IO16** |
+| | sortie 3 (Serial RX) | **IO15** |
 | | − | GND |
-| **Alimentation (voiture)** | régulateur 5 V | **5V** + GND |
+| **Alimentation (voiture)** | régulateur 5 V | **VIN** + GND |
 
 **Boîtier imprimé 3D (1/10)** : [docs/boitier/trimbox-boitier.3mf](docs/boitier/trimbox-boitier.3mf),
 sans aucune vis : carte clipsée dans le fond, GPS (antenne à l'air libre par
@@ -103,9 +104,9 @@ sortie 1 (CH1) ; ESC sur la sortie 4 (**CH2**).
 Règles à respecter :
 
 - **Jamais plus de 3,3 V sur une broche GPIO** : l'ESP32-S3 ne tolère pas le 5 V.
-- **Jamais le BEC (6 à 8,4 V) directement sur la broche 5V** de la carte :
+- **Jamais le BEC (6 à 8,4 V) directement sur la broche VIN** de la carte :
   toujours passer par le régulateur 5 V.
-- Broches à ne pas utiliser : 35, 36, 37 (mémoire PSRAM), 19 et 20 (USB),
+- Broches à ne pas utiliser : IO33 à IO37 (mémoire PSRAM, bien que sorties sur la carte), 19 et 20 (USB),
   0, 3, 45, 46 (démarrage).
 - L'IMU se visse **rigidement** sur le châssis, près du centre de gravité,
   axes alignés sur la voiture (pas sur mousse).
@@ -304,7 +305,7 @@ Dans **`trimbox_s3/src/config.h`** :
 | `WIFI_AUTO_DEFAULT` | `1` | Wi-Fi automatique à l'arrêt (0 : seulement à la demande) |
 | `WIFI_AUTO_ON_S` | `30` | secondes d'arrêt avant l'ouverture du Wi-Fi |
 | `CRSF_LINE_CHANNEL_DEFAULT` | `8` | voie radio de pose de ligne |
-| `PIN_LED_RGB` | `48` | DEL de la carte : **38** sur une DevKitC-1 v1.1 |
+| `PIN_LED_RGB` | `48` | DEL RGB de la carte (à confirmer : si elle reste éteinte, essayer 38 ou 21) |
 | `AXIS_*` | capteur à plat, x vers l'avant | orientation de l'IMU selon son montage |
 
 Les autres valeurs du fichier ont été fixées par mesure ou par contrainte
