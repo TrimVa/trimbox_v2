@@ -41,6 +41,7 @@ G V T R au bout du câble du GPS (les câbles SH existent en « 1 → 1 » et en
 | `trimbox-support-kicad5-pour-EasyEDA.zip` | Projet KiCad 5.1 (schéma, symboles, empreintes, PCB) |
 | `fabrication/trimbox-support-gerber-JLCPCB.zip` | Gerber + perçages, prêts pour JLCPCB |
 | `fabrication/*-BOM-JLCPCB.csv`, `*-CPL-JLCPCB.csv` | Nomenclature (codes LCSC) et placement pour l'assemblage CMS |
+| `apercus/visualiseur.html` | Visualiseur 2D / 3D autonome (ouvrir dans un navigateur ; three.js chargé depuis jsDelivr) |
 | `apercus/schema.pdf` · `schema.svg` | Schéma lisible |
 | `apercus/faces-cuivre.png` | Les deux faces (gauche : composants, droite : côté ESP32, vue de son côté) |
 | `apercus/placement-routage.png` | Placement et pistes |
@@ -110,6 +111,7 @@ cd hardware/pcb-support/src
 python3 do_route.py      # routage (≈ 3 min), écrit routing.json
 python3 build.py         # contrôle, KiCad, Gerber, BOM/CPL, aperçus
 python3 verify_kicad.py && python3 verify_gerber.py
+python3 viewer_build.py  # visualiseur 2D/3D
 ```
 
 Dépendances : Python 3 avec numpy, scipy et Pillow. Empreintes : bibliothèque

@@ -1,0 +1,398 @@
+<title>PCB support TrimBox</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Sans:wght@400;500&display=swap">
+<style>
+/* Plan : établi d'électronique — une grande zone de visualisation, une colonne
+   « nomenclature » à droite ; vert vernis et étain comme couleurs du sujet. */
+:root{
+  --bg:#eef1ee; --panel:#f8faf8; --ink:#16201b; --muted:#5b6a62; --line:#cfd8d2;
+  --accent:#1f6b45; --tin:#8d969c; --hl:#c77d1a; --stage:#dfe6e1; --stage2:#c9d3cd;
+  --f-display:"IBM Plex Sans Condensed","Arial Narrow",sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#101613; --panel:#161e1a; --ink:#e3ebe6; --muted:#93a39a; --line:#2a3530;
+  --accent:#5fbf8a; --tin:#9aa4aa; --hl:#e6a14a; --stage:#18211c; --stage2:#0d120f; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#101613; --panel:#161e1a; --ink:#e3ebe6; --muted:#93a39a; --line:#2a3530;
+  --accent:#5fbf8a; --tin:#9aa4aa; --hl:#e6a14a; --stage:#18211c; --stage2:#0d120f; color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);line-height:1.45}
+.wrap{max-width:1280px;margin:0 auto;padding-block:20px 32px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  display:grid;gap:16px}
+header{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:12px 24px}
+h1{font-family:var(--f-display);font-weight:600;font-size:clamp(1.5rem,3.2vw,2.1rem);margin:0;letter-spacing:.01em;text-wrap:balance}
+.sub{color:var(--muted);margin:2px 0 0;font-size:.95rem}
+.specs{display:flex;flex-wrap:wrap;gap:6px 18px;font-family:var(--f-mono);font-size:.78rem;color:var(--muted)}
+.specs b{color:var(--ink);font-weight:500}
+.tabs{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--panel)}
+.tabs button{font:500 .85rem var(--f-body);padding:7px 16px;border:0;background:transparent;color:var(--muted);cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--accent);color:var(--bg)}
+.tabs button:focus-visible,.ctl button:focus-visible,.ctl input:focus-visible{outline:2px solid var(--hl);outline-offset:2px}
+.main{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:16px;align-items:start}
+@media (max-width:900px){.main{grid-template-columns:minmax(0,1fr)}}
+.stage{position:relative;background:radial-gradient(120% 90% at 50% 30%,var(--stage),var(--stage2));
+  border:1px solid var(--line);border-radius:8px;overflow:hidden;min-width:0}
+#v3d{display:block;width:100%;height:min(68vh,640px);touch-action:none}
+.ctl{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;padding:10px 12px;border-top:1px solid var(--line);
+  background:var(--panel);font-size:.85rem}
+.ctl button{font:500 .8rem var(--f-body);padding:5px 10px;border:1px solid var(--line);border-radius:5px;
+  background:var(--bg);color:var(--ink);cursor:pointer}
+.ctl button:hover{border-color:var(--accent)}
+.ctl label{display:inline-flex;align-items:center;gap:6px;color:var(--muted)}
+.ctl input[type=range]{width:120px;accent-color:var(--accent)}
+.ctl .grp{display:inline-flex;gap:6px;align-items:center}
+.tip{position:absolute;pointer-events:none;background:var(--panel);color:var(--ink);border:1px solid var(--line);
+  border-radius:6px;padding:7px 9px;font-size:.8rem;box-shadow:0 6px 18px rgba(0,0,0,.18);max-width:260px;z-index:3}
+.tip b{font-family:var(--f-mono);font-weight:500;color:var(--hl)}
+.tip .m{font-family:var(--f-mono);font-size:.72rem;color:var(--muted)}
+.hint{position:absolute;left:12px;top:10px;font-size:.75rem;color:var(--muted);font-family:var(--f-mono)}
+.v2d{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px;padding:18px}
+.face{display:grid;gap:8px;justify-items:center;min-width:0}
+.face h3{font:600 .95rem var(--f-display);margin:0;letter-spacing:.02em}
+.face p{margin:0;font-size:.78rem;color:var(--muted);text-align:center;max-width:32ch}
+.face svg{width:100%;max-width:320px;height:auto;display:block;filter:drop-shadow(0 4px 10px rgba(0,0,0,.25))}
+.face svg .cmp{fill:transparent;stroke:transparent;stroke-width:.12;cursor:pointer}
+.face svg .cmp:hover,.face svg .cmp.on{fill:rgba(230,161,74,.28);stroke:var(--hl)}
+.face svg text{font-family:var(--f-mono);paint-order:stroke;stroke:#0d1f15;stroke-width:.18px;fill:#fff}
+aside{background:var(--panel);border:1px solid var(--line);border-radius:8px;min-width:0}
+aside h2{font:600 .95rem var(--f-display);margin:0;padding:12px 14px;border-bottom:1px solid var(--line);letter-spacing:.02em}
+.bom{list-style:none;margin:0;padding:4px 0;max-height:min(70vh,660px);overflow:auto}
+.bom li{display:grid;grid-template-columns:44px 1fr;gap:2px 8px;padding:7px 14px;cursor:default;border-left:3px solid transparent}
+.bom li:hover,.bom li.on{background:color-mix(in srgb,var(--hl) 14%,transparent);border-left-color:var(--hl)}
+.bom .r{font-family:var(--f-mono);font-weight:500;font-size:.82rem}
+.bom .v{font-size:.84rem}
+.bom .d{grid-column:2;font-size:.74rem;color:var(--muted)}
+.bom .l{grid-column:2;font-family:var(--f-mono);font-size:.7rem;color:var(--muted)}
+.notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px 24px;font-size:.85rem;color:var(--muted)}
+.notes p{margin:0}
+.notes b{color:var(--ink);font-weight:500}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>PCB support TrimBox</h1>
+      <p class="sub">ESP32-S3 Mini Nano posée au-dessus, centrale inertielle et régulateur 5 V en dessous.</p>
+    </div>
+    <div class="tabs" role="tablist" aria-label="Type de vue">
+      <button id="t3d" role="tab" aria-selected="true">Vue 3D</button>
+      <button id="t2d" role="tab" aria-selected="false">Vue 2D</button>
+    </div>
+  </header>
+  <div class="specs" id="specs"></div>
+
+  <div class="main">
+    <div class="stage" id="stage">
+      <div id="p3d">
+        <canvas id="v3d" aria-label="Montage en 3D : faites glisser pour tourner, molette ou pincement pour zoomer"></canvas>
+        <div class="hint">glisser : tourner · molette : zoom · clic droit : déplacer</div>
+        <div class="ctl">
+          <span class="grp"><button id="vIso">Perspective</button><button id="vTop">Dessus</button><button id="vBot">Dessous</button><button id="vSide">Profil</button></span>
+          <label for="expl">Écarter <input id="expl" type="range" min="0" max="14" step="0.5" value="0"></label>
+          <label for="showEsp"><input id="showEsp" type="checkbox" checked> Carte ESP32</label>
+          <label for="showPins"><input id="showPins" type="checkbox" checked> Picots</label>
+        </div>
+      </div>
+      <div id="p2d" hidden>
+        <div class="v2d" id="v2d"></div>
+      </div>
+      <div class="tip" id="tip" hidden></div>
+    </div>
+    <aside>
+      <h2>Composants posés par JLCPCB</h2>
+      <ul class="bom" id="bom"></ul>
+    </aside>
+  </div>
+
+  <div class="notes">
+    <p><b>Montage.</b> La carte ESP32 se soude sur des picots 2,54 mm, du côté opposé aux composants. Une fois dans la voiture, l'ESP32 est au-dessus : prise USB-C, boutons et DEL restent accessibles.</p>
+    <p><b>Câbles.</b> J1 (5 broches) relie le récepteur et le BEC, J2 (4 broches) le GPS, dans l'ordre G V T R. Avec des nombres de broches différents, les deux câbles ne peuvent pas être inversés.</p>
+    <p><b>Fidélité.</b> Les faces sont tirées des mêmes données que les fichiers Gerber. Les volumes des composants sont simplifiés. La carte ESP32 est modélisée d'après la photo : ses cotes restent à confirmer.</p>
+  </div>
+</div>
+
+<script>window.PCB = /*DATA*/;</script>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+const D = window.PCB, B = D.board, E = D.esp;
+const tip = document.getElementById('tip'), stage = document.getElementById('stage');
+
+// ------------------------------------------------------------ chiffres clés
+document.getElementById('specs').innerHTML = [
+  ['Taille', `${B.W.toFixed(1).replace('.', ',')} × ${(B.H - B.YCUT).toFixed(1).replace('.', ',')} mm`],
+  ['Couches', '2'], ['Composants CMS', D.comps.length], ['Pistes', D.stats.tracks], ['Vias', D.stats.vias],
+  ['Isolement mini', `${String(D.stats.clearance).replace('.', ',')} mm`], ['Contrôle DRC', D.stats.drc ? `${D.stats.drc} erreur(s)` : 'aucune erreur'],
+].map(([k, v]) => `<span>${k} <b>${v}</b></span>`).join('');
+
+// ------------------------------------------------------------ nomenclature
+const bom = document.getElementById('bom');
+const order = c => [c.ref[0], parseInt(c.ref.slice(1))];
+const sorted = [...D.comps].sort((a, b) => a.ref[0] === b.ref[0] ? parseInt(a.ref.slice(1)) - parseInt(b.ref.slice(1)) : a.ref.localeCompare(b.ref));
+bom.innerHTML = sorted.map(c => `<li data-ref="${c.ref}"><span class="r">${c.ref}</span><span class="v">${c.value}</span>
+  <span class="d">${c.descr}</span><span class="l">${c.mpn} · LCSC ${c.lcsc}</span></li>`).join('');
+let hlRef = null;
+function highlight(ref) {
+  hlRef = ref;
+  bom.querySelectorAll('li').forEach(li => li.classList.toggle('on', li.dataset.ref === ref));
+  document.querySelectorAll('.cmp').forEach(el => el.classList.toggle('on', el.dataset.ref === ref));
+  for (const [r, g] of Object.entries(meshByRef)) g.traverse(o => { if (o.isMesh && o.material.emissive) o.material.emissive.setHex(r === ref ? 0x7a4a10 : 0x000000); });
+}
+bom.addEventListener('mouseover', e => { const li = e.target.closest('li'); if (li) highlight(li.dataset.ref); });
+bom.addEventListener('mouseleave', () => highlight(null));
+
+function showTip(html, x, y) {
+  tip.innerHTML = html; tip.hidden = false;
+  const r = stage.getBoundingClientRect(), tw = tip.offsetWidth, th = tip.offsetHeight;
+  tip.style.left = Math.min(r.width - tw - 8, Math.max(8, x - r.left + 14)) + 'px';
+  tip.style.top = Math.min(r.height - th - 8, Math.max(8, y - r.top + 14)) + 'px';
+}
+const tipHtml = c => `<b>${c.ref}</b> ${c.value}<br><span class="m">${c.mpn}${c.lcsc ? ' · LCSC ' + c.lcsc : ''}</span><br>${c.descr}${c.nets ? `<br><span class="m">${c.nets.join(' · ')}</span>` : ''}`;
+
+// ------------------------------------------------------------ vue 2D
+const v2d = document.getElementById('v2d');
+const H2 = B.H - B.YCUT;
+function cmpRects(mirror) {
+  return D.comps.map(c => {
+    const x = mirror ? B.W - c.x : c.x, y = c.y - B.YCUT, rot = mirror ? c.rot : -c.rot;
+    return `<g transform="translate(${x} ${y}) rotate(${rot})"><rect class="cmp" data-ref="${c.ref}" x="${-c.w / 2 - .15}" y="${-c.d / 2 - .15}" width="${c.w + .3}" height="${c.d + .3}" rx=".2"/></g>`;
+  }).join('');
+}
+function cmpLabels() {
+  return D.comps.map(c => `<text x="${c.x}" y="${c.y - B.YCUT + .25}" font-size="${c.w > 2.2 ? .95 : .7}" text-anchor="middle" pointer-events="none">${c.ref}</text>`).join('');
+}
+// carte ESP32 vue de dessus (face composants de l'ESP32)
+function espTopSvg() {
+  const holes = [];
+  for (let k = 0; k < 11; k++) for (const cx of E.cols) holes.push([E.W - cx, E.Y0 + k * E.PITCH]);
+  const parts = E.top.map(p => {
+    const col = p.color;
+    let extra = '';
+    if (p.kind === 'btn') extra = `<circle cx="${p.x}" cy="${p.y}" r=".75" fill="#222"/>`;
+    if (p.kind === 'led') extra = `<circle cx="${p.x}" cy="${p.y}" r="1" fill="#d9d4c4" stroke="#999" stroke-width=".1"/>`;
+    if (p.kind === 'chip') extra = `<circle cx="${p.x - 2.6}" cy="${p.y - 2.6}" r=".3" fill="#777"/>`;
+    return `<rect x="${p.x - p.w / 2}" y="${p.y - p.d / 2}" width="${p.w}" height="${p.d}" rx="${p.kind === 'usb' ? 1 : .25}" fill="${col}" stroke="#000" stroke-opacity=".35" stroke-width=".08"/>${extra}`;
+  }).join('');
+  return `<svg viewBox="-0.6 -0.6 ${E.W + 1.2} ${E.H + 3.2}" role="img" aria-label="Carte ESP32 montée, vue de dessus">
+    <rect x="0" y="0" width="${E.W}" height="${E.H}" rx=".6" fill="#141414"/>
+    ${holes.map(([x, y]) => `<circle cx="${x}" cy="${y}" r=".85" fill="#c9a640"/><circle cx="${x}" cy="${y}" r=".38" fill="#555"/>`).join('')}
+    ${parts}
+  </svg>`;
+}
+v2d.innerHTML = `
+  <div class="face"><h3>Face composants</h3>
+    <svg viewBox="0 0 ${B.W} ${H2}" role="img" aria-label="Face composants du PCB support">
+      <image href="${D.textures.F}" width="${B.W}" height="${H2}"/>${cmpRects(false)}${cmpLabels()}</svg>
+    <p>Tournée vers le bas une fois montée. Survolez un composant.</p></div>
+  <div class="face"><h3>Face ESP32</h3>
+    <svg viewBox="0 0 ${B.W} ${H2}" role="img" aria-label="Face du PCB support qui reçoit l'ESP32, vue de dessus">
+      <image href="${D.textures.B}" width="${B.W}" height="${H2}" transform="translate(${B.W} 0) scale(-1 1)"/></svg>
+    <p>Vue de dessus, carte ESP32 retirée : plan de masse quasi continu.</p></div>
+  <div class="face"><h3>Monté, vu de dessus</h3>${espTopSvg()}
+    <p>L'ESP32 recouvre le support. Le support s'arrête sous l'antenne, sans cuivre dessous.</p></div>`;
+v2d.addEventListener('mousemove', e => {
+  const el = e.target.closest('.cmp');
+  if (!el) { tip.hidden = true; if (hlRef) highlight(null); return; }
+  const c = D.comps.find(c => c.ref === el.dataset.ref);
+  highlight(c.ref); showTip(tipHtml(c), e.clientX, e.clientY);
+});
+v2d.addEventListener('mouseleave', () => { tip.hidden = true; highlight(null); });
+
+// ------------------------------------------------------------ vue 3D
+const canvas = document.getElementById('v3d');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(32, 1, 0.5, 600);
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true; controls.dampingFactor = 0.12;
+scene.add(new THREE.HemisphereLight(0xffffff, 0x445048, 1.25));
+const sun = new THREE.DirectionalLight(0xffffff, 1.4); sun.position.set(30, 40, 60); scene.add(sun);
+const fill = new THREE.DirectionalLight(0xffffff, 0.55); fill.position.set(-40, -30, -50); scene.add(fill);
+
+// repère : X = largeur − x (vue de dessus), Y = −y, Z vers le haut ; face composants du support en z = 0
+const W = B.W, cx0 = W / 2, cy0 = -(B.H + B.YCUT) / 2;
+const root = new THREE.Group(); root.position.set(-cx0, -cy0, 0); scene.add(root);
+const mat = (c, o = {}) => new THREE.MeshStandardMaterial(Object.assign({ color: c, roughness: 0.55, metalness: 0.05 }, o));
+const tin = mat(0xc9ccd0, { metalness: 0.8, roughness: 0.32 });
+const gold = mat(0xd2ac45, { metalness: 0.85, roughness: 0.3 });
+function box(w, d, h, m, x, y, z, parent) {
+  const g = new THREE.Mesh(new THREE.BoxGeometry(w, d, h), m); g.position.set(x, y, z); (parent || root).add(g); return g;
+}
+const loader = new THREE.TextureLoader();
+function faceMesh(uri, z, up) {
+  const tex = loader.load(uri); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8;
+  const geo = new THREE.PlaneGeometry(W, B.H - B.YCUT);
+  // UV depuis les coordonnées PCB (x = largeur − X), les deux textures sont dessinées dans ce repère
+  const pos = geo.attributes.position, uv = geo.attributes.uv;
+  for (let i = 0; i < pos.count; i++) {
+    // le plan de la face du dessous est retourné autour de X : son y local s'inverse
+    const X = pos.getX(i) + W / 2, Y = (up ? pos.getY(i) : -pos.getY(i)) - (B.H + B.YCUT) / 2;
+    const x = W - X, y = -Y;
+    uv.setXY(i, x / W, 1 - (y - B.YCUT) / (B.H - B.YCUT));
+  }
+  const m = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ map: tex, roughness: 0.62, metalness: 0.08 }));
+  m.position.set(W / 2, -(B.H + B.YCUT) / 2, z);
+  if (!up) m.rotation.x = Math.PI;
+  root.add(m); return m;
+}
+// --- PCB support
+const carrier = new THREE.Group(); root.add(carrier);
+const core = box(W, B.H - B.YCUT, B.T - 0.02, mat(0x2c5a3c, { roughness: 0.8 }), W / 2, -(B.H + B.YCUT) / 2, B.T / 2, carrier);
+carrier.add(faceMesh(D.textures.F, -0.001, false));
+carrier.add(faceMesh(D.textures.B, B.T + 0.001, true));
+const meshByRef = {};
+const pick = [];
+function addComp(c) {
+  const g = new THREE.Group();
+  g.position.set(W - c.x, -c.y, 0);
+  g.rotation.z = Math.PI - c.rot * Math.PI / 180;
+  const m = mat(c.color, c.kind === 'jst' ? { roughness: 0.7 } : {});
+  const h = c.h;
+  if (c.kind === 'res' || c.kind === 'cap') {
+    box(c.w * 0.7, c.d, h, m, 0, 0, -h / 2, g);
+    box(c.w * 0.16, c.d * 1.02, h * 1.02, tin, -c.w * 0.42, 0, -h / 2, g);
+    box(c.w * 0.16, c.d * 1.02, h * 1.02, tin, c.w * 0.42, 0, -h / 2, g);
+  } else if (c.kind === 'ic') {
+    box(c.w, c.d, h, m, 0, 0, -h / 2 - 0.05, g);
+    for (const sx of [-1, 1]) for (const yy of [-0.95, 0, 0.95]) box(0.55, 0.38, 0.15, tin, sx * 1.15, yy, -0.08, g);
+  } else if (c.kind === 'lga') {
+    box(c.w, c.d, h, m, 0, 0, -h / 2, g);
+    const dot = new THREE.Mesh(new THREE.CircleGeometry(0.18, 18), mat(0xdddddd)); dot.rotation.x = Math.PI;
+    dot.position.set(-1.05, -0.8, -h - 0.002); g.add(dot);
+  } else if (c.kind === 'ind') {
+    const cyl = new THREE.Mesh(new THREE.CylinderGeometry(1.35, 1.35, h * 0.9, 32), m); cyl.rotation.x = Math.PI / 2;
+    cyl.position.z = -h / 2; g.add(cyl); box(c.w, c.d, 0.25, m, 0, 0, -0.13, g);
+  } else if (c.kind === 'diode') {
+    box(c.w * 0.8, c.d, h, m, 0, 0, -h / 2, g);
+    box(0.32, c.d * 1.02, h * 1.02, mat(0xb9bdc2), -c.w * 0.28, 0, -h / 2, g);   // bague de cathode
+    for (const sx of [-1, 1]) box(0.6, 0.7, 0.12, tin, sx * 1.55, 0, -0.07, g);
+  } else if (c.kind === 'jst') {
+    box(c.w, c.d, h, m, 0, 0, -h / 2, g);
+    box(c.w - 1.0, 0.25, h - 0.7, mat(0x3a3a33), 0, c.d / 2 + 0.02, -h / 2, g);   // ouverture (côté +y)
+    for (const sx of [-1, 1]) box(0.9, 1.6, 0.2, tin, sx * (c.w / 2 + 0.25), 1.4, -0.12, g);
+    const n = c.ref === 'J1' ? 5 : 4;
+    for (let k = 0; k < n; k++) box(0.3, 1.0, 0.12, tin, (k - (n - 1) / 2), -2.2, -0.07, g);
+  } else box(c.w, c.d, h, m, 0, 0, -h / 2, g);
+  g.userData = c; g.traverse(o => { if (o.isMesh) { o.userData = c; o.material = o.material.clone(); pick.push(o); } });
+  carrier.add(g); meshByRef[c.ref] = g;
+}
+D.comps.forEach(addComp);
+// --- carte ESP32 (posée sur la face B)
+const esp = new THREE.Group(); root.add(esp);
+const espTex = (() => {
+  const s = 24, cv = document.createElement('canvas'); cv.width = E.W * s; cv.height = E.H * s;
+  const x = cv.getContext('2d'); x.fillStyle = '#151515'; x.fillRect(0, 0, cv.width, cv.height);
+  for (let k = 0; k < 11; k++) for (const c of E.cols) {
+    const px = (E.W - c) * s, py = (E.Y0 + k * E.PITCH) * s;
+    x.fillStyle = '#c9a640'; x.beginPath(); x.arc(px, py, 0.85 * s, 0, 7); x.fill();
+    x.fillStyle = '#2a2a2a'; x.beginPath(); x.arc(px, py, 0.4 * s, 0, 7); x.fill();
+  }
+  x.fillStyle = '#d8d8d8'; x.font = `${0.9 * s}px monospace`; x.textAlign = 'center';
+  x.fillText('RST', 8.6 * s, 25.3 * s); x.fillText('BOOT', 14.3 * s, 25.3 * s);
+  const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; return t;
+})();
+const espZ0 = B.T + E.gap;
+box(E.W, E.H, E.T - 0.02, mat(0x141414, { roughness: 0.7 }), E.W / 2, -E.H / 2, E.T / 2, esp);
+{
+  const top = new THREE.Mesh(new THREE.PlaneGeometry(E.W, E.H), new THREE.MeshStandardMaterial({ map: espTex, roughness: 0.6 }));
+  top.position.set(E.W / 2, -E.H / 2, E.T + 0.001); esp.add(top);
+}
+for (const p of E.top) {
+  const info = { ref: p.name, value: '', mpn: 'Carte ESP32-S3 Mini Nano', lcsc: '', descr: 'Composant de la carte ESP32 (modèle approximatif)' };
+  const m = p.kind === 'usb' || p.kind === 'box' && p.color === '#c9c9c9' ? mat(p.color, { metalness: 0.75, roughness: 0.3 }) : mat(p.color);
+  const g = new THREE.Group(); g.position.set(p.x, -p.y, E.T); esp.add(g);
+  if (p.kind === 'usb') {
+    const shape = new THREE.Shape(); const w = p.w / 2, r = 1.5;
+    shape.absarc(-w + r, 0, r, Math.PI / 2, 3 * Math.PI / 2); shape.absarc(w - r, 0, r, -Math.PI / 2, Math.PI / 2);
+    const geo = new THREE.ExtrudeGeometry(shape, { depth: p.d, bevelEnabled: false, curveSegments: 16 });
+    const u = new THREE.Mesh(geo, m); u.rotation.x = Math.PI / 2; u.position.set(0, p.d / 2, r); g.add(u);
+  } else {
+    box(p.w, p.d, p.h, m, 0, 0, p.h / 2, g);
+    if (p.kind === 'btn') { const k = new THREE.Mesh(new THREE.CylinderGeometry(0.75, 0.75, 0.6, 24), mat(0x1c1c1c)); k.rotation.x = Math.PI / 2; k.position.z = p.h + 0.3; g.add(k); }
+    if (p.kind === 'led') { const k = new THREE.Mesh(new THREE.CylinderGeometry(1.05, 1.05, 0.05, 24), mat(0xe9e2c8, { emissive: 0x2a2416 })); k.rotation.x = Math.PI / 2; k.position.z = p.h + 0.03; g.add(k); }
+  }
+  g.traverse(o => { if (o.isMesh) { o.userData = info; pick.push(o); } });
+}
+// --- picots (soudés) et entretoises plastique
+const pins = new THREE.Group(); root.add(pins);
+const pinMat = gold, spacerMat = mat(0x111111, { roughness: 0.8 });
+const pinsByCol = {};
+for (const h of D.holes) {
+  const X = W - h.x, Y = -h.y;
+  const p = box(0.64, 0.64, 1, pinMat, X, Y, 0, pins);
+  p.userData = { ref: h.name, value: h.net ? '→ ' + h.net : 'tenue mécanique', mpn: 'Picot 2,54 mm', lcsc: '', descr: 'Broche de la carte ESP32 soudée sur le support' };
+  pick.push(p);
+  const sp = box(2.4, 2.4, 1, spacerMat, X, Y, 0, pins); sp.userData = p.userData;
+  // soudure côté composants
+  const sol = new THREE.Mesh(new THREE.ConeGeometry(0.85, 0.7, 20), tin); sol.rotation.x = -Math.PI / 2; sol.position.set(X, Y, -0.35); pins.add(sol);
+  h._p = p; h._s = sp;
+}
+function layout(ex) {
+  const zE = espZ0 + ex;
+  esp.position.z = zE;
+  for (const h of D.holes) {
+    const z0 = -1.6, z1 = zE + E.T + 1.2;
+    h._p.scale.z = z1 - z0; h._p.position.z = (z0 + z1) / 2;
+    h._s.scale.z = 2.5; h._s.position.z = zE - 1.25;
+  }
+}
+layout(0);
+// --- caméra
+function fit(dir, up = [0, 0, 1]) {
+  const d = 72;
+  camera.up.set(...up);
+  camera.position.set(dir[0] * d, dir[1] * d, dir[2] * d + 2);
+  controls.target.set(0, 0, 2); controls.update();
+}
+const views = {
+  vIso: () => fit([0.55, -0.62, 0.56]),
+  vTop: () => fit([0, -0.001, 1], [0, 1, 0]),
+  vBot: () => fit([0, -0.001, -1], [0, 1, 0]),
+  vSide: () => fit([0.05, -1, 0.12]),
+};
+Object.entries(views).forEach(([id, f]) => document.getElementById(id).addEventListener('click', f));
+views.vIso();
+document.getElementById('expl').addEventListener('input', e => layout(parseFloat(e.target.value)));
+document.getElementById('showEsp').addEventListener('change', e => { esp.visible = e.target.checked; });
+document.getElementById('showPins').addEventListener('change', e => { pins.visible = e.target.checked; });
+// --- survol
+const ray = new THREE.Raycaster(), ptr = new THREE.Vector2();
+canvas.addEventListener('pointermove', e => {
+  const r = canvas.getBoundingClientRect();
+  ptr.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+  ray.setFromCamera(ptr, camera);
+  const hit = ray.intersectObjects(pick.filter(o => { let v = o; while (v) { if (!v.visible) return false; v = v.parent; } return true; }), false)[0];
+  if (hit && hit.object.userData && hit.object.userData.ref) {
+    const c = hit.object.userData; showTip(tipHtml(c), e.clientX, e.clientY);
+    highlight(meshByRef[c.ref] ? c.ref : null);
+  } else { tip.hidden = true; if (hlRef) highlight(null); }
+});
+canvas.addEventListener('pointerleave', () => { tip.hidden = true; highlight(null); });
+// --- rendu
+function resize() {
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  if (canvas.width !== Math.round(w * renderer.getPixelRatio()) || canvas.height !== Math.round(h * renderer.getPixelRatio())) {
+    renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
+  }
+}
+renderer.setAnimationLoop(() => { resize(); controls.update(); renderer.render(scene, camera); });
+
+// ------------------------------------------------------------ onglets
+const t3 = document.getElementById('t3d'), t2 = document.getElementById('t2d');
+function tab(is3) {
+  t3.setAttribute('aria-selected', is3); t2.setAttribute('aria-selected', !is3);
+  document.getElementById('p3d').hidden = !is3; document.getElementById('p2d').hidden = is3; tip.hidden = true;
+  try { localStorage.setItem('trimbox-pcb-vue', is3 ? '3d' : '2d'); } catch (e) {}
+}
+t3.addEventListener('click', () => tab(true)); t2.addEventListener('click', () => tab(false));
+try { if (localStorage.getItem('trimbox-pcb-vue') === '2d' || location.hash === '#vue2d') tab(false); } catch (e) {}
+</script>

@@ -633,7 +633,7 @@
   (gr_text GPS (at 106.9 87.9) (layer F.SilkS)
     (effects (font (size 0.9 0.9) (thickness 0.15)))
   )
-  (gr_text RX/BEC (at 106.6 72.3) (layer F.SilkS)
+  (gr_text RX/BEC (at 109.4 72.6) (layer F.SilkS)
     (effects (font (size 0.9 0.9) (thickness 0.15)))
   )
   (gr_text 1 (at 106.1 73.5) (layer F.SilkS)
