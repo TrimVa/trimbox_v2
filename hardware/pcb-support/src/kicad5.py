@@ -76,10 +76,10 @@ def footprint_sexpr(c, netidx, layer_note=None):
 
 
 SILK_TEXT = [   # (texte, x, y, taille, couche)
-    ('GPS', 7.0, 11.9, 0.9, 'F.SilkS'),
-    ('1', 6.3, 6.1, 0.7, 'F.SilkS'),
-    ('TX', 3.9, 14.0, 0.8, 'F.SilkS'), ('RX', 3.9, 17.0, 0.8, 'F.SilkS'),
-    ('+', 3.6, 20.0, 1.0, 'F.SilkS'), ('-', 3.6, 23.0, 1.0, 'F.SilkS'),
+    ('GPS', 7.3, 14.4, 0.9, 'F.SilkS'),
+    ('1', 6.3, 8.5, 0.7, 'F.SilkS'),
+    ('TX', 3.9, 16.5, 0.8, 'F.SilkS'), ('RX', 3.9, 19.5, 0.8, 'F.SilkS'),
+    ('+', 3.6, 22.5, 1.0, 'F.SilkS'), ('-', 3.6, 25.5, 1.0, 'F.SilkS'),
     ('TrimBox v1', 11.7, 4.6, 0.9, 'F.SilkS'),
 ]
 

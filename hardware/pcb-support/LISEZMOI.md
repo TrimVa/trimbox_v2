@@ -13,6 +13,9 @@ Petit PCB 2 couches de **23,4 × 29 mm**, à la taille de la carte NiceMCU
 
 L'ESP32 se soude **de l'autre côté**, sur des picots 2,54 mm (composants du
 PCB vers le bas, ESP32 au-dessus, prise USB-C et DEL accessibles).
+Elle est tenue par **26 picots** : toute la rangée de droite (22, dont les
+signaux utiles) et 2 picots à chaque bout du côté gauche (rangées 1 et 11,
+tenue mécanique seulement).
 
 > ⚠️ **Avant de commander** : les cotes de la carte ESP32 (`GEO` dans
 > `src/model.py`) sont **estimées d'après une photo**, et la correspondance

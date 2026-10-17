@@ -34,7 +34,7 @@ MAPPING = dict(
         9: ('3V3', '3V3'), 10: ('GND', 'GND'), 11: ('VIN', 'VIN'),
     },
     left={   # rangée : (colonne extérieure, colonne intérieure) — tenue mécanique seulement
-        11: ('IO47', 'IO48'),
+        1: ('IO3', 'IO1'), 11: ('IO47', 'IO48'),
     },
 )
 
@@ -67,11 +67,11 @@ COMPS = [
     # J1 : pastilles à souder pour les fils du récepteur (rallonges servo coupées) :
     # 1 TX ← sortie 2 du récepteur (Serial TX → IO16), 2 RX → sortie 3 (Serial RX ← IO15),
     # 3 + BEC (fils rouges), 4 masse (fils noirs/marron). Rien ne dépasse du PCB.
-    Comp('J1', 'Fils récepteur', 'TrimBox_Pastilles_fils_4x1.1mm', 1.65, 14.0, 0,
+    Comp('J1', 'Fils récepteur', 'TrimBox_Pastilles_fils_4x1.1mm', 1.65, 16.5, 0,
          {'1': 'ELRS_TX', '2': 'ELRS_RX', '3': 'VBEC', '4': 'GND'}, '', 'Pastilles à souder',
          'Fils du récepteur : TX, RX, + BEC, masse', dnp=True, sym='WIRE4'),
     # J2 : 1 masse, 2 + 5 V, 3 ← TX du GPS (IO18), 4 → RX du GPS (IO17) — ordre G V T R du M100 Mini
-    Comp('J2', 'GPS', 'JST_SH_SM04B-SRSS-TB_1x04-1MP_P1.00mm_Horizontal', 3.1, 7.6, 270,
+    Comp('J2', 'GPS', 'JST_SH_SM04B-SRSS-TB_1x04-1MP_P1.00mm_Horizontal', 3.1, 10.0, 270,
          {'1': 'GND', '2': '+5V', '3': 'GPS_TX', '4': 'GPS_RX', 'MP': 'GND'},
          'C160404', 'SM04B-SRSS-TB(LF)(SN)', 'JST SH 1,0 mm 4 broches, sortie latérale', sym='CONN4'),
     # --- alimentation 5 V (TPS563201, 4,5-17 V → 5,07 V)
@@ -96,7 +96,7 @@ COMPS = [
          'C45783', 'CL21A226MAQNNNE', 'Sortie régulateur', sym='C'),
     Comp('D1', 'B5819W', 'D_SOD-123', 16.4, 31.65, 180, {'1': '+5V', '2': 'V5_BUCK'},
          'C8598', 'B5819W', 'Schottky : empêche l’USB d’alimenter le BEC', sym='D'),
-    Comp('C8', '10 µF 25 V', 'C_0805_2012Metric', 7.4, 9.0, 90, {'1': '+5V', '2': 'GND'},
+    Comp('C8', '10 µF 25 V', 'C_0805_2012Metric', 7.4, 11.0, 90, {'1': '+5V', '2': 'GND'},
          'C15850', 'CL21A106KAYNNNE', '5 V du GPS et de la carte', sym='C'),
     # --- centrale inertielle
     Comp('U2', 'LSM6DS3TR-C', 'LGA-14_3x2.5mm_P0.5mm_LayoutBorder3x4y', 12.0, 8.6, 270,

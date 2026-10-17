@@ -70,11 +70,17 @@
 <text x="924.0" y="543.5" font-size="8.5" text-anchor="start" fill="#00507a">VIN</text>
 <text x="910.0" y="538.0" font-size="7" text-anchor="middle" fill="#8a2d2d">VIN</text>
 <line x1="1020.0" y1="360.0" x2="1000.0" y2="360.0" stroke="#8a2d2d" stroke-width="1.2"/>
-<text x="996.0" y="363.5" font-size="8.5" text-anchor="end" fill="#00507a">IO47</text>
-<text x="1010.0" y="358.0" font-size="7" text-anchor="middle" fill="#8a2d2d">IO47</text>
+<text x="996.0" y="363.5" font-size="8.5" text-anchor="end" fill="#00507a">IO3</text>
+<text x="1010.0" y="358.0" font-size="7" text-anchor="middle" fill="#8a2d2d">IO3</text>
 <line x1="1020.0" y1="370.0" x2="1000.0" y2="370.0" stroke="#8a2d2d" stroke-width="1.2"/>
-<text x="996.0" y="373.5" font-size="8.5" text-anchor="end" fill="#00507a">IO48</text>
-<text x="1010.0" y="368.0" font-size="7" text-anchor="middle" fill="#8a2d2d">IO48</text>
+<text x="996.0" y="373.5" font-size="8.5" text-anchor="end" fill="#00507a">IO1</text>
+<text x="1010.0" y="368.0" font-size="7" text-anchor="middle" fill="#8a2d2d">IO1</text>
+<line x1="1020.0" y1="380.0" x2="1000.0" y2="380.0" stroke="#8a2d2d" stroke-width="1.2"/>
+<text x="996.0" y="383.5" font-size="8.5" text-anchor="end" fill="#00507a">IO47</text>
+<text x="1010.0" y="378.0" font-size="7" text-anchor="middle" fill="#8a2d2d">IO47</text>
+<line x1="1020.0" y1="390.0" x2="1000.0" y2="390.0" stroke="#8a2d2d" stroke-width="1.2"/>
+<text x="996.0" y="393.5" font-size="8.5" text-anchor="end" fill="#00507a">IO48</text>
+<text x="1010.0" y="388.0" font-size="7" text-anchor="middle" fill="#8a2d2d">IO48</text>
 <text x="960.0" y="352.0" font-size="10" font-weight="700" text-anchor="middle" fill="#333">U3</text>
 <text x="960.0" y="556.0" font-size="9" text-anchor="middle" fill="#555">ESP32-S3 Mini Nano N16R8</text>
 <rect x="120.0" y="170.0" width="15.0" height="40.0" fill="#fff7d6" stroke="#8a2d2d" stroke-width="1.4"/>
@@ -384,6 +390,8 @@
 <path d="M897.0,507.0 L903.0,513.0 M897.0,513.0 L903.0,507.0" stroke="#2a2ab0" stroke-width="1.2"/>
 <path d="M1017.0,357.0 L1023.0,363.0 M1017.0,363.0 L1023.0,357.0" stroke="#2a2ab0" stroke-width="1.2"/>
 <path d="M1017.0,367.0 L1023.0,373.0 M1017.0,373.0 L1023.0,367.0" stroke="#2a2ab0" stroke-width="1.2"/>
+<path d="M1017.0,377.0 L1023.0,383.0 M1017.0,383.0 L1023.0,377.0" stroke="#2a2ab0" stroke-width="1.2"/>
+<path d="M1017.0,387.0 L1023.0,393.0 M1017.0,393.0 L1023.0,387.0" stroke="#2a2ab0" stroke-width="1.2"/>
 <path d="M482.0,527.0 L488.0,533.0 M482.0,533.0 L488.0,527.0" stroke="#2a2ab0" stroke-width="1.2"/>
 <path d="M482.0,537.0 L488.0,543.0 M482.0,543.0 L488.0,537.0" stroke="#2a2ab0" stroke-width="1.2"/>
 <path d="M482.0,547.0 L488.0,553.0 M482.0,553.0 L488.0,547.0" stroke="#2a2ab0" stroke-width="1.2"/>
