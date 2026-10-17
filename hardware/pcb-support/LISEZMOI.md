@@ -7,9 +7,8 @@ Petit PCB 2 couches de **23,4 × 29 mm**, à la taille de la carte NiceMCU
 - la centrale inertielle **LSM6DS3TR-C**, soudée par JLCPCB (rigide, I2C 0x6A) ;
 - un **régulateur 5 V** (TPS563201) alimenté directement par le BEC (6 à 8,4 V) :
   plus besoin du régulateur Pololu séparé ;
-- **J1** et **J3** : picots coudés 2,54 mm (1 × 3) pour deux **rallonges servo
-  ordinaires** vers le récepteur (sortie 2 = TX, sortie 3 = RX) ; leur fil +
-  amène le BEC ;
+- **J1** : 4 pastilles à souder (TX, RX, +, −) pour les fils du récepteur ;
+  rien ne dépasse du contour du PCB ;
 - **J2** (JST SH 4 broches) : GPS HGLRC M100 Mini.
 
 L'ESP32 se soude **de l'autre côté**, sur des picots 2,54 mm (composants du
@@ -22,11 +21,20 @@ PCB vers le bas, ESP32 au-dessus, prise USB-C et DEL accessibles).
 
 ## Brochage des connecteurs
 
-| Picot | J1 « TX » (sortie 2 du récepteur) | J3 « RX » (sortie 3 du récepteur) |
-|---|---|---|
-| S (carré, marqué S) | depuis **TX** du récepteur → IO16 | vers **RX** du récepteur ← IO15 |
-| + (milieu) | + BEC 6-8,4 V | + BEC 6-8,4 V |
-| − (marqué -) | masse | masse |
+| Pastille J1 (sérigraphie) | Fil à souder |
+|---|---|
+| TX (carrée) | signal de la **sortie 2** du récepteur (son TX) → IO16 |
+| RX | signal de la **sortie 3** du récepteur (son RX) ← IO15 |
+| + | fil rouge (+ BEC 6-8,4 V) |
+| - | fil noir ou marron (masse) |
+
+Deux rallonges servo coupées suffisent : leurs deux fils signal vont sur TX et
+RX, et leurs fils + et − se soudent ensemble dans la pastille + et dans la
+pastille − (trous de 1,1 mm : deux fils 26 AWG passent). Le fil traverse le
+trou depuis la face composants, on soude, puis on coupe à ras ce qui dépasse
+côté ESP32 (à faire avant de poser la carte ESP32). Un point de colle ou un collier
+sur les fils évite de fatiguer les soudures. Côté récepteur (page web de
+l'ER5C-i, onglet *Model*) : sorties 2 et 3 en **Serial TX / RX, protocole CRSF**.
 
 | J2 (GPS) | Signal |
 |---|---|
@@ -35,15 +43,7 @@ PCB vers le bas, ESP32 au-dessus, prise USB-C et DEL accessibles).
 | 3 | depuis **TX** du GPS (IO18) |
 | 4 | vers **RX** du GPS (IO17) |
 
-Côté récepteur (page web de l'ER5C-i, onglet *Model*) : sorties 2 et 3 en
-**Serial TX / RX, protocole CRSF**. Les rallonges servo se branchent comme sur
-un servo, fil signal côté S. Une rallonge branchée à l'envers échange signal
-et masse, le + reste au milieu : rien ne grille, mais la liaison ne marche
-pas. Les deux picots sont **à souder soi-même** (pas dans la commande
-d'assemblage JLCPCB) ; ils dépassent du bord gauche de 6 mm.
-
-Le GPS reste sur un JST SH 4 broches : impossible d'y brancher une rallonge
-servo, donc il ne recevra jamais les 8,4 V du BEC. Vérifier l'ordre G V T R au
+Le GPS reste sur un JST SH 4 broches. Vérifier l'ordre G V T R au
 bout du câble du GPS (les câbles SH existent en « 1 → 1 » et en « inversé »).
 
 ## Fichiers
@@ -82,8 +82,8 @@ bout du câble du GPS (les câbles SH existent en « 1 → 1 » et en « invers�
    KiCad doivent souvent être corrigées à la main dans cet aperçu. Pour J2,
    le point de pose est l'origine de l'empreinte KiCad, pas le centre du
    boîtier (≈ 0,45 mm d'écart, l'aperçu le montre).
-4. La carte ESP32 et les deux picots servo (J1, J3) ne sont pas dans la BOM :
-   ils se soudent à la main.
+4. La carte ESP32 n'est pas dans la BOM : picots soudés à la main. J1 n'est
+   qu'un jeu de pastilles (fils soudés).
 
 ## Règles respectées (contrôle automatique au 0,01 mm, `src/check.py`)
 

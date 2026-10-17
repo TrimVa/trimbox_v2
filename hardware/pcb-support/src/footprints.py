@@ -87,6 +87,22 @@ def esp_header(geo, mapping):
     return fp
 
 
+WIRE_PITCH = 3.0
+
+
+def wire_pads():
+    """4 pastilles traversantes pour souder les fils du récepteur (trou 1,1 mm : un ou deux fils 26 AWG)."""
+    fp = Footprint('TrimBox_Pastilles_fils_4x1.1mm', 'Pastilles à souder pour fils, trou 1,1 mm, pas 3 mm')
+    fp.attr = 'virtual'
+    for k in range(4):
+        fp.pads.append(Pad(str(k + 1), 'thru_hole', 'rect' if k == 0 else 'circle', 0.0, k * WIRE_PITCH, 2.2, 2.2, 0, 1.1))
+    fp.crtyd = (-1.4, -1.4, 1.4, 3 * WIRE_PITCH + 1.4)
+    fp.lines = [('F.CrtYd', -1.4, -1.4, 1.4, -1.4, 0.05), ('F.CrtYd', 1.4, -1.4, 1.4, 3 * WIRE_PITCH + 1.4, 0.05),
+                ('F.CrtYd', 1.4, 3 * WIRE_PITCH + 1.4, -1.4, 3 * WIRE_PITCH + 1.4, 0.05),
+                ('F.CrtYd', -1.4, 3 * WIRE_PITCH + 1.4, -1.4, -1.4, 0.05)]
+    return fp
+
+
 def esp_holes(geo, mapping):
     """(x, y, nom) de chaque trou utilisé, d'après la correspondance de sérigraphie."""
     out = []

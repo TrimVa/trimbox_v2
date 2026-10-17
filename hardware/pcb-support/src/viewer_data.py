@@ -29,7 +29,7 @@ BODY = {
     'D_SOD-123': (0, 0, 2.7, 1.6, 1.1, '#202022', 'diode'),
     'JST_SH_SM04B-SRSS-TB_1x04-1MP_P1.00mm_Horizontal': (0, 0.45, 6.0, 4.25, 2.9, '#efe6cf', 'jst'),
     'JST_SH_SM05B-SRSS-TB_1x05-1MP_P1.00mm_Horizontal': (0, 0.45, 7.0, 4.25, 2.9, '#efe6cf', 'jst'),
-    'PinHeader_1x03_P2.54mm_Horizontal': (2.77, 2.54, 2.54, 7.62, 2.54, '#1b1b1d', 'hdr'),
+    'TrimBox_Pastilles_fils_4x1.1mm': (0, 4.5, 2.6, 11.6, 0.6, '#c9ccd0', 'wires'),
 }
 
 # Dessus de la carte ESP32 (relevé sur la photo, vue de face : x depuis le bord

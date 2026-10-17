@@ -88,7 +88,7 @@ def render(path, comps, labels, wires, noconns):
         a, b = x * K, y * K
         o.append(f'<path d="M{a - 3},{b - 3} L{a + 3},{b + 3} M{a - 3},{b + 3} L{a + 3},{b - 3}" stroke="#2a2ab0" stroke-width="1.2"/>')
     notes = ['PCB support à la taille de la carte ESP32 : composants sur cette face, ESP32 de l\'autre côté (picots 2,54 mm).',
-             'J1 / J3 : picots coudés pour rallonges servo (S, +, −) — J1 : sortie 2 du récepteur (TX → IO16), J3 : sortie 3 (RX ← IO15), + = BEC.',
+             'J1 : pastilles à souder — TX (sortie 2 du récepteur → IO16), RX (sortie 3 ← IO15), + BEC, masse.',
              'J2 : 1 masse · 2 +5 V · 3 depuis TX du GPS (IO18) · 4 vers RX du GPS (IO17) — ordre G V T R du HGLRC M100 Mini.',
              'Régulateur : Vout = 0,768 × (1 + R1/R2) = 5,07 V ; D1 empêche l\'USB de la carte d\'alimenter le BEC.',
              'IMU : adresse I2C 0x6A (SA0 à la masse), CS au 3,3 V (mode I2C), INT1 sur IO7.',

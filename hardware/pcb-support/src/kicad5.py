@@ -78,9 +78,8 @@ def footprint_sexpr(c, netidx, layer_note=None):
 SILK_TEXT = [   # (texte, x, y, taille, couche)
     ('GPS', 7.0, 11.9, 0.9, 'F.SilkS'),
     ('1', 6.3, 6.1, 0.7, 'F.SilkS'),
-    ('S', 5.75, 18.4, 0.8, 'F.SilkS'), ('-', 5.75, 13.32, 0.8, 'F.SilkS'),
-    ('S', 5.75, 27.15, 0.8, 'F.SilkS'), ('-', 5.75, 22.07, 0.8, 'F.SilkS'),
-    ('TX', 7.0, 15.86, 0.9, 'F.SilkS'), ('RX', 7.0, 24.61, 0.9, 'F.SilkS'),
+    ('TX', 3.9, 14.0, 0.8, 'F.SilkS'), ('RX', 3.9, 17.0, 0.8, 'F.SilkS'),
+    ('+', 3.6, 20.0, 1.0, 'F.SilkS'), ('-', 3.6, 23.0, 1.0, 'F.SilkS'),
     ('TrimBox v1', 11.7, 4.6, 0.9, 'F.SilkS'),
 ]
 
@@ -182,18 +181,19 @@ def write_pretty(dirpath, comps):
         src = os.path.join(model.__file__.rsplit('/', 2)[0], 'lib', c.fp.name + '.kicad_mod')
         if os.path.exists(src):
             txt = open(src, encoding='utf-8').read()
-        else:          # empreinte de la carte ESP32 (générée)
+        else:          # empreintes générées (carte ESP32, pastilles à fils)
             fp = c.fp
             L = [f'(module {fp.name} (layer F.Cu) (tedit {ts(0)})', f'  (descr {q(fp.descr)})', '  (attr virtual)',
-                 '  (fp_text reference REF** (at 11.7 2) (layer F.SilkS) hide (effects (font (size 1 1) (thickness 0.15))))',
-                 f'  (fp_text value {fp.name} (at 11.7 34) (layer F.Fab) (effects (font (size 1 1) (thickness 0.15))))']
-            g = model.GEO
-            L.append(f'  (fp_line (start 0 0) (end {g["W"]} 0) (layer F.Fab) (width 0.1))')
-            L.append(f'  (fp_line (start {g["W"]} 0) (end {g["W"]} {g["H"]}) (layer F.Fab) (width 0.1))')
-            L.append(f'  (fp_line (start {g["W"]} {g["H"]}) (end 0 {g["H"]}) (layer F.Fab) (width 0.1))')
-            L.append(f'  (fp_line (start 0 {g["H"]}) (end 0 0) (layer F.Fab) (width 0.1))')
+                 '  (fp_text reference REF** (at 0 -2) (layer F.SilkS) hide (effects (font (size 1 1) (thickness 0.15))))',
+                 f'  (fp_text value {fp.name} (at 0 -3.5) (layer F.Fab) (effects (font (size 1 1) (thickness 0.15))))']
+            if c.ref == 'U3':
+                g = model.GEO
+                for (a1, b1, a2, b2) in ((0, 0, g['W'], 0), (g['W'], 0, g['W'], g['H']), (g['W'], g['H'], 0, g['H']), (0, g['H'], 0, 0)):
+                    L.append(f'  (fp_line (start {f(a1)} {f(b1)}) (end {f(a2)} {f(b2)}) (layer F.Fab) (width 0.1))')
+            for (layer, x1, y1, x2, y2, w) in fp.lines:
+                L.append(f'  (fp_line (start {f(x1)} {f(y1)}) (end {f(x2)} {f(y2)}) (layer {layer}) (width {f(w)}))')
             for p in fp.pads:
-                L.append(f'  (pad {q(p.num)} thru_hole circle (at {f(p.x)} {f(p.y)}) (size {f(p.w)} {f(p.h)}) (drill {f(p.drill)}) (layers *.Cu *.Mask))')
+                L.append(f'  (pad {q(p.num)} thru_hole {p.shape} (at {f(p.x)} {f(p.y)}) (size {f(p.w)} {f(p.h)}) (drill {f(p.drill)}) (layers *.Cu *.Mask))')
             L.append(')')
             txt = '\n'.join(L) + '\n'
         open(os.path.join(dirpath, c.fp.name + '.kicad_mod'), 'w', encoding='utf-8').write(txt)
@@ -231,9 +231,9 @@ def symbol_defs():
     d['CONN5'] = ('J', ['S -100 300 50 -300 0 1 10 f'],
                   [(str(i), str(i), 250, 200 - (i - 1) * 100, 'L', 'P', 200) for i in range(1, 6)] +
                   [('MP', 'MP', 0, -500, 'U', 'P', 200)], 'JST SH 5 broches')
-    d['SERVO'] = ('J', ['S -100 150 50 -150 0 1 10 f'],
-                  [('S', '1', 250, 100, 'L', 'P', 200), ('+', '2', 250, 0, 'L', 'P', 200),
-                   ('-', '3', 250, -100, 'L', 'P', 200)], 'picot servo 1×3')
+    d['WIRE4'] = ('J', ['S -100 200 50 -200 0 1 10 f'],
+                  [('TX', '1', 250, 150, 'L', 'P', 200), ('RX', '2', 250, 50, 'L', 'P', 200),
+                   ('+', '3', 250, -50, 'L', 'P', 200), ('-', '4', 250, -150, 'L', 'P', 200)], 'pastilles à souder')
     d['CONN4'] = ('J', ['S -100 250 50 -250 0 1 10 f'],
                   [(str(i), str(i), 250, 150 - (i - 1) * 100, 'L', 'P', 200) for i in range(1, 5)] +
                   [('MP', 'MP', 0, -450, 'U', 'P', 200)], 'JST SH 4 broches')
@@ -257,7 +257,7 @@ def symbol_defs():
 
 
 SYMNAME = {'R': 'R', 'C': 'C', 'L': 'L', 'D': 'D_Schottky', 'TPS': 'TPS563201', 'IMU': 'LSM6DS3TR-C',
-           'CONN5': 'JST_SH_5', 'SERVO': 'Servo_1x03', 'CONN4': 'JST_SH_4', 'ESP': 'ESP32-S3_MiniNano'}
+           'CONN5': 'JST_SH_5', 'WIRE4': 'Pastilles_fils_4', 'CONN4': 'JST_SH_4', 'ESP': 'ESP32-S3_MiniNano'}
 
 
 def write_lib(path, cache=False):
@@ -283,7 +283,7 @@ def write_lib(path, cache=False):
 # ============================================================ schéma
 # Placement des symboles (mils, feuille A4 paysage 11693 × 8268)
 SCH_POS = {
-    'J1': (1300, 1500), 'J3': (1300, 2300), 'J2': (1300, 3300),
+    'J1': (1300, 1900), 'J2': (1300, 3300),
     'U1': (4300, 1800), 'C1': (3100, 2400), 'C2': (3100, 2800), 'C3': (5500, 1350),
     'L1': (6000, 1800), 'R1': (6100, 2450), 'R2': (6100, 2850), 'C4': (7000, 1450), 'C5': (7000, 1850),
     'D1': (7300, 2350), 'C8': (7300, 2850),
@@ -346,7 +346,7 @@ def write_sch(path, comps, project):
         out.append(f'NoConn ~ {x} {y}')
     notes = [
         (700, 7100, 'PCB support à la taille de la carte ESP32 : composants sur cette face, ESP32 de l\'autre côté (picots 2,54 mm).'),
-        (700, 7250, 'J1 / J3 : picots coudés pour rallonges servo (S, +, -) : J1 sortie 2 du récepteur (TX -> IO16), J3 sortie 3 (RX <- IO15), + = BEC.'),
+        (700, 7250, 'J1 : pastilles à souder : TX (sortie 2 du récepteur -> IO16), RX (sortie 3 <- IO15), + BEC, masse.'),
         (700, 7400, 'J2 : 1 masse, 2 +5 V, 3 depuis TX du GPS (IO18), 4 vers RX du GPS (IO17) — ordre G V T R du HGLRC M100 Mini.'),
         (700, 7550, 'Régulateur : Vout = 0,768 × (1 + R1/R2) = 5,07 V ; D1 empêche l\'USB de la carte d\'alimenter le BEC.'),
         (700, 7700, 'IMU : adresse I2C 0x6A (SA0 à la masse), CS au 3,3 V (mode I2C), INT1 sur IO7.'),

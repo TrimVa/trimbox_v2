@@ -9,7 +9,7 @@
 #  Origine : coin haut-gauche du contour de la carte ESP32 (antenne en haut,
 #  USB-C en bas) ; x vers la droite, y vers le bas ; millimètres.
 # ============================================================================
-from footprints import load, esp_header, xform
+from footprints import load, esp_header, wire_pads, xform
 
 # ---------------------------------------------------------------- géométrie
 # [À MESURER] valeurs estimées d'après la photo ; à remplacer par les cotes
@@ -64,15 +64,12 @@ COMPS = [
     Comp('U3', 'ESP32-S3 Mini Nano N16R8', None, 0, 0, 0, ESP_NETS, dnp=True,
          descr='Carte NiceMCU ESP32-S3_MINI_Nano N16R8, picots 2,54 mm', sym='ESP'),
     # --- connecteurs (sortie des câbles par le bord gauche)
-    # J1 et J3 : picots coudés 2,54 mm pour deux rallonges servo (S, +, −), à souder soi-même.
-    # J1 ← sortie 2 du récepteur (Serial TX → IO16) ; J3 → sortie 3 (Serial RX ← IO15).
-    # Le + des deux rallonges amène le BEC (6 à 8,4 V) depuis le récepteur.
-    Comp('J1', 'Servo RX-TX', 'PinHeader_1x03_P2.54mm_Horizontal', 4.04, 18.4, 180,
-         {'1': 'ELRS_TX', '2': 'VBEC', '3': 'GND'}, '', 'Picot coudé 1×3 2,54 mm',
-         'Sortie 2 du récepteur (TX) : S, +, − — à souder', dnp=True, sym='SERVO'),
-    Comp('J3', 'Servo RX-RX', 'PinHeader_1x03_P2.54mm_Horizontal', 4.04, 27.15, 180,
-         {'1': 'ELRS_RX', '2': 'VBEC', '3': 'GND'}, '', 'Picot coudé 1×3 2,54 mm',
-         'Sortie 3 du récepteur (RX) : S, +, − — à souder', dnp=True, sym='SERVO'),
+    # J1 : pastilles à souder pour les fils du récepteur (rallonges servo coupées) :
+    # 1 TX ← sortie 2 du récepteur (Serial TX → IO16), 2 RX → sortie 3 (Serial RX ← IO15),
+    # 3 + BEC (fils rouges), 4 masse (fils noirs/marron). Rien ne dépasse du PCB.
+    Comp('J1', 'Fils récepteur', 'TrimBox_Pastilles_fils_4x1.1mm', 1.65, 14.0, 0,
+         {'1': 'ELRS_TX', '2': 'ELRS_RX', '3': 'VBEC', '4': 'GND'}, '', 'Pastilles à souder',
+         'Fils du récepteur : TX, RX, + BEC, masse', dnp=True, sym='WIRE4'),
     # J2 : 1 masse, 2 + 5 V, 3 ← TX du GPS (IO18), 4 → RX du GPS (IO17) — ordre G V T R du M100 Mini
     Comp('J2', 'GPS', 'JST_SH_SM04B-SRSS-TB_1x04-1MP_P1.00mm_Horizontal', 3.1, 7.6, 270,
          {'1': 'GND', '2': '+5V', '3': 'GPS_TX', '4': 'GPS_RX', 'MP': 'GND'},
@@ -119,9 +116,12 @@ COMPS = [
 
 def build():
     for c in COMPS:
-        c.fp = esp_header(GEO, MAPPING) if c.ref == 'U3' else load(c.fpname)
         if c.ref == 'U3':
-            c.fpname = c.fp.name
+            c.fp = esp_header(GEO, MAPPING); c.fpname = c.fp.name
+        elif c.fpname.startswith('TrimBox_Pastilles'):
+            c.fp = wire_pads()
+        else:
+            c.fp = load(c.fpname)
         for n in c.nets:
             assert any(p.num == n for p in c.fp.pads), (c.ref, n)
     return COMPS
