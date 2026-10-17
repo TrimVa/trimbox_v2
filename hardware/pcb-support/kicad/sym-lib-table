@@ -1,0 +1,3 @@
+(sym_lib_table
+  (lib (name TrimBox)(type Legacy)(uri ${KIPRJMOD}/TrimBox.lib)(options "")(descr ""))
+)

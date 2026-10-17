@@ -1,0 +1,74 @@
+{
+ "drc": {
+  "erreurs": [],
+  "mesures": {
+   "isolement_min": 0.16,
+   "paires_les_plus_proches": [
+    [
+     "F:+3V3↔GPS_RX",
+     0.16
+    ],
+    [
+     "F:+5V↔GPS_TX",
+     0.17
+    ],
+    [
+     "F:GPS_RX↔GPS_TX",
+     0.17
+    ],
+    [
+     "F:+3V3↔GND",
+     0.18
+    ],
+    [
+     "F:+3V3↔SCL",
+     0.18
+    ],
+    [
+     "F:(sans réseau)↔+3V3",
+     0.18
+    ]
+   ],
+   "bord_F": 0.3,
+   "bord_B": 0.3,
+   "entre_trous_min": 0.877,
+   "morceaux": {
+    "+3V3": 1,
+    "+5V": 1,
+    "BST": 1,
+    "ELRS_RX": 1,
+    "ELRS_TX": 1,
+    "FB": 1,
+    "GND": 1,
+    "GPS_RX": 1,
+    "GPS_TX": 1,
+    "IMU_INT1": 1,
+    "SCL": 1,
+    "SDA": 1,
+    "SW": 1,
+    "V5_BUCK": 1,
+    "VBEC": 1
+   },
+   "pistes": 53,
+   "vias": 27,
+   "plan_GND_F_mm2": 320.3,
+   "plan_GND_B_mm2": 528.8
+  }
+ },
+ "gerber": {
+  "F_Cu": "trimbox-support-F_Cu.GTL",
+  "B_Cu": "trimbox-support-B_Cu.GBL",
+  "F_Mask": "trimbox-support-F_Mask.GTS",
+  "B_Mask": "trimbox-support-B_Mask.GBS",
+  "F_Paste": "trimbox-support-F_Paste.GTP",
+  "F_Silkscreen": "trimbox-support-F_Silkscreen.GTO",
+  "B_Silkscreen": "trimbox-support-B_Silkscreen.GBO",
+  "Edge_Cuts": "trimbox-support-Edge_Cuts.GKO",
+  "PTH": "trimbox-support-PTH.drl"
+ },
+ "percages": {
+  "0.3": 27,
+  "1.0": 28
+ },
+ "bom_lignes": 13
+}

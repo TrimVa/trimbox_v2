@@ -1,0 +1,553 @@
+EESchema Schematic File Version 4
+EELAYER 30 0
+EELAYER END
+$Descr A4 11693 8268
+encoding utf-8
+Sheet 1 1
+Title "TrimBox — PCB support ESP32-S3 Mini Nano"
+Date "2026-10-17"
+Rev "1"
+Comp "TrimBox"
+Comment1 "ESP32-S3 Mini Nano (dessus) + LSM6DS3TR-C + régulateur 5 V TPS563201 + JST SH GPS et récepteur"
+Comment2 "Brochage ESP32 : hypothèse de sérigraphie A (à confirmer, voir LISEZMOI)"
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Comp
+L TrimBox:ESP32-S3_MiniNano U3
+U 1 1 5F000001
+P 9600 4600
+F 0 "U3" H 9600 3500 50  0000 C CNN
+F 1 "ESP32-S3 Mini Nano N16R8" H 9600 5500 50  0000 C CNN
+F 2 "TrimBox:TrimBox_ESP32-S3_MiniNano_Carrier" H 9600 4600 50  0001 C CNN
+F 3 "" H 9600 4600 50  0001 C CNN
+	1    9600 4600
+	1    0    0    -1  
+$EndComp
+$Comp
+L TrimBox:JST_SH_5 J1
+U 1 1 5F000002
+P 1300 1700
+F 0 "J1" H 1300 1400 50  0000 C CNN
+F 1 "RX / BEC" H 1300 2300 50  0000 C CNN
+F 2 "TrimBox:JST_SH_SM05B-SRSS-TB_1x05-1MP_P1.00mm_Horizontal" H 1300 1700 50  0001 C CNN
+F 3 "" H 1300 1700 50  0001 C CNN
+F 4 "C136657" H 1300 1700 50  0001 C CNN "LCSC"
+F 5 "SM05B-SRSS-TB(LF)(SN)" H 1300 1700 50  0001 C CNN "MPN"
+	1    1300 1700
+	1    0    0    -1  
+$EndComp
+$Comp
+L TrimBox:JST_SH_4 J2
+U 1 1 5F000003
+P 1300 3300
+F 0 "J2" H 1300 3050 50  0000 C CNN
+F 1 "GPS" H 1300 3850 50  0000 C CNN
+F 2 "TrimBox:JST_SH_SM04B-SRSS-TB_1x04-1MP_P1.00mm_Horizontal" H 1300 3300 50  0001 C CNN
+F 3 "" H 1300 3300 50  0001 C CNN
+F 4 "C160404" H 1300 3300 50  0001 C CNN "LCSC"
+F 5 "SM04B-SRSS-TB(LF)(SN)" H 1300 3300 50  0001 C CNN "MPN"
+	1    1300 3300
+	1    0    0    -1  
+$EndComp
+$Comp
+L TrimBox:TPS563201 U1
+U 1 1 5F000004
+P 4300 1800
+F 0 "U1" H 4300 1550 50  0000 C CNN
+F 1 "TPS563201" H 4300 2350 50  0000 C CNN
+F 2 "TrimBox:SOT-23-6" H 4300 1800 50  0001 C CNN
+F 3 "" H 4300 1800 50  0001 C CNN
+F 4 "C116592" H 4300 1800 50  0001 C CNN "LCSC"
+F 5 "TPS563201DDCR" H 4300 1800 50  0001 C CNN "MPN"
+	1    4300 1800
+	1    0    0    -1  
+$EndComp
+$Comp
+L TrimBox:L L1
+U 1 1 5F000005
+P 6000 1800
+F 0 "L1" H 6000 1700 50  0000 C CNN
+F 1 "3,3 µH" H 6000 1900 50  0000 C CNN
+F 2 "TrimBox:L_Taiyo-Yuden_NR-30xx" H 6000 1800 50  0001 C CNN
+F 3 "" H 6000 1800 50  0001 C CNN
+F 4 "C167749" H 6000 1800 50  0001 C CNN "LCSC"
+F 5 "FNR3015S3R3MT" H 6000 1800 50  0001 C CNN "MPN"
+	1    6000 1800
+	1    0    0    -1  
+$EndComp
+$Comp
+L TrimBox:C C1
+U 1 1 5F000006
+P 3100 2400
+F 0 "C1" H 3100 2300 50  0000 C CNN
+F 1 "22 µF 25 V" H 3100 2500 50  0000 C CNN
+F 2 "TrimBox:C_0805_2012Metric" H 3100 2400 50  0001 C CNN
+F 3 "" H 3100 2400 50  0001 C CNN
+F 4 "C45783" H 3100 2400 50  0001 C CNN "LCSC"
+F 5 "CL21A226MAQNNNE" H 3100 2400 50  0001 C CNN "MPN"
+	1    3100 2400
+	1    0    0    -1  
+$EndComp
+$Comp
+L TrimBox:C C2
+U 1 1 5F000007
+P 3100 2800
+F 0 "C2" H 3100 2700 50  0000 C CNN
+F 1 "100 nF 50 V" H 3100 2900 50  0000 C CNN
+F 2 "TrimBox:C_0603_1608Metric" H 3100 2800 50  0001 C CNN
+F 3 "" H 3100 2800 50  0001 C CNN
+F 4 "C14663" H 3100 2800 50  0001 C CNN "LCSC"
+F 5 "CC0603KRX7R9BB104" H 3100 2800 50  0001 C CNN "MPN"
+	1    3100 2800
+	1    0    0    -1  
+$EndComp
+$Comp
+L TrimBox:C C3
+U 1 1 5F000008
+P 5500 1350
+F 0 "C3" H 5500 1250 50  0000 C CNN
+F 1 "100 nF" H 5500 1450 50  0000 C CNN
+F 2 "TrimBox:C_0402_1005Metric" H 5500 1350 50  0001 C CNN
+F 3 "" H 5500 1350 50  0001 C CNN
+F 4 "C1525" H 5500 1350 50  0001 C CNN "LCSC"
+F 5 "CL05B104KO5NNNC" H 5500 1350 50  0001 C CNN "MPN"
+	1    5500 1350
+	1    0    0    -1  
+$EndComp
+$Comp
+L TrimBox:R R1
+U 1 1 5F000009
+P 6100 2450
+F 0 "R1" H 6100 2350 50  0000 C CNN
+F 1 "56 kΩ 1 %" H 6100 2550 50  0000 C CNN
+F 2 "TrimBox:R_0402_1005Metric" H 6100 2450 50  0001 C CNN
+F 3 "" H 6100 2450 50  0001 C CNN
+F 4 "C25796" H 6100 2450 50  0001 C CNN "LCSC"
+F 5 "0402WGF5602TCE" H 6100 2450 50  0001 C CNN "MPN"
+	1    6100 2450
+	1    0    0    -1  
+$EndComp
+$Comp
+L TrimBox:R R2
+U 1 1 5F00000A
+P 6100 2850
+F 0 "R2" H 6100 2750 50  0000 C CNN
+F 1 "10 kΩ 1 %" H 6100 2950 50  0000 C CNN
+F 2 "TrimBox:R_0402_1005Metric" H 6100 2850 50  0001 C CNN
+F 3 "" H 6100 2850 50  0001 C CNN
+F 4 "C25744" H 6100 2850 50  0001 C CNN "LCSC"
+F 5 "0402WGF1002TCE" H 6100 2850 50  0001 C CNN "MPN"
+	1    6100 2850
+	1    0    0    -1  
+$EndComp
+$Comp
+L TrimBox:C C4
+U 1 1 5F00000B
+P 7000 1450
+F 0 "C4" H 7000 1350 50  0000 C CNN
+F 1 "22 µF 25 V" H 7000 1550 50  0000 C CNN
+F 2 "TrimBox:C_0805_2012Metric" H 7000 1450 50  0001 C CNN
+F 3 "" H 7000 1450 50  0001 C CNN
+F 4 "C45783" H 7000 1450 50  0001 C CNN "LCSC"
+F 5 "CL21A226MAQNNNE" H 7000 1450 50  0001 C CNN "MPN"
+	1    7000 1450
+	1    0    0    -1  
+$EndComp
+$Comp
+L TrimBox:C C5
+U 1 1 5F00000C
+P 7000 1850
+F 0 "C5" H 7000 1750 50  0000 C CNN
+F 1 "22 µF 25 V" H 7000 1950 50  0000 C CNN
+F 2 "TrimBox:C_0805_2012Metric" H 7000 1850 50  0001 C CNN
+F 3 "" H 7000 1850 50  0001 C CNN
+F 4 "C45783" H 7000 1850 50  0001 C CNN "LCSC"
+F 5 "CL21A226MAQNNNE" H 7000 1850 50  0001 C CNN "MPN"
+	1    7000 1850
+	1    0    0    -1  
+$EndComp
+$Comp
+L TrimBox:D_Schottky D1
+U 1 1 5F00000D
+P 7300 2350
+F 0 "D1" H 7300 2250 50  0000 C CNN
+F 1 "B5819W" H 7300 2450 50  0000 C CNN
+F 2 "TrimBox:D_SOD-123" H 7300 2350 50  0001 C CNN
+F 3 "" H 7300 2350 50  0001 C CNN
+F 4 "C8598" H 7300 2350 50  0001 C CNN "LCSC"
+F 5 "B5819W" H 7300 2350 50  0001 C CNN "MPN"
+	1    7300 2350
+	1    0    0    -1  
+$EndComp
+$Comp
+L TrimBox:C C8
+U 1 1 5F00000E
+P 7300 2850
+F 0 "C8" H 7300 2750 50  0000 C CNN
+F 1 "10 µF 25 V" H 7300 2950 50  0000 C CNN
+F 2 "TrimBox:C_0805_2012Metric" H 7300 2850 50  0001 C CNN
+F 3 "" H 7300 2850 50  0001 C CNN
+F 4 "C15850" H 7300 2850 50  0001 C CNN "LCSC"
+F 5 "CL21A106KAYNNNE" H 7300 2850 50  0001 C CNN "MPN"
+	1    7300 2850
+	1    0    0    -1  
+$EndComp
+$Comp
+L TrimBox:LSM6DS3TR-C U2
+U 1 1 5F00000F
+P 4300 5300
+F 0 "U2" H 4300 4850 50  0000 C CNN
+F 1 "LSM6DS3TR-C" H 4300 6050 50  0000 C CNN
+F 2 "TrimBox:LGA-14_3x2.5mm_P0.5mm_LayoutBorder3x4y" H 4300 5300 50  0001 C CNN
+F 3 "" H 4300 5300 50  0001 C CNN
+F 4 "C967633" H 4300 5300 50  0001 C CNN "LCSC"
+F 5 "LSM6DS3TR-C" H 4300 5300 50  0001 C CNN "MPN"
+	1    4300 5300
+	1    0    0    -1  
+$EndComp
+$Comp
+L TrimBox:C C6
+U 1 1 5F000010
+P 2800 4700
+F 0 "C6" H 2800 4600 50  0000 C CNN
+F 1 "100 nF" H 2800 4800 50  0000 C CNN
+F 2 "TrimBox:C_0402_1005Metric" H 2800 4700 50  0001 C CNN
+F 3 "" H 2800 4700 50  0001 C CNN
+F 4 "C1525" H 2800 4700 50  0001 C CNN "LCSC"
+F 5 "CL05B104KO5NNNC" H 2800 4700 50  0001 C CNN "MPN"
+	1    2800 4700
+	1    0    0    -1  
+$EndComp
+$Comp
+L TrimBox:C C7
+U 1 1 5F000011
+P 2800 5100
+F 0 "C7" H 2800 5000 50  0000 C CNN
+F 1 "100 nF" H 2800 5200 50  0000 C CNN
+F 2 "TrimBox:C_0402_1005Metric" H 2800 5100 50  0001 C CNN
+F 3 "" H 2800 5100 50  0001 C CNN
+F 4 "C1525" H 2800 5100 50  0001 C CNN "LCSC"
+F 5 "CL05B104KO5NNNC" H 2800 5100 50  0001 C CNN "MPN"
+	1    2800 5100
+	1    0    0    -1  
+$EndComp
+$Comp
+L TrimBox:R R3
+U 1 1 5F000012
+P 5800 4600
+F 0 "R3" H 5800 4500 50  0000 C CNN
+F 1 "4,7 kΩ" H 5800 4700 50  0000 C CNN
+F 2 "TrimBox:R_0402_1005Metric" H 5800 4600 50  0001 C CNN
+F 3 "" H 5800 4600 50  0001 C CNN
+F 4 "C25900" H 5800 4600 50  0001 C CNN "LCSC"
+F 5 "0402WGF4701TCE" H 5800 4600 50  0001 C CNN "MPN"
+	1    5800 4600
+	1    0    0    -1  
+$EndComp
+$Comp
+L TrimBox:R R4
+U 1 1 5F000013
+P 5800 5000
+F 0 "R4" H 5800 4900 50  0000 C CNN
+F 1 "4,7 kΩ" H 5800 5100 50  0000 C CNN
+F 2 "TrimBox:R_0402_1005Metric" H 5800 5000 50  0001 C CNN
+F 3 "" H 5800 5000 50  0001 C CNN
+F 4 "C25900" H 5800 5000 50  0001 C CNN "LCSC"
+F 5 "0402WGF4701TCE" H 5800 5000 50  0001 C CNN "MPN"
+	1    5800 5000
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	9000 3800 8900 3800
+Wire Wire Line
+	9000 3900 8900 3900
+Wire Wire Line
+	9000 4100 8900 4100
+Wire Wire Line
+	9000 4600 8900 4600
+Wire Wire Line
+	9000 4700 8900 4700
+Wire Wire Line
+	9000 4800 8900 4800
+Wire Wire Line
+	9000 4900 8900 4900
+Wire Wire Line
+	9000 5200 8900 5200
+Wire Wire Line
+	9000 5300 8900 5300
+Wire Wire Line
+	9000 5400 8900 5400
+Wire Wire Line
+	1550 1500 1650 1500
+Wire Wire Line
+	1550 1600 1650 1600
+Wire Wire Line
+	1550 1700 1650 1700
+Wire Wire Line
+	1550 1800 1650 1800
+Wire Wire Line
+	1550 1900 1650 1900
+Wire Wire Line
+	1300 2200 1300 2300
+Wire Wire Line
+	1550 3150 1650 3150
+Wire Wire Line
+	1550 3250 1650 3250
+Wire Wire Line
+	1550 3350 1650 3350
+Wire Wire Line
+	1550 3450 1650 3450
+Wire Wire Line
+	1300 3750 1300 3850
+Wire Wire Line
+	3800 1650 3700 1650
+Wire Wire Line
+	3800 1800 3700 1800
+Wire Wire Line
+	4300 2250 4300 2350
+Wire Wire Line
+	4800 1650 4900 1650
+Wire Wire Line
+	4800 1800 4900 1800
+Wire Wire Line
+	4800 1950 4900 1950
+Wire Wire Line
+	5850 1800 5750 1800
+Wire Wire Line
+	6150 1800 6250 1800
+Wire Wire Line
+	2950 2400 2850 2400
+Wire Wire Line
+	3250 2400 3350 2400
+Wire Wire Line
+	2950 2800 2850 2800
+Wire Wire Line
+	3250 2800 3350 2800
+Wire Wire Line
+	5350 1350 5250 1350
+Wire Wire Line
+	5650 1350 5750 1350
+Wire Wire Line
+	5950 2450 5850 2450
+Wire Wire Line
+	6250 2450 6350 2450
+Wire Wire Line
+	5950 2850 5850 2850
+Wire Wire Line
+	6250 2850 6350 2850
+Wire Wire Line
+	6850 1450 6750 1450
+Wire Wire Line
+	7150 1450 7250 1450
+Wire Wire Line
+	6850 1850 6750 1850
+Wire Wire Line
+	7150 1850 7250 1850
+Wire Wire Line
+	7450 2350 7550 2350
+Wire Wire Line
+	7150 2350 7050 2350
+Wire Wire Line
+	7150 2850 7050 2850
+Wire Wire Line
+	7450 2850 7550 2850
+Wire Wire Line
+	3750 4950 3650 4950
+Wire Wire Line
+	3750 5050 3650 5050
+Wire Wire Line
+	3750 5200 3650 5200
+Wire Wire Line
+	3750 5350 3650 5350
+Wire Wire Line
+	3750 5450 3650 5450
+Wire Wire Line
+	3750 5550 3650 5550
+Wire Wire Line
+	4200 5950 4200 6050
+Wire Wire Line
+	4400 5950 4400 6050
+Wire Wire Line
+	4850 4950 4950 4950
+Wire Wire Line
+	4850 5050 4950 5050
+Wire Wire Line
+	4850 5200 4950 5200
+Wire Wire Line
+	2650 4700 2550 4700
+Wire Wire Line
+	2950 4700 3050 4700
+Wire Wire Line
+	2650 5100 2550 5100
+Wire Wire Line
+	2950 5100 3050 5100
+Wire Wire Line
+	5650 4600 5550 4600
+Wire Wire Line
+	5950 4600 6050 4600
+Wire Wire Line
+	5650 5000 5550 5000
+Wire Wire Line
+	5950 5000 6050 5000
+Text Label 8900 3800 2    50   ~ 0
+SDA
+Text Label 8900 3900 2    50   ~ 0
+IMU_INT1
+Text Label 8900 4100 2    50   ~ 0
+SCL
+Text Label 8900 4600 2    50   ~ 0
+ELRS_TX
+Text Label 8900 4700 2    50   ~ 0
+ELRS_RX
+Text Label 8900 4800 2    50   ~ 0
+GPS_TX
+Text Label 8900 4900 2    50   ~ 0
+GPS_RX
+Text Label 8900 5200 2    50   ~ 0
++3V3
+Text Label 8900 5300 2    50   ~ 0
+GND
+Text Label 8900 5400 2    50   ~ 0
++5V
+Text Label 1650 1500 0    50   ~ 0
+GND
+Text Label 1650 1600 0    50   ~ 0
+VBEC
+Text Label 1650 1700 0    50   ~ 0
+ELRS_RX
+Text Label 1650 1800 0    50   ~ 0
+ELRS_TX
+Text Label 1650 1900 0    50   ~ 0
+GND
+Text Label 1300 2300 3    50   ~ 0
+GND
+Text Label 1650 3150 0    50   ~ 0
+GND
+Text Label 1650 3250 0    50   ~ 0
++5V
+Text Label 1650 3350 0    50   ~ 0
+GPS_TX
+Text Label 1650 3450 0    50   ~ 0
+GPS_RX
+Text Label 1300 3850 3    50   ~ 0
+GND
+Text Label 3700 1650 2    50   ~ 0
+VBEC
+Text Label 3700 1800 2    50   ~ 0
+VBEC
+Text Label 4300 2350 3    50   ~ 0
+GND
+Text Label 4900 1650 0    50   ~ 0
+BST
+Text Label 4900 1800 0    50   ~ 0
+SW
+Text Label 4900 1950 0    50   ~ 0
+FB
+Text Label 5750 1800 2    50   ~ 0
+V5_BUCK
+Text Label 6250 1800 0    50   ~ 0
+SW
+Text Label 2850 2400 2    50   ~ 0
+GND
+Text Label 3350 2400 0    50   ~ 0
+VBEC
+Text Label 2850 2800 2    50   ~ 0
+GND
+Text Label 3350 2800 0    50   ~ 0
+VBEC
+Text Label 5250 1350 2    50   ~ 0
+SW
+Text Label 5750 1350 0    50   ~ 0
+BST
+Text Label 5850 2450 2    50   ~ 0
+FB
+Text Label 6350 2450 0    50   ~ 0
+V5_BUCK
+Text Label 5850 2850 2    50   ~ 0
+GND
+Text Label 6350 2850 0    50   ~ 0
+FB
+Text Label 6750 1450 2    50   ~ 0
+GND
+Text Label 7250 1450 0    50   ~ 0
+V5_BUCK
+Text Label 6750 1850 2    50   ~ 0
+V5_BUCK
+Text Label 7250 1850 0    50   ~ 0
+GND
+Text Label 7550 2350 0    50   ~ 0
++5V
+Text Label 7050 2350 2    50   ~ 0
+V5_BUCK
+Text Label 7050 2850 2    50   ~ 0
++5V
+Text Label 7550 2850 0    50   ~ 0
+GND
+Text Label 3650 4950 2    50   ~ 0
++3V3
+Text Label 3650 5050 2    50   ~ 0
++3V3
+Text Label 3650 5200 2    50   ~ 0
++3V3
+Text Label 3650 5350 2    50   ~ 0
+GND
+Text Label 3650 5450 2    50   ~ 0
+GND
+Text Label 3650 5550 2    50   ~ 0
+GND
+Text Label 4200 6050 3    50   ~ 0
+GND
+Text Label 4400 6050 3    50   ~ 0
+GND
+Text Label 4950 4950 0    50   ~ 0
+SDA
+Text Label 4950 5050 0    50   ~ 0
+SCL
+Text Label 4950 5200 0    50   ~ 0
+IMU_INT1
+Text Label 2550 4700 2    50   ~ 0
+GND
+Text Label 3050 4700 0    50   ~ 0
++3V3
+Text Label 2550 5100 2    50   ~ 0
++3V3
+Text Label 3050 5100 0    50   ~ 0
+GND
+Text Label 5550 4600 2    50   ~ 0
++3V3
+Text Label 6050 4600 0    50   ~ 0
+SDA
+Text Label 5550 5000 2    50   ~ 0
++3V3
+Text Label 6050 5000 0    50   ~ 0
+SCL
+NoConn ~ 9000 3600
+NoConn ~ 9000 3700
+NoConn ~ 9000 4000
+NoConn ~ 9000 4200
+NoConn ~ 9000 4300
+NoConn ~ 9000 4400
+NoConn ~ 9000 4500
+NoConn ~ 9000 5000
+NoConn ~ 9000 5100
+NoConn ~ 10200 3600
+NoConn ~ 10200 3700
+NoConn ~ 10200 3800
+NoConn ~ 10200 3900
+NoConn ~ 10200 4000
+NoConn ~ 10200 4100
+NoConn ~ 4850 5300
+NoConn ~ 4850 5400
+NoConn ~ 4850 5500
+Text Notes 700 7100 0    50   ~ 0
+PCB support à la taille de la carte ESP32 : composants sur cette face, ESP32 de l'autre côté (picots 2,54 mm).
+Text Notes 700 7250 0    50   ~ 0
+J1 : 1 masse, 2 +BEC (6-8,4 V), 3 vers RX du récepteur (IO15), 4 depuis TX du récepteur (IO16), 5 masse.
+Text Notes 700 7400 0    50   ~ 0
+J2 : 1 masse, 2 +5 V, 3 depuis TX du GPS (IO18), 4 vers RX du GPS (IO17) — ordre G V T R du HGLRC M100 Mini.
+Text Notes 700 7550 0    50   ~ 0
+Régulateur : Vout = 0,768 × (1 + R1/R2) = 5,07 V ; D1 empêche l'USB de la carte d'alimenter le BEC.
+Text Notes 700 7700 0    50   ~ 0
+IMU : adresse I2C 0x6A (SA0 à la masse), CS au 3,3 V (mode I2C), INT1 sur IO7.
+$EndSCHEMATC
