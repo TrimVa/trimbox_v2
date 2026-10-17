@@ -65,6 +65,8 @@ def load(name):
             w, h = max(px) - min(px), max(py) - min(py)
             x += (max(px) + min(px)) / 2; y += (max(py) + min(py)) / 2
             shape = 'rect'
+        if shape == 'oval' and abs(w - h) < 1e-6:
+            shape = 'circle'
         dr = find(p, 'drill')
         fp.pads.append(Pad(num, kind, shape, x, y, w, h, rot,
                            _f(dr[1]) if dr else 0.0, _f(rr[1]) if rr else 0.0))

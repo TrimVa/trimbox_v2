@@ -7,7 +7,9 @@ Petit PCB 2 couches de **23,4 × 29 mm**, à la taille de la carte NiceMCU
 - la centrale inertielle **LSM6DS3TR-C**, soudée par JLCPCB (rigide, I2C 0x6A) ;
 - un **régulateur 5 V** (TPS563201) alimenté directement par le BEC (6 à 8,4 V) :
   plus besoin du régulateur Pololu séparé ;
-- **J1** (JST SH 5 broches) : récepteur ELRS + alimentation BEC ;
+- **J1** et **J3** : picots coudés 2,54 mm (1 × 3) pour deux **rallonges servo
+  ordinaires** vers le récepteur (sortie 2 = TX, sortie 3 = RX) ; leur fil +
+  amène le BEC ;
 - **J2** (JST SH 4 broches) : GPS HGLRC M100 Mini.
 
 L'ESP32 se soude **de l'autre côté**, sur des picots 2,54 mm (composants du
@@ -20,19 +22,29 @@ PCB vers le bas, ESP32 au-dessus, prise USB-C et DEL accessibles).
 
 ## Brochage des connecteurs
 
-| J1 (récepteur) | Signal | | J2 (GPS) | Signal |
-|---|---|---|---|---|
-| 1 | masse | | 1 | masse (G) |
-| 2 | + BEC 6-8,4 V | | 2 | + 5 V (V) |
-| 3 | vers **RX** du récepteur (IO15) | | 3 | depuis **TX** du GPS (IO18) |
-| 4 | depuis **TX** du récepteur (IO16) | | 4 | vers **RX** du GPS (IO17) |
-| 5 | masse | | | |
+| Picot | J1 « TX » (sortie 2 du récepteur) | J3 « RX » (sortie 3 du récepteur) |
+|---|---|---|
+| S (carré, marqué S) | depuis **TX** du récepteur → IO16 | vers **RX** du récepteur ← IO15 |
+| + (milieu) | + BEC 6-8,4 V | + BEC 6-8,4 V |
+| − (marqué -) | masse | masse |
 
-Le 5 broches côté récepteur rend impossible l'inversion des deux câbles (le
-GPS ne recevra jamais les 8,4 V du BEC). Les câbles se font avec des
-connecteurs JST SH 1,0 mm (fils sertis vendus tout faits) ; vérifier l'ordre
-G V T R au bout du câble du GPS (les câbles SH existent en « 1 → 1 » et en
-« inversé »).
+| J2 (GPS) | Signal |
+|---|---|
+| 1 | masse (G) |
+| 2 | + 5 V (V) |
+| 3 | depuis **TX** du GPS (IO18) |
+| 4 | vers **RX** du GPS (IO17) |
+
+Côté récepteur (page web de l'ER5C-i, onglet *Model*) : sorties 2 et 3 en
+**Serial TX / RX, protocole CRSF**. Les rallonges servo se branchent comme sur
+un servo, fil signal côté S. Une rallonge branchée à l'envers échange signal
+et masse, le + reste au milieu : rien ne grille, mais la liaison ne marche
+pas. Les deux picots sont **à souder soi-même** (pas dans la commande
+d'assemblage JLCPCB) ; ils dépassent du bord gauche de 6 mm.
+
+Le GPS reste sur un JST SH 4 broches : impossible d'y brancher une rallonge
+servo, donc il ne recevra jamais les 8,4 V du BEC. Vérifier l'ordre G V T R au
+bout du câble du GPS (les câbles SH existent en « 1 → 1 » et en « inversé »).
 
 ## Fichiers
 
@@ -66,11 +78,12 @@ G V T R au bout du câble du GPS (les câbles SH existent en « 1 → 1 » et en
 2. Cocher **PCB Assembly**, face *Top*, déposer la BOM et le CPL.
 3. Dans l'aperçu de pose, **vérifier l'orientation** de U1 (SOT-23-6), U2
    (point de la broche 1 du LGA-14), D1 (barre de cathode côté prise VIN de
-   l'ESP32) et J1/J2 (ouverture vers le bord de la carte) : les rotations
-   KiCad doivent souvent être corrigées à la main dans cet aperçu. Pour J1/J2,
+   l’ESP32) et J2 (ouverture vers le bord de la carte) : les rotations
+   KiCad doivent souvent être corrigées à la main dans cet aperçu. Pour J2,
    le point de pose est l'origine de l'empreinte KiCad, pas le centre du
    boîtier (≈ 0,45 mm d'écart, l'aperçu le montre).
-4. La carte ESP32 n'est pas dans la BOM : picots soudés à la main.
+4. La carte ESP32 et les deux picots servo (J1, J3) ne sont pas dans la BOM :
+   ils se soudent à la main.
 
 ## Règles respectées (contrôle automatique au 0,01 mm, `src/check.py`)
 

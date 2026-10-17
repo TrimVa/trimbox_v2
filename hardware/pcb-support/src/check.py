@@ -138,7 +138,10 @@ def run(verbose=True):
             labels[(L, n)] = lab
     for s in sh:
         if s.net and s.layers == {'F', 'B'}:
-            x, y = s.data[0], s.data[1]
+            if s.kind == 'poly':
+                x = sum(q[0] for q in s.data) / len(s.data); y = sum(q[1] for q in s.data) / len(s.data)
+            else:
+                x, y = s.data[0], s.data[1]
             i, j = R.px(x, y)
             a = labels[('F', s.net)][int(round(j)), int(round(i))]
             b = labels[('B', s.net)][int(round(j)), int(round(i))]

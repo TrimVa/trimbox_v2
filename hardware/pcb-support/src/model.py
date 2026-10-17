@@ -34,7 +34,7 @@ MAPPING = dict(
         9: ('3V3', '3V3'), 10: ('GND', 'GND'), 11: ('VIN', 'VIN'),
     },
     left={   # rangée : (colonne extérieure, colonne intérieure) — tenue mécanique seulement
-        1: ('IO3', 'IO1'), 2: ('IO2', 'IO4'), 11: ('IO47', 'IO48'),
+        11: ('IO47', 'IO48'),
     },
 )
 
@@ -64,12 +64,17 @@ COMPS = [
     Comp('U3', 'ESP32-S3 Mini Nano N16R8', None, 0, 0, 0, ESP_NETS, dnp=True,
          descr='Carte NiceMCU ESP32-S3_MINI_Nano N16R8, picots 2,54 mm', sym='ESP'),
     # --- connecteurs (sortie des câbles par le bord gauche)
-    # J1 : 1 masse, 2 + BEC, 3 → RX du récepteur (IO15), 4 ← TX du récepteur (IO16), 5 masse
-    Comp('J1', 'RX / BEC', 'JST_SH_SM05B-SRSS-TB_1x05-1MP_P1.00mm_Horizontal', 3.1, 15.5, 270,
-         {'1': 'GND', '2': 'VBEC', '3': 'ELRS_RX', '4': 'ELRS_TX', '5': 'GND', 'MP': 'GND'},
-         'C136657', 'SM05B-SRSS-TB(LF)(SN)', 'JST SH 1,0 mm 5 broches, sortie latérale', sym='CONN5'),
+    # J1 et J3 : picots coudés 2,54 mm pour deux rallonges servo (S, +, −), à souder soi-même.
+    # J1 ← sortie 2 du récepteur (Serial TX → IO16) ; J3 → sortie 3 (Serial RX ← IO15).
+    # Le + des deux rallonges amène le BEC (6 à 8,4 V) depuis le récepteur.
+    Comp('J1', 'Servo RX-TX', 'PinHeader_1x03_P2.54mm_Horizontal', 4.04, 18.4, 180,
+         {'1': 'ELRS_TX', '2': 'VBEC', '3': 'GND'}, '', 'Picot coudé 1×3 2,54 mm',
+         'Sortie 2 du récepteur (TX) : S, +, − — à souder', dnp=True, sym='SERVO'),
+    Comp('J3', 'Servo RX-RX', 'PinHeader_1x03_P2.54mm_Horizontal', 4.04, 27.15, 180,
+         {'1': 'ELRS_RX', '2': 'VBEC', '3': 'GND'}, '', 'Picot coudé 1×3 2,54 mm',
+         'Sortie 3 du récepteur (RX) : S, +, − — à souder', dnp=True, sym='SERVO'),
     # J2 : 1 masse, 2 + 5 V, 3 ← TX du GPS (IO18), 4 → RX du GPS (IO17) — ordre G V T R du M100 Mini
-    Comp('J2', 'GPS', 'JST_SH_SM04B-SRSS-TB_1x04-1MP_P1.00mm_Horizontal', 3.1, 25.0, 270,
+    Comp('J2', 'GPS', 'JST_SH_SM04B-SRSS-TB_1x04-1MP_P1.00mm_Horizontal', 3.1, 7.6, 270,
          {'1': 'GND', '2': '+5V', '3': 'GPS_TX', '4': 'GPS_RX', 'MP': 'GND'},
          'C160404', 'SM04B-SRSS-TB(LF)(SN)', 'JST SH 1,0 mm 4 broches, sortie latérale', sym='CONN4'),
     # --- alimentation 5 V (TPS563201, 4,5-17 V → 5,07 V)
@@ -94,7 +99,7 @@ COMPS = [
          'C45783', 'CL21A226MAQNNNE', 'Sortie régulateur', sym='C'),
     Comp('D1', 'B5819W', 'D_SOD-123', 16.4, 31.65, 180, {'1': '+5V', '2': 'V5_BUCK'},
          'C8598', 'B5819W', 'Schottky : empêche l’USB d’alimenter le BEC', sym='D'),
-    Comp('C8', '10 µF 25 V', 'C_0805_2012Metric', 6.8, 30.6, 90, {'1': '+5V', '2': 'GND'},
+    Comp('C8', '10 µF 25 V', 'C_0805_2012Metric', 7.4, 9.0, 90, {'1': '+5V', '2': 'GND'},
          'C15850', 'CL21A106KAYNNNE', '5 V du GPS et de la carte', sym='C'),
     # --- centrale inertielle
     Comp('U2', 'LSM6DS3TR-C', 'LGA-14_3x2.5mm_P0.5mm_LayoutBorder3x4y', 12.0, 8.6, 270,

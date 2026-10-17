@@ -2,19 +2,19 @@
  "drc": {
   "erreurs": [],
   "mesures": {
-   "isolement_min": 0.16,
+   "isolement_min": 0.17,
    "paires_les_plus_proches": [
     [
-     "F:+3V3↔GPS_RX",
-     0.16
+     "F:ELRS_RX↔GPS_RX",
+     0.17
     ],
     [
-     "F:+5V↔GPS_TX",
-     0.17
+     "F:+3V3↔GPS_TX",
+     0.177
     ],
     [
      "F:GPS_RX↔GPS_TX",
-     0.17
+     0.179
     ],
     [
      "F:+3V3↔GND",
@@ -31,7 +31,7 @@
    ],
    "bord_F": 0.3,
    "bord_B": 0.3,
-   "entre_trous_min": 0.877,
+   "entre_trous_min": 0.867,
    "morceaux": {
     "+3V3": 1,
     "+5V": 1,
@@ -49,10 +49,10 @@
     "V5_BUCK": 1,
     "VBEC": 1
    },
-   "pistes": 53,
-   "vias": 27,
-   "plan_GND_F_mm2": 320.3,
-   "plan_GND_B_mm2": 528.8
+   "pistes": 55,
+   "vias": 31,
+   "plan_GND_F_mm2": 292.2,
+   "plan_GND_B_mm2": 515.8
   }
  },
  "gerber": {
@@ -67,8 +67,8 @@
   "PTH": "trimbox-support-PTH.drl"
  },
  "percages": {
-  "0.3": 27,
-  "1.0": 28
+  "0.3": 31,
+  "1.0": 30
  },
- "bom_lignes": 13
+ "bom_lignes": 12
 }

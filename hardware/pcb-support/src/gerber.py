@@ -148,11 +148,16 @@ def write_all(outdir, comps, pours, R_pour, silk_texts):
     # 2) pastilles
     for c in comps:
         for p, x, y, ang in c.pads_abs():
-            if p.kind == 'thru_hole':
+            if p.kind == 'thru_hole' and p.shape == 'circle':
                 for gb in (cuF, cuB):
                     gb.flash_circle(x, y, p.w)
                 for gb in (mF, mB):
                     gb.flash_circle(x, y, p.w + 0.1)
+            elif p.kind == 'thru_hole':
+                for gb in (cuF, cuB):
+                    gb.region(pad_outline(p, x, y, ang))
+                for gb in (mF, mB):
+                    gb.region(pad_outline(p, x, y, ang, 0.05))
             else:
                 cuF.region(pad_outline(p, x, y, ang))
                 mF.region(pad_outline(p, x, y, ang, 0.05))

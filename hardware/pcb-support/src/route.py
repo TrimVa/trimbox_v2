@@ -49,7 +49,7 @@ class Router:
         vr = RULES['via_dia'] / 2
         via_ok = (self.free(net, 'F', vr) & self.free(net, 'B', vr))
         # trous : au moins 0,5 mm entre perçages (vias et trous traversants, tous réseaux)
-        holes = self.R.mask([s for s in self.shapes if s.src == 'via' or 'U3.' in s.src], 'F')
+        holes = self.R.mask([s for s in self.shapes if s.src == 'via' or s.layers == {'F', 'B'}], 'F')
         dh = ndimage.distance_transform_edt(~holes) * RES
         via_ok &= dh >= vr + 0.5 + MARGIN
         nx, ny = self.R.nx, self.R.ny

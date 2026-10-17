@@ -104,14 +104,14 @@ aside h2{font:600 .95rem var(--f-display);margin:0;padding:12px 14px;border-bott
       <div class="tip" id="tip" hidden></div>
     </div>
     <aside>
-      <h2>Composants posés par JLCPCB</h2>
+      <h2>Composants du PCB support</h2>
       <ul class="bom" id="bom"></ul>
     </aside>
   </div>
 
   <div class="notes">
     <p><b>Montage.</b> La carte ESP32 se soude sur des picots 2,54 mm, du côté opposé aux composants. Une fois dans la voiture, l'ESP32 est au-dessus : prise USB-C, boutons et DEL restent accessibles.</p>
-    <p><b>Câbles.</b> J1 (5 broches) relie le récepteur et le BEC, J2 (4 broches) le GPS, dans l'ordre G V T R. Avec des nombres de broches différents, les deux câbles ne peuvent pas être inversés.</p>
+    <p><b>Câbles.</b> Deux rallonges servo ordinaires relient le récepteur : J1 (TX) sur sa sortie 2, J3 (RX) sur sa sortie 3, signal du côté marqué S. Le + amène le BEC. J2 reçoit le GPS (JST SH 4 broches, ordre G V T R).</p>
     <p><b>Fidélité.</b> Les faces sont tirées des mêmes données que les fichiers Gerber. Les volumes des composants sont simplifiés. La carte ESP32 est modélisée d'après la photo : ses cotes restent à confirmer.</p>
   </div>
 </div>
@@ -128,7 +128,7 @@ const tip = document.getElementById('tip'), stage = document.getElementById('sta
 // ------------------------------------------------------------ chiffres clés
 document.getElementById('specs').innerHTML = [
   ['Taille', `${B.W.toFixed(1).replace('.', ',')} × ${(B.H - B.YCUT).toFixed(1).replace('.', ',')} mm`],
-  ['Couches', '2'], ['Composants CMS', D.comps.length], ['Pistes', D.stats.tracks], ['Vias', D.stats.vias],
+  ['Couches', '2'], ['Composants CMS', D.comps.filter(c => c.lcsc).length], ['Picots servo', D.comps.filter(c => !c.lcsc).length], ['Pistes', D.stats.tracks], ['Vias', D.stats.vias],
   ['Isolement mini', `${String(D.stats.clearance).replace('.', ',')} mm`], ['Contrôle DRC', D.stats.drc ? `${D.stats.drc} erreur(s)` : 'aucune erreur'],
 ].map(([k, v]) => `<span>${k} <b>${v}</b></span>`).join('');
 
@@ -137,7 +137,7 @@ const bom = document.getElementById('bom');
 const order = c => [c.ref[0], parseInt(c.ref.slice(1))];
 const sorted = [...D.comps].sort((a, b) => a.ref[0] === b.ref[0] ? parseInt(a.ref.slice(1)) - parseInt(b.ref.slice(1)) : a.ref.localeCompare(b.ref));
 bom.innerHTML = sorted.map(c => `<li data-ref="${c.ref}"><span class="r">${c.ref}</span><span class="v">${c.value}</span>
-  <span class="d">${c.descr}</span><span class="l">${c.mpn} · LCSC ${c.lcsc}</span></li>`).join('');
+  <span class="d">${c.descr}</span><span class="l">${c.lcsc ? c.mpn + ' · LCSC ' + c.lcsc : c.mpn + ' · à souder soi-même'}</span></li>`).join('');
 let hlRef = null;
 function highlight(ref) {
   hlRef = ref;
@@ -281,6 +281,16 @@ function addComp(c) {
     for (const sx of [-1, 1]) box(0.9, 1.6, 0.2, tin, sx * (c.w / 2 + 0.25), 1.4, -0.12, g);
     const n = c.ref === 'J1' ? 5 : 4;
     for (let k = 0; k < n; k++) box(0.3, 1.0, 0.12, tin, (k - (n - 1) / 2), -2.2, -0.07, g);
+  } else if (c.kind === 'hdr') {
+    // repère du groupe = centre de l'entretoise ; trous à x = −2,77, broches pliées vers +x (bord de carte)
+    box(c.w, c.d, h, m, 0, 0, -h / 2, g);
+    for (let k = 0; k < 3; k++) {
+      const yy = (k - 1) * 2.54;
+      box(0.64, 0.64, 3.87, gold, -2.77, yy, 0.665, g);   // de z = −1,27 (coude) à z = 2,6 (au-dessus de la face B)
+      box(10.04, 0.64, 0.64, gold, 2.25, yy, -1.27, g);                                                // horizontale
+      const sol = new THREE.Mesh(new THREE.ConeGeometry(0.85, 0.7, 20), tin); sol.rotation.x = Math.PI / 2;
+      sol.position.set(-2.77, yy, 1.6 + 0.35); g.add(sol);                                              // soudure côté ESP32
+    }
   } else box(c.w, c.d, h, m, 0, 0, -h / 2, g);
   g.userData = c; g.traverse(o => { if (o.isMesh) { o.userData = c; o.material = o.material.clone(); pick.push(o); } });
   carrier.add(g); meshByRef[c.ref] = g;

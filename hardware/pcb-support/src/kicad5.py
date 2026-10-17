@@ -76,10 +76,11 @@ def footprint_sexpr(c, netidx, layer_note=None):
 
 
 SILK_TEXT = [   # (texte, x, y, taille, couche)
-    ('GPS', 6.9, 27.9, 0.9, 'F.SilkS'),
-    ('RX/BEC', 9.4, 12.6, 0.9, 'F.SilkS'),
-    ('1', 6.1, 13.5, 0.7, 'F.SilkS'),
-    ('1', 6.1, 23.5, 0.7, 'F.SilkS'),
+    ('GPS', 7.0, 11.9, 0.9, 'F.SilkS'),
+    ('1', 6.3, 6.1, 0.7, 'F.SilkS'),
+    ('S', 5.75, 18.4, 0.8, 'F.SilkS'), ('-', 5.75, 13.32, 0.8, 'F.SilkS'),
+    ('S', 5.75, 27.15, 0.8, 'F.SilkS'), ('-', 5.75, 22.07, 0.8, 'F.SilkS'),
+    ('TX', 7.0, 15.86, 0.9, 'F.SilkS'), ('RX', 7.0, 24.61, 0.9, 'F.SilkS'),
     ('TrimBox v1', 11.7, 4.6, 0.9, 'F.SilkS'),
 ]
 
@@ -230,6 +231,9 @@ def symbol_defs():
     d['CONN5'] = ('J', ['S -100 300 50 -300 0 1 10 f'],
                   [(str(i), str(i), 250, 200 - (i - 1) * 100, 'L', 'P', 200) for i in range(1, 6)] +
                   [('MP', 'MP', 0, -500, 'U', 'P', 200)], 'JST SH 5 broches')
+    d['SERVO'] = ('J', ['S -100 150 50 -150 0 1 10 f'],
+                  [('S', '1', 250, 100, 'L', 'P', 200), ('+', '2', 250, 0, 'L', 'P', 200),
+                   ('-', '3', 250, -100, 'L', 'P', 200)], 'picot servo 1×3')
     d['CONN4'] = ('J', ['S -100 250 50 -250 0 1 10 f'],
                   [(str(i), str(i), 250, 150 - (i - 1) * 100, 'L', 'P', 200) for i in range(1, 5)] +
                   [('MP', 'MP', 0, -450, 'U', 'P', 200)], 'JST SH 4 broches')
@@ -253,7 +257,7 @@ def symbol_defs():
 
 
 SYMNAME = {'R': 'R', 'C': 'C', 'L': 'L', 'D': 'D_Schottky', 'TPS': 'TPS563201', 'IMU': 'LSM6DS3TR-C',
-           'CONN5': 'JST_SH_5', 'CONN4': 'JST_SH_4', 'ESP': 'ESP32-S3_MiniNano'}
+           'CONN5': 'JST_SH_5', 'SERVO': 'Servo_1x03', 'CONN4': 'JST_SH_4', 'ESP': 'ESP32-S3_MiniNano'}
 
 
 def write_lib(path, cache=False):
@@ -279,7 +283,7 @@ def write_lib(path, cache=False):
 # ============================================================ schéma
 # Placement des symboles (mils, feuille A4 paysage 11693 × 8268)
 SCH_POS = {
-    'J1': (1300, 1700), 'J2': (1300, 3300),
+    'J1': (1300, 1500), 'J3': (1300, 2300), 'J2': (1300, 3300),
     'U1': (4300, 1800), 'C1': (3100, 2400), 'C2': (3100, 2800), 'C3': (5500, 1350),
     'L1': (6000, 1800), 'R1': (6100, 2450), 'R2': (6100, 2850), 'C4': (7000, 1450), 'C5': (7000, 1850),
     'D1': (7300, 2350), 'C8': (7300, 2850),
@@ -342,7 +346,7 @@ def write_sch(path, comps, project):
         out.append(f'NoConn ~ {x} {y}')
     notes = [
         (700, 7100, 'PCB support à la taille de la carte ESP32 : composants sur cette face, ESP32 de l\'autre côté (picots 2,54 mm).'),
-        (700, 7250, 'J1 : 1 masse, 2 +BEC (6-8,4 V), 3 vers RX du récepteur (IO15), 4 depuis TX du récepteur (IO16), 5 masse.'),
+        (700, 7250, 'J1 / J3 : picots coudés pour rallonges servo (S, +, -) : J1 sortie 2 du récepteur (TX -> IO16), J3 sortie 3 (RX <- IO15), + = BEC.'),
         (700, 7400, 'J2 : 1 masse, 2 +5 V, 3 depuis TX du GPS (IO18), 4 vers RX du GPS (IO17) — ordre G V T R du HGLRC M100 Mini.'),
         (700, 7550, 'Régulateur : Vout = 0,768 × (1 + R1/R2) = 5,07 V ; D1 empêche l\'USB de la carte d\'alimenter le BEC.'),
         (700, 7700, 'IMU : adresse I2C 0x6A (SA0 à la masse), CS au 3,3 V (mode I2C), INT1 sur IO7.'),
